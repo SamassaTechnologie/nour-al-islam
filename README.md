@@ -2,6 +2,8 @@
 
 Plateforme éducative islamique : apprendre, comprendre et pratiquer l'Islam à la lumière du Coran et de la Sounnah.
 
+Application en ligne : https://nour-al-islam.vercel.app
+
 ## État actuel : phase 1 (socle)
 
 - Next.js, TypeScript et Tailwind CSS
