@@ -109,8 +109,10 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
     if (shouldPlay.current) start();
     document.querySelectorAll("[data-playing]").forEach((el) => el.removeAttribute("data-playing"));
     const verse = document.getElementById(`v${surah}-${current.number}`);
-    verse?.setAttribute("data-playing", "");
-    if (shouldPlay.current) verse?.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (shouldPlay.current) {
+      verse?.setAttribute("data-playing", "");
+      verse?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
     const following = files[index + 1];
     if (following) new Audio().src = following.url;
   }, [current, files, index, speed, start, surah]);
