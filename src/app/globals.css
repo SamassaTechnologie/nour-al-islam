@@ -230,7 +230,7 @@ html[data-reading] .page-bottom {
 }
 
 .mushaf-page {
-  --mushaf-size: calc(100cqw / 15.5);
+  --mushaf-size: min(calc(100cqw / 15.2), calc((100dvh - 9rem - env(safe-area-inset-bottom) - env(safe-area-inset-top)) / 24.3));
   container-type: inline-size;
   direction: rtl;
   touch-action: pan-y;
@@ -240,14 +240,16 @@ html[data-reading] .page-bottom {
 
 .mushaf-lines {
   color: var(--ink);
+  width: 15.2em;
+  margin-inline: auto;
   font-size: var(--mushaf-size);
-  line-height: 1.75;
+  line-height: 1.6;
 }
 
 .mushaf-line {
   display: flex;
   justify-content: center;
-  height: 1.75em;
+  height: 1.6em;
   white-space: nowrap;
 }
 
@@ -268,8 +270,8 @@ html[data-reading] .page-bottom {
 .mushaf-surah {
   position: relative;
   display: flex;
-  height: 1.55em;
-  margin-block: 0.1em;
+  height: 1.45em;
+  margin-block: 0.075em;
   align-items: center;
   justify-content: center;
   overflow: hidden;

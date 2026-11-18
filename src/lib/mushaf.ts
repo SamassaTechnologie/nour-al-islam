@@ -49,9 +49,12 @@ export const getMushafPage = unstable_cache(
         if (number !== 1 || index !== 0) return;
         let line = word.line_number - 1;
         if (surah !== 1 && surah !== 9) slots.set(line, { number: line--, kind: "bismillah" });
-        slots.set(line, { number: line, kind: "surah", surah });
+        if (line >= 1) slots.set(line, { number: line, kind: "surah", surah });
       });
     }
+    // Dans cette edition, le titre de certaines sourates occupe la derniere ligne de la page precedente.
+    const lastSurah = Number(verses[verses.length - 1].verse_key.split(":")[0]);
+    if (!words.has(count) && !slots.has(count) && lastSurah < 114) slots.set(count, { number: count, kind: "surah", surah: lastSurah + 1 });
     const opening = page === 1 ? [] : (await fetchVerses(1))[0].words.filter((word) => word.char_type_name !== "end").map((word) => toWord("1:1", word));
     return {
       page,
@@ -65,6 +68,6 @@ export const getMushafPage = unstable_cache(
       }),
     };
   },
-  ["qf-mushaf-v1-page-1"],
+  ["qf-mushaf-v1-page-2"],
   { revalidate: 86400 },
 );

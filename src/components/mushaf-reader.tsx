@@ -130,7 +130,7 @@ export function MushafReader({ t, names, children }: { t: T; names: string[]; ch
       if (!active) return;
       article.querySelectorAll<HTMLElement>(".mushaf-line").forEach((line) => {
         const used = Array.from(line.children).reduce((sum, child) => sum + child.getBoundingClientRect().width, 0);
-        line.toggleAttribute("data-full", used / line.clientWidth > 0.8);
+        line.toggleAttribute("data-full", used / parseFloat(getComputedStyle(line).fontSize) > 12.5);
       });
       article.setAttribute("data-ready", "");
     };
