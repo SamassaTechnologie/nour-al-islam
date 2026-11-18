@@ -6,6 +6,7 @@
 @import "@fontsource/alegreya-sans/latin-400.css";
 @import "@fontsource/alegreya-sans/latin-500.css";
 @import "@fontsource/alegreya-sans/latin-700.css";
+@import "@fontsource/amiri-quran/arabic-400.css";
 @import "@fontsource/noto-naskh-arabic/arabic-400.css";
 @import "@fontsource/noto-naskh-arabic/arabic-600.css";
 
@@ -119,6 +120,36 @@ html[data-theme="dark"] {
   input {
     font-size: 1rem;
   }
+}
+
+.quran-text {
+  font-family: "Amiri Quran", "Noto Naskh Arabic", serif;
+  font-size: calc(1.6rem * var(--quran-scale, 1));
+  line-height: 2.5;
+  overflow-wrap: anywhere;
+}
+
+.surah-name {
+  font-family: "Noto Naskh Arabic", serif;
+  font-size: 1.25rem;
+}
+
+html[data-hide-translation] .verse-translation {
+  display: none;
+}
+
+html[data-reading] .app-header,
+html[data-reading] .bottom-nav,
+html[data-reading] .reader-chrome {
+  display: none;
+}
+
+html[data-reading] .reader-bar {
+  padding-top: env(safe-area-inset-top);
+}
+
+html[data-reading] .page-bottom {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 2rem);
 }
 
 .page-bottom {

@@ -25,6 +25,7 @@ export default async function HomePage() {
             </h1>
             <p className="mt-5 text-lg leading-snug">{t.slogan}</p>
             <div className="mt-6 space-y-2">
+              <Link href="/coran" className="flex min-h-12 items-center justify-center rounded-lg bg-night px-5 font-medium text-on-night">{t.quran.title}</Link>
               {session ? (
                 <Link href="/profil" className="flex min-h-12 items-center justify-center rounded-lg bg-emerald px-5 font-medium text-on-emerald">{h.open}</Link>
               ) : (

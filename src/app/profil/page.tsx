@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { setPreference, signOut } from "@/app/actions";
+import Link from "next/link";
 import { ProfileForm } from "@/components/forms";
+import { getReadingSummary, getSurahs } from "@/lib/quran";
 import { getPreferences, type Theme } from "@/lib/preferences";
 import { getSession } from "@/lib/supabase/server";
 
@@ -22,7 +24,8 @@ function Choice({ name, value, label, active }: { name: string; value: string; l
 export default async function ProfilePage() {
   const session = await getSession();
   if (!session) redirect("/connexion?suivant=/profil");
-  const { t, locale, theme } = await getPreferences();
+  const [{ t, locale, theme }, reading, surahs] = await Promise.all([getPreferences(), getReadingSummary(), getSurahs()]);
+  const last = reading?.recent[0];
   const p = t.profile;
   const name = session.profile?.display_name ?? "";
   const role = session.profile?.role ?? "user";
@@ -34,7 +37,12 @@ export default async function ProfilePage() {
 
       <section className="mt-7 border-s-2 border-gold ps-4">
         <h2 className="text-xl">{p.progressTitle}</h2>
-        <p className="mt-1 text-muted">{p.progressEmpty}</p>
+        {last ? (
+          <Link href={`/coran/${last.surah}#v${last.surah}-${last.ayahs.number}`} className="mt-1 flex min-h-11 items-center font-medium text-emerald underline underline-offset-4">
+            {t.quran.progressLast} : {surahs[last.surah - 1].name_translit}, {last.ayahs.number}
+          </Link>
+        ) : <p className="mt-1 text-muted">{p.progressEmpty}</p>}
+        <Link href="/coran/signets" className="flex min-h-11 items-center text-muted underline underline-offset-4">{t.quran.progressBookmarks} : {reading?.bookmarkCount ?? 0}</Link>
       </section>
 
       <section className="mt-9">
