@@ -69,7 +69,7 @@ export const getBismillah = cache(async (): Promise<string> => {
   return data.text_uthmani;
 });
 
-async function verses(column: "surah" | "juz", value: number) {
+async function verses(column: "surah" | "juz" | "hizb", value: number) {
   const { data, error } = await content()
     .from("ayahs")
     .select(VERSE_COLUMNS)
@@ -82,11 +82,18 @@ async function verses(column: "surah" | "juz", value: number) {
 
 export const getSurahVerses = cache((surah: number) => verses("surah", surah));
 export const getJuzVerses = cache((juz: number) => verses("juz", juz));
+export const getHizbVerses = cache((hizb: number) => verses("hizb", hizb));
 
 export const getJuzStarts = cache(async () => {
   const { data, error } = await content().rpc("juz_starts");
   if (error) throw new Error(error.message);
   return data as { juz: number; surah: number; number: number; ayah_count: number }[];
+});
+
+export const getHizbStarts = cache(async () => {
+  const { data, error } = await content().rpc("hizb_starts");
+  if (error) throw new Error(error.message);
+  return data as { hizb: number; rub: number; surah: number; number: number; ayah_count: number }[];
 });
 
 export const getSources = cache(async (): Promise<Source[]> => {

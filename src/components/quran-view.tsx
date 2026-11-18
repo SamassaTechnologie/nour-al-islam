@@ -24,12 +24,13 @@ export async function SourceNote({ t }: { t: Dictionary["quran"] }) {
   );
 }
 
-export async function VerseList({ verses, surahs, t, trackSurah, showHeadings = false }: {
+export async function VerseList({ verses, surahs, t, trackSurah, showHeadings = false, showRub = false }: {
   verses: Verse[];
   surahs: Surah[];
   t: Dictionary["quran"];
   trackSurah?: number;
   showHeadings?: boolean;
+  showRub?: boolean;
 }) {
   const [bismillah, bookmarks] = await Promise.all([
     getBismillah(),
@@ -40,12 +41,15 @@ export async function VerseList({ verses, surahs, t, trackSurah, showHeadings = 
       <ReaderControls t={t} />
       {trackSurah && bookmarks ? <ReadingTracker surah={trackSurah} /> : null}
       <ol className="mt-2">
-        {verses.map((verse) => {
+        {verses.map((verse, index) => {
           const surah = surahs[verse.surah - 1];
           return (
             <li key={verse.id} id={`v${verse.surah}-${verse.number}`} data-ayah-id={verse.id} className="scroll-mt-14 border-b border-line py-5">
+              {showRub && verses[index - 1]?.rub !== verse.rub ? (
+                <p id={`rub-${verse.rub}`} className="mb-4 scroll-mt-14 border-s-2 border-gold ps-3 font-medium">{t.rub} {verse.rub}/4</p>
+              ) : null}
               {showHeadings && verse.number === 1 ? (
-                <h2 className="mb-4 text-center text-xl">{surah.name_translit} <span lang="ar" dir="rtl">{surah.name_ar}</span></h2>
+                <h2 className="mb-4 text-center text-xl"><span lang="en" dir="ltr">{surah.name_translit}</span> <span lang="ar" dir="rtl" className="surah-name ms-2">{surah.name_ar}</span></h2>
               ) : null}
               {verse.bismillah_length > 0 ? <ArabicVerse text={bismillah} className="mb-5 text-center" /> : null}
               <div className="flex items-center justify-between">
