@@ -64,6 +64,8 @@ export function MushafReader({ t, names, children }: { t: T; names: string[]; ch
     if (!position) return false;
     const words = document.querySelectorAll(`[data-v="${verseKey(position)}"]`);
     words.forEach((el) => el.setAttribute("data-current", ""));
+    const screen = document.querySelector<HTMLElement>(".mushaf-screen");
+    if (playingRef.current && words[0] && screen && screen.scrollHeight > screen.clientHeight) words[0].scrollIntoView({ behavior: "smooth", block: "center" });
     return words.length > 0;
   }, []);
 
@@ -120,6 +122,7 @@ export function MushafReader({ t, names, children }: { t: T; names: string[]; ch
   useEffect(() => {
     document.cookie = `nour_mushaf_page=${page}; path=/; max-age=31536000; samesite=lax${location.protocol === "https:" ? "; secure" : ""}`;
     turning.current = 0;
+    document.querySelector(".mushaf-screen")?.scrollTo(0, 0);
     if (page < LAST_PAGE) router.prefetch(`/coran/mushaf/${page + 1}`);
     if (page > 1) router.prefetch(`/coran/mushaf/${page - 1}`);
     let frame = 0;
@@ -160,6 +163,16 @@ export function MushafReader({ t, names, children }: { t: T; names: string[]; ch
     const timer = setTimeout(() => goPage(page + 1), auto * 60_000);
     return () => clearTimeout(timer);
   }, [auto, goPage, page, playing]);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if ((event.target as HTMLElement).closest("input, select, textarea")) return;
+      if (event.key === "ArrowLeft") goPage(page + 1);
+      if (event.key === "ArrowRight") goPage(page - 1);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [goPage, page]);
 
   const onEnded = async () => {
     const current = posRef.current;
@@ -224,13 +237,13 @@ export function MushafReader({ t, names, children }: { t: T; names: string[]; ch
   const arrow = "M15 5 8 12l7 7";
 
   return (
-    <main className="mx-auto max-w-xl px-3 pt-1 pb-16">
-      <div className="flex min-h-11 items-center justify-between text-base">
+    <main className="mushaf-screen">
+      <div className="mx-auto flex min-h-11 w-full max-w-xl shrink-0 items-center justify-between px-3 text-base">
         <Link href="/coran" className="inline-flex min-h-11 items-center text-muted underline underline-offset-4">{t.allSurahs}</Link>
         {pos ? <span className="text-muted">{names[pos.surah - 1]}</span> : null}
       </div>
-      <div onClick={onClick} onTouchStart={(event) => { const p = event.touches[0]; touch.current = { x: p.clientX, y: p.clientY }; }} onTouchEnd={onTouchEnd}>{children}</div>
-      <p className="py-1 text-center text-base text-muted">{t.mushafPage} <span data-page-number>{page}</span></p>
+      <div className="mushaf-stage" onClick={onClick} onTouchStart={(event) => { const p = event.touches[0]; touch.current = { x: p.clientX, y: p.clientY }; }} onTouchEnd={onTouchEnd}>{children}</div>
+      <p className="shrink-0 py-1 text-center text-base text-muted">{t.mushafPage} <span data-page-number>{page}</span></p>
       <section aria-label={t.audioPlayer} className="audio-bar fixed inset-x-0 z-20 border-t border-line bg-page">
         <audio ref={audio} preload="auto" playsInline onPlay={() => { playingRef.current = true; setPlaying(true); }} onPause={() => { if (!audio.current?.ended) playingRef.current = false; setPlaying(false); }} onEnded={() => void onEnded()} onError={() => { if (audio.current?.getAttribute("src")) setFailed(true); }} onCanPlay={() => setFailed(false)} />
         <div className="mx-auto max-w-xl px-3">
