@@ -230,7 +230,7 @@ html[data-reading] .page-bottom {
 }
 
 .mushaf-page {
-  --mushaf-size: min(calc(100cqw / 15.2), calc((100dvh - 9rem - env(safe-area-inset-bottom) - env(safe-area-inset-top)) / 24.3));
+  --mushaf-size: min(calc(100cqw / 15.2), calc((100dvh - 11rem - env(safe-area-inset-bottom) - env(safe-area-inset-top)) / 24.3));
   container-type: inline-size;
   direction: rtl;
   touch-action: pan-y;
