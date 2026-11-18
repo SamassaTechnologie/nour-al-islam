@@ -134,6 +134,22 @@ html[data-theme="dark"] {
   font-size: 1.25rem;
 }
 
+.audio-bar {
+  bottom: calc(var(--nav-height) + env(safe-area-inset-bottom));
+  max-height: 80dvh;
+  overflow-y: auto;
+}
+
+html[data-reading] .audio-bar {
+  bottom: 0;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+[data-playing] {
+  background: var(--tint);
+  box-shadow: -1.25rem 0 0 var(--tint), 1.25rem 0 0 var(--tint);
+}
+
 html[data-hide-translation] .verse-translation {
   display: none;
 }
@@ -192,6 +208,9 @@ html[data-reading] .page-bottom {
 }
 
 @media (min-width: 900px) {
+  .audio-bar {
+    bottom: 0;
+  }
   .page-bottom {
     padding-bottom: 4rem;
   }

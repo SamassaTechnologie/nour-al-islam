@@ -18,6 +18,7 @@ export async function SourceNote({ t }: { t: Dictionary["quran"] }) {
   return (
     <footer className="mt-10 border-t border-line pt-4 text-base text-muted">
       {text ? <p>{t.textSource} : <a href={text.source_url} className="underline underline-offset-4">{text.publisher}</a>, version {text.version}</p> : null}
+      <p>{t.audioSource} : <a href="https://quran.foundation" className="underline underline-offset-4">Quran Foundation</a></p>
       {translation ? <p>{t.translationSource} : {translation.author}, <a href={translation.source_url} className="underline underline-offset-4">{translation.publisher}</a>, version {translation.version}</p> : null}
       <Link href="/coran/sources" className="inline-flex min-h-11 items-center underline underline-offset-4">{t.sourcesLink}</Link>
     </footer>
@@ -56,7 +57,14 @@ export async function VerseList({ verses, surahs, t, trackSurah, showHeadings = 
                 <Link href={`/coran/${verse.surah}#v${verse.surah}-${verse.number}`} aria-label={`${t.verse} ${verse.surah}:${verse.number}`} className="inline-flex min-h-11 items-center gap-2 text-base font-medium text-emerald">
                   {verse.surah}:{verse.number}
                 </Link>
-                {bookmarks ? <BookmarkButton ayahId={verse.id} initial={bookmarks.has(verse.id)} t={t} /> : null}
+                <span className="flex items-center">
+                  {trackSurah ? (
+                    <button type="button" data-play-verse={verse.number} aria-label={`${t.playVerse} ${verse.surah}:${verse.number}`} className="grid h-11 w-11 place-items-center rounded-md text-muted">
+                      <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                    </button>
+                  ) : null}
+                  {bookmarks ? <BookmarkButton ayahId={verse.id} initial={bookmarks.has(verse.id)} t={t} /> : null}
+                </span>
               </div>
               <ArabicVerse text={verseBody(verse.text_uthmani, verse.bismillah_length)} />
               {verse.translation ? (

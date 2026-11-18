@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AudioPlayer } from "@/components/audio-player";
 import { SourceNote, VerseList, place } from "@/components/quran-view";
 import { getSurahs, getSurahVerses } from "@/lib/quran";
 import { getPreferences } from "@/lib/preferences";
@@ -28,7 +29,7 @@ export default async function SurahPage({ params }: Props) {
   const previous = surahs[surah.number - 2];
   const next = surahs[surah.number];
   return (
-    <main className="mx-auto max-w-xl px-5 pt-5">
+    <main className="mx-auto max-w-xl px-5 pt-5 pb-16">
       <Link href="/coran" className="reader-chrome inline-flex min-h-11 items-center text-base text-muted underline underline-offset-4">{q.allSurahs}</Link>
       <header className="py-3 text-center">
         <p lang="ar" dir="rtl" className="wordmark text-4xl leading-normal text-emerald">{surah.name_ar}</p>
@@ -41,6 +42,7 @@ export default async function SurahPage({ params }: Props) {
         {next ? <Link href={`/coran/${next.number}`} className="inline-flex min-h-11 items-center text-end font-medium text-emerald">{q.next} : {next.name_translit}</Link> : null}
       </nav>
       <SourceNote t={q} />
+      <AudioPlayer surah={surah.number} surahName={surah.name_translit} t={q} />
     </main>
   );
 }
