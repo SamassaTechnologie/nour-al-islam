@@ -1,0 +1,174 @@
+@import "tailwindcss";
+@import "@fontsource/reem-kufi/arabic-500.css";
+@import "@fontsource/reem-kufi/arabic-600.css";
+@import "@fontsource/reem-kufi/latin-500.css";
+@import "@fontsource/reem-kufi/latin-600.css";
+@import "@fontsource/alegreya-sans/latin-400.css";
+@import "@fontsource/alegreya-sans/latin-500.css";
+@import "@fontsource/alegreya-sans/latin-700.css";
+@import "@fontsource/noto-naskh-arabic/arabic-400.css";
+@import "@fontsource/noto-naskh-arabic/arabic-600.css";
+
+:root {
+  --page: #ffffff;
+  --tint: #edf6f2;
+  --ink: #10261f;
+  --muted: #4d645b;
+  --line: #cfe0d8;
+  --emerald: #0a6b50;
+  --on-emerald: #ffffff;
+  --night: #06382c;
+  --on-night: #f1f8f4;
+  --gold: #c9a85a;
+  --gold-ink: #7a5f1e;
+  --danger: #a32a2a;
+  --body-font: "Alegreya Sans", "Noto Naskh Arabic", system-ui, sans-serif;
+  --display-font: "Reem Kufi", "Alegreya Sans", system-ui, sans-serif;
+  --nav-height: 58px;
+}
+
+html[lang="ar"] {
+  --body-font: "Noto Naskh Arabic", "Alegreya Sans", serif;
+  --display-font: "Noto Naskh Arabic", "Reem Kufi", serif;
+}
+
+.wordmark {
+  font-family: "Reem Kufi", "Noto Naskh Arabic", serif;
+}
+
+html[data-theme="dark"] {
+  --page: #07261e;
+  --tint: #0c332a;
+  --ink: #eaf3ee;
+  --muted: #a8c2b7;
+  --line: #1f4c3f;
+  --emerald: #4ccba3;
+  --on-emerald: #06281f;
+  --night: #041b15;
+  --gold-ink: #d9bc72;
+  --danger: #f2a0a0;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme="system"] {
+    --page: #07261e;
+    --tint: #0c332a;
+    --ink: #eaf3ee;
+    --muted: #a8c2b7;
+    --line: #1f4c3f;
+    --emerald: #4ccba3;
+    --on-emerald: #06281f;
+    --night: #041b15;
+    --gold-ink: #d9bc72;
+    --danger: #f2a0a0;
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-page: var(--page);
+  --color-tint: var(--tint);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-emerald: var(--emerald);
+  --color-on-emerald: var(--on-emerald);
+  --color-night: var(--night);
+  --color-on-night: var(--on-night);
+  --color-gold: var(--gold);
+  --color-gold-ink: var(--gold-ink);
+  --color-danger: var(--danger);
+  --font-body: var(--body-font);
+  --font-display: var(--display-font);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--page);
+    color: var(--ink);
+    font-family: var(--body-font);
+    font-size: 1.125rem;
+    line-height: 1.5;
+    -webkit-tap-highlight-color: transparent;
+  }
+  html[lang="ar"] body {
+    font-size: 1.0625rem;
+    line-height: 1.85;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--display-font);
+    font-weight: 500;
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+  html[lang="ar"] h1,
+  html[lang="ar"] h2,
+  html[lang="ar"] h3 {
+    line-height: 1.5;
+  }
+  :focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+  input {
+    font-size: 1rem;
+  }
+}
+
+.page-bottom {
+  padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 2rem);
+}
+
+.bottom-nav {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.app-header {
+  padding-top: env(safe-area-inset-top);
+}
+
+.door-line {
+  stroke-dasharray: 1;
+  animation: door-draw 1.4s cubic-bezier(0.3, 0, 0.2, 1) both;
+}
+
+.door-light {
+  animation: door-open 1.1s 0.25s ease-out both;
+}
+
+@keyframes door-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes door-open {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (min-width: 900px) {
+  .page-bottom {
+    padding-bottom: 4rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .door-line,
+  .door-light {
+    animation: none;
+  }
+}

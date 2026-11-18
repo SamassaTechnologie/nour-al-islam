@@ -1,0 +1,75 @@
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { setPreference, signOut } from "@/app/actions";
+import { ProfileForm } from "@/components/forms";
+import { getPreferences, type Theme } from "@/lib/preferences";
+import { getSession } from "@/lib/supabase/server";
+
+export const metadata: Metadata = { title: "Mon espace" };
+
+function Choice({ name, value, label, active }: { name: string; value: string; label: string; active: boolean }) {
+  return (
+    <form action={setPreference} className="flex-1">
+      <input type="hidden" name="key" value={name} />
+      <input type="hidden" name="value" value={value} />
+      <button aria-pressed={active} className={`min-h-11 w-full rounded-md px-2 text-base ${active ? "bg-emerald font-medium text-on-emerald" : "text-ink"}`}>
+        {label}
+      </button>
+    </form>
+  );
+}
+
+export default async function ProfilePage() {
+  const session = await getSession();
+  if (!session) redirect("/connexion?suivant=/profil");
+  const { t, locale, theme } = await getPreferences();
+  const p = t.profile;
+  const name = session.profile?.display_name ?? "";
+  const role = session.profile?.role ?? "user";
+  const themes: Theme[] = ["system", "light", "dark"];
+  return (
+    <main className="mx-auto max-w-md px-5 pt-8">
+      <p className="text-muted">{p.title}</p>
+      <h1 className="text-3xl break-words">{p.greeting} {name}</h1>
+
+      <section className="mt-7 border-s-2 border-gold ps-4">
+        <h2 className="text-xl">{p.progressTitle}</h2>
+        <p className="mt-1 text-muted">{p.progressEmpty}</p>
+      </section>
+
+      <section className="mt-9">
+        <h2 className="mb-3 text-xl">{p.account}</h2>
+        <ProfileForm t={p} pending={t.auth.pending} name={name} />
+        <dl className="mt-5 space-y-2">
+          <div>
+            <dt className="text-base text-muted">{p.email}</dt>
+            <dd dir="ltr" className="text-start break-all">{session.user.email}</dd>
+          </div>
+          {role !== "user" ? (
+            <div>
+              <dt className="text-base text-muted">{p.role}</dt>
+              <dd>{p.roles[role]}</dd>
+            </div>
+          ) : null}
+        </dl>
+      </section>
+
+      <section className="mt-9">
+        <h2 className="mb-3 text-xl">{p.preferences}</h2>
+        <p className="mb-1 font-medium">{p.language}</p>
+        <div className="flex gap-1 rounded-lg bg-tint p-1">
+          <Choice name="locale" value="fr" label="Français" active={locale === "fr"} />
+          <Choice name="locale" value="ar" label="العربية" active={locale === "ar"} />
+        </div>
+        <p className="mt-4 mb-1 font-medium">{p.theme}</p>
+        <div className="flex gap-1 rounded-lg bg-tint p-1">
+          {themes.map((value) => <Choice key={value} name="theme" value={value} label={p.themes[value]} active={theme === value} />)}
+        </div>
+      </section>
+
+      <form action={signOut} className="mt-9">
+        <button className="min-h-12 w-full rounded-lg border border-line px-5 font-medium">{p.signOut}</button>
+      </form>
+    </main>
+  );
+}
