@@ -3,7 +3,7 @@ import { quranApi } from "@/lib/quran-audio";
 
 export const MUSHAF_PAGES = 604;
 
-export type MushafWord = { verse: string; code: string; text: string; end: boolean };
+export type MushafWord = { verse: string; code: string; end: boolean };
 export type MushafLine =
   | { number: number; kind: "words"; words: MushafWord[] }
   | { number: number; kind: "surah"; surah: number }
@@ -11,7 +11,7 @@ export type MushafLine =
   | { number: number; kind: "empty" };
 export type MushafPage = { page: number; first: string; last: string; lines: MushafLine[]; bismillah: MushafWord[] };
 
-type ApiWord = { position: number; char_type_name: string; line_number: number; code_v1: string; text_uthmani?: string; text_qpc_hafs?: string };
+type ApiWord = { position: number; char_type_name: string; line_number: number; code_v1: string };
 type ApiVerse = { verse_key: string; words: ApiWord[] };
 type ApiPage = { verses: ApiVerse[]; pagination?: { next_page: number | null } };
 
@@ -22,7 +22,7 @@ async function fetchVerses(page: number) {
   const verses: ApiVerse[] = [];
   let next: number | null = 1;
   while (next) {
-    const data: ApiPage = await quranApi<ApiPage>(`/verses/by_page/${page}?mushaf=2&words=true&word_fields=code_v1,text_uthmani,text_qpc_hafs,line_number,page_number&per_page=50&page=${next}`);
+    const data: ApiPage = await quranApi<ApiPage>(`/verses/by_page/${page}?mushaf=2&words=true&word_fields=code_v1,line_number,page_number&per_page=50&page=${next}`);
     verses.push(...data.verses);
     next = data.pagination?.next_page ?? null;
   }
@@ -32,7 +32,6 @@ async function fetchVerses(page: number) {
 const toWord = (verse: string, word: ApiWord): MushafWord => ({
   verse,
   code: glyphs(word.code_v1),
-  text: word.text_uthmani ?? word.text_qpc_hafs ?? "",
   end: word.char_type_name === "end",
 });
 
@@ -68,6 +67,6 @@ export const getMushafPage = unstable_cache(
       }),
     };
   },
-  ["qf-mushaf-v1-page-2"],
+  ["qf-mushaf-v1-page-3"],
   { revalidate: 86400 },
 );

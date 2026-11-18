@@ -84,6 +84,12 @@ export const getSurahVerses = cache((surah: number) => verses("surah", surah));
 export const getJuzVerses = cache((juz: number) => verses("juz", juz));
 export const getHizbVerses = cache((hizb: number) => verses("hizb", hizb));
 
+export const getVerseRange = cache(async (firstId: number, lastId: number) => {
+  const { data, error } = await content().from("ayahs").select("id,surah,number,text_uthmani,bismillah_length").gte("id", firstId).lte("id", lastId).order("id");
+  if (error) throw new Error(error.message);
+  return data as Pick<Verse, "id" | "surah" | "number" | "text_uthmani" | "bismillah_length">[];
+});
+
 export const getJuzStarts = cache(async () => {
   const { data, error } = await content().rpc("juz_starts");
   if (error) throw new Error(error.message);
