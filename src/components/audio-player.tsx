@@ -34,6 +34,7 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
   const audio = useRef<HTMLAudioElement>(null);
   const plays = useRef(1);
   const shouldPlay = useRef(false);
+  const selected = useRef(false);
   const [recitations, setRecitations] = useState<Recitation[]>([]);
   const [recitation, setRecitation] = useState<number | null>(null);
   const [files, setFiles] = useState<AudioFile[]>([]);
@@ -89,8 +90,14 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
   const go = useCallback((next: number, autoplay = true) => {
     plays.current = 1;
     shouldPlay.current = autoplay;
+    selected.current = true;
     setIndex(next);
   }, []);
+
+  const highlight = useCallback((number: number) => {
+    document.querySelectorAll("[data-playing]").forEach((el) => el.removeAttribute("data-playing"));
+    document.getElementById(`v${surah}-${number}`)?.setAttribute("data-playing", "");
+  }, [surah]);
 
   const start = useCallback(() => {
     const element = audio.current;
@@ -107,15 +114,11 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
     }
     element.playbackRate = speed;
     if (shouldPlay.current) start();
-    document.querySelectorAll("[data-playing]").forEach((el) => el.removeAttribute("data-playing"));
-    const verse = document.getElementById(`v${surah}-${current.number}`);
-    if (shouldPlay.current) {
-      verse?.setAttribute("data-playing", "");
-      verse?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
+    if (shouldPlay.current || selected.current) highlight(current.number);
+    if (shouldPlay.current) document.getElementById(`v${surah}-${current.number}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
     const following = files[index + 1];
     if (following) new Audio().src = following.url;
-  }, [current, files, index, speed, start, surah]);
+  }, [current, files, highlight, index, speed, start, surah]);
 
   useEffect(() => () => document.querySelectorAll("[data-playing]").forEach((el) => el.removeAttribute("data-playing")), []);
 
@@ -149,11 +152,15 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
 
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
-      const button = (event.target as HTMLElement).closest<HTMLElement>("[data-play-verse]");
-      if (!button) return;
-      const position = files.findIndex((file) => file.number === Number(button.dataset.playVerse));
+      const target = event.target as HTMLElement;
+      const button = target.closest<HTMLElement>("[data-play-verse]");
+      const verse = document.documentElement.dataset.quranView === "mushaf" ? target.closest<HTMLElement>("[data-verse-number]") : null;
+      const number = Number(button?.dataset.playVerse ?? verse?.dataset.verseNumber);
+      const position = files.findIndex((file) => file.number === number);
       if (position < 0) return;
-      if (position === index) {
+      if (!button) {
+        go(position, !audio.current?.paused);
+      } else if (position === index) {
         shouldPlay.current = true;
         start();
       } else {
@@ -182,7 +189,7 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
         ref={audio}
         preload="auto"
         playsInline
-        onPlay={() => setPlaying(true)}
+        onPlay={() => { setPlaying(true); if (current) highlight(current.number); }}
         onPause={() => setPlaying(false)}
         onEnded={onEnded}
         onError={() => { if (current) { setFailed(true); setPlaying(false); } }}

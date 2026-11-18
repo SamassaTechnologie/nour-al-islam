@@ -16,6 +16,7 @@ Application en ligne : https://nour-al-islam.vercel.app
 
 - Texte Tanzil Uthmani 1.1 et traduction de Rachid Maach (QuranEnc, version 1.0.3), importés sans saisie et verrouillés dans la base
 - Sourates, juz, hizb et rubʿ, recherche, signets, dernière lecture, taille du texte et lecture plein écran
+- Mode Mushaf : texte continu, cadre de sourate, marques de versets et verset en cours surligné, sans modifier le texte verrouillé
 - Récitation verset par verset avec Quran Foundation : choix du récitant, répétition, vitesse et suivi du verset
 
 Les sections Apprendre et Prière indiquent clairement qu'elles ne sont pas encore ouvertes.

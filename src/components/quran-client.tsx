@@ -28,11 +28,13 @@ export function ReaderControls({ t }: { t: T }) {
   const [scale, setScale] = useState(1);
   const [translation, setTranslation] = useState(true);
   const [focus, setFocus] = useState(false);
+  const [mushaf, setMushaf] = useState(false);
 
   useEffect(() => {
     const saved = Number(read(SCALE_KEY));
     if (saved >= 0.8 && saved <= 1.8) setScale(saved);
     if (read(TRANSLATION_KEY) === "off") setTranslation(false);
+    setMushaf(document.documentElement.dataset.quranView === "mushaf");
   }, []);
 
   useEffect(() => {
@@ -52,13 +54,20 @@ export function ReaderControls({ t }: { t: T }) {
     write(TRANSLATION_KEY, translation ? "off" : "on");
     setTranslation(!translation);
   };
+  const toggleView = () => {
+    const next = !mushaf;
+    setMushaf(next);
+    document.documentElement.dataset.quranView = next ? "mushaf" : "verses";
+    document.cookie = `nour_quran_view=${next ? "mushaf" : "verses"}; path=/; max-age=31536000; samesite=lax${location.protocol === "https:" ? "; secure" : ""}`;
+  };
   const button = "grid min-h-11 min-w-11 place-items-center rounded-md px-2 text-base";
 
   return (
     <div className="reader-bar sticky top-0 z-10 -mx-5 flex items-center gap-1 border-b border-line bg-page px-3">
       <button type="button" aria-label={t.smaller} onClick={() => size(-0.1)} className={button}>A−</button>
       <button type="button" aria-label={t.larger} onClick={() => size(0.1)} className={`${button} text-xl`}>A+</button>
-      <button type="button" aria-pressed={translation} onClick={toggleTranslation} className={`${button} ms-auto ${translation ? "text-emerald" : "text-muted"}`}>{t.translation}</button>
+      <button type="button" aria-pressed={translation} onClick={toggleTranslation} className={`verses-only ${button} ms-auto ${translation ? "text-emerald" : "text-muted"}`}>{t.translation}</button>
+      <button type="button" onClick={toggleView} className={`${button} ${mushaf ? "ms-auto" : ""} font-medium text-emerald`}>{mushaf ? t.versesView : t.mushafView}</button>
       <button type="button" aria-pressed={focus} onClick={() => setFocus(!focus)} className={`${button} ${focus ? "text-emerald" : ""}`}>{focus ? t.exitFocus : t.focus}</button>
     </div>
   );

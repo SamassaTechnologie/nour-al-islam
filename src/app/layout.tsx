@@ -28,9 +28,9 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const [{ locale, theme, t }, session] = await Promise.all([getPreferences(), getSession()]);
+  const [{ locale, theme, quranView, t }, session] = await Promise.all([getPreferences(), getSession()]);
   return (
-    <html lang={locale} dir={locale === "ar" ? "rtl" : "ltr"} data-theme={theme}>
+    <html lang={locale} dir={locale === "ar" ? "rtl" : "ltr"} data-theme={theme} data-quran-view={quranView}>
       <body className="min-h-dvh">
         <AppHeader t={t} locale={locale} theme={theme} signedIn={Boolean(session)} />
         <div className="page-bottom">{children}</div>

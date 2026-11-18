@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AudioPlayer } from "@/components/audio-player";
-import { SourceNote, VerseList, place } from "@/components/quran-view";
+import { SourceNote, SurahFrame, VerseList, place } from "@/components/quran-view";
 import { getSurahs, getSurahVerses } from "@/lib/quran";
 import { getPreferences } from "@/lib/preferences";
 
@@ -31,7 +31,8 @@ export default async function SurahPage({ params }: Props) {
   return (
     <main className="mx-auto max-w-xl px-5 pt-5 pb-16">
       <Link href="/coran" className="reader-chrome inline-flex min-h-11 items-center text-base text-muted underline underline-offset-4">{q.allSurahs}</Link>
-      <header className="py-3 text-center">
+      <div className="my-3"><SurahFrame surah={surah} t={q} /></div>
+      <header className="verses-only py-3 text-center">
         <p lang="ar" dir="rtl" className="wordmark text-4xl leading-normal text-emerald">{surah.name_ar}</p>
         <h1 lang="en" dir="ltr" className="text-2xl">{surah.number}. {surah.name_translit}</h1>
         <p className="text-base text-muted">{place(q, surah)}, {surah.ayah_count} {q.verses}</p>
