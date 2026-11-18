@@ -25,35 +25,47 @@ function config() {
   };
 }
 
-let token: { value: string; expiresAt: number } | null = null;
+const AUDIO_SCOPES = ["content.audio.read"];
+const QURAN_SCOPES = ["content.quran.read", "content"];
+const tokens = new Map<string, { value: string; expiresAt: number }>();
 
-async function accessToken() {
-  if (token && token.expiresAt > Date.now() + 60_000) return token.value;
+async function accessToken(scopes: string[]) {
+  const key = scopes.join(" ");
+  const known = tokens.get(key);
+  if (known && known.expiresAt > Date.now() + 60_000) return known.value;
   const { clientId, clientSecret, oauth } = config();
-  const res = await fetch(`${oauth}/oauth2/token`, {
-    method: "POST",
-    cache: "no-store",
-    headers: {
-      Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({ grant_type: "client_credentials", scope: "content.audio.read" }),
-  });
-  if (!res.ok) throw new AudioUnavailable(res.status, "jeton");
-  const data = (await res.json()) as { access_token: string; expires_in: number };
-  token = { value: data.access_token, expiresAt: Date.now() + data.expires_in * 1000 };
-  return token.value;
+  let status = 500;
+  for (const scope of scopes) {
+    const res = await fetch(`${oauth}/oauth2/token`, {
+      method: "POST",
+      cache: "no-store",
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({ grant_type: "client_credentials", scope }),
+    });
+    status = res.status;
+    if (!res.ok) continue;
+    const data = (await res.json()) as { access_token: string; expires_in: number };
+    const token = { value: data.access_token, expiresAt: Date.now() + data.expires_in * 1000 };
+    tokens.set(key, token);
+    return token.value;
+  }
+  throw new AudioUnavailable(status, "jeton");
 }
 
-async function api<T>(path: string): Promise<T> {
+async function api<T>(path: string, scopes = AUDIO_SCOPES): Promise<T> {
   const { clientId, api: base } = config();
   const res = await fetch(`${base}/content/api/v4${path}`, {
     cache: "no-store",
-    headers: { "x-auth-token": await accessToken(), "x-client-id": clientId, Accept: "application/json" },
+    headers: { "x-auth-token": await accessToken(scopes), "x-client-id": clientId, Accept: "application/json" },
   });
   if (!res.ok) throw new AudioUnavailable(res.status, "contenu");
   return (await res.json()) as T;
 }
+
+export const quranApi = <T>(path: string) => api<T>(path, QURAN_SCOPES);
 
 const PREFERRED = [/sudais/i, /afasy/i, /mu.?aiqly|muaiqly/i, /abdul.?basit|abdulbaset/i, /minshaw/i, /husar|hussar/i];
 const rank = (name: string) => {

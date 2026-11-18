@@ -22,6 +22,11 @@ export default async function SourcesPage() {
           {s.notice ? <pre dir="ltr" lang="en" className="mt-2 overflow-x-auto rounded-lg bg-tint p-3 text-xs leading-relaxed whitespace-pre-wrap">{s.notice}</pre> : null}
         </section>
       ))}
+      <section className="mt-6 border-t border-line pt-4">
+        <h2 className="text-xl">{t.quran.mushaf}</h2>
+        <p className="mt-2 text-muted">{t.quran.mushafCredit}</p>
+        <a href="https://quran.foundation" className="inline-flex min-h-11 items-center font-medium text-emerald underline underline-offset-4">quran.foundation</a>
+      </section>
     </main>
   );
 }

@@ -37,6 +37,8 @@ export default async function QuranPage({ searchParams }: { searchParams: Promis
         </Link>
       ) : null}
 
+      <Link href="/coran/mushaf" className="mt-3 flex min-h-12 items-center justify-center rounded-lg border border-line px-4 font-medium text-emerald">{q.mushaf}</Link>
+
       <form role="search" action="/coran" className="mt-4 flex gap-2">
         <input name="q" type="search" defaultValue={query} aria-label={q.searchLabel} placeholder={q.searchPlaceholder} className="min-h-12 min-w-0 flex-1 rounded-lg border border-line bg-page px-3 outline-none focus:border-emerald" />
         <button className="min-h-12 rounded-lg border border-line px-4 font-medium">{q.searchAction}</button>

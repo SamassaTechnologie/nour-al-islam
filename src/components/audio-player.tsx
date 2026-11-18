@@ -152,15 +152,11 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
 
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      const button = target.closest<HTMLElement>("[data-play-verse]");
-      const verse = document.documentElement.dataset.quranView === "mushaf" ? target.closest<HTMLElement>("[data-verse-number]") : null;
-      const number = Number(button?.dataset.playVerse ?? verse?.dataset.verseNumber);
-      const position = files.findIndex((file) => file.number === number);
+      const button = (event.target as HTMLElement).closest<HTMLElement>("[data-play-verse]");
+      if (!button) return;
+      const position = files.findIndex((file) => file.number === Number(button.dataset.playVerse));
       if (position < 0) return;
-      if (!button) {
-        go(position, !audio.current?.paused);
-      } else if (position === index) {
+      if (position === index) {
         shouldPlay.current = true;
         start();
       } else {

@@ -150,69 +150,6 @@ html[data-reading] .audio-bar {
   box-shadow: -1.25rem 0 0 var(--tint), 1.25rem 0 0 var(--tint);
 }
 
-.mushaf-only,
-.ayah-mark {
-  display: none;
-}
-
-html[data-quran-view="mushaf"] .mushaf-only {
-  display: block;
-}
-
-html[data-quran-view="mushaf"] .verses-only,
-html[data-quran-view="mushaf"] .verse-translation {
-  display: none;
-}
-
-html[data-quran-view="mushaf"] .verse-list {
-  direction: rtl;
-  padding-block: 1rem;
-  text-align: center;
-}
-
-html[data-quran-view="mushaf"] .verse-item {
-  display: inline;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
-}
-
-html[data-quran-view="mushaf"] .verse-body {
-  display: inline;
-}
-
-html[data-quran-view="mushaf"] .verse-block,
-html[data-quran-view="mushaf"] .surah-frame {
-  display: block;
-  margin-block: 1rem;
-}
-
-html[data-quran-view="mushaf"] .ayah-mark {
-  display: inline;
-  white-space: nowrap;
-}
-
-html[data-quran-view="mushaf"] .ayah-mark > span {
-  display: inline-grid;
-  width: calc(1.75rem * var(--quran-scale, 1));
-  height: calc(1.75rem * var(--quran-scale, 1));
-  place-items: center;
-  margin-inline: 0.15rem;
-  vertical-align: middle;
-  color: var(--ink);
-  font-family: "Noto Naskh Arabic", serif;
-  font-size: calc(0.8rem * var(--quran-scale, 1));
-  line-height: 1;
-  background: center / contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%23c9a85a' stroke-width='1.2' d='M12 1.5 15.2 4.8h4v4L22.5 12l-3.3 3.2v4h-4L12 22.5l-3.2-3.3h-4v-4L1.5 12l3.3-3.2v-4h4Z'/%3E%3C/svg%3E");
-}
-
-html[data-quran-view="mushaf"] [data-playing] {
-  border-radius: 0.5rem;
-  box-shadow: none;
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
-}
-
 html[data-hide-translation] .verse-translation {
   display: none;
 }
@@ -284,4 +221,68 @@ html[data-reading] .page-bottom {
   .door-light {
     animation: none;
   }
+}
+
+@font-face {
+  font-family: "qcf-surah-names";
+  src: url("https://verses.quran.foundation/fonts/quran/surah-names/v1/sura_names.woff2") format("woff2");
+  font-display: block;
+}
+
+.mushaf-page {
+  --mushaf-size: calc(100cqw / 15.5);
+  container-type: inline-size;
+  direction: rtl;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.mushaf-lines {
+  color: var(--ink);
+  font-size: var(--mushaf-size);
+  line-height: 1.75;
+}
+
+.mushaf-line {
+  display: flex;
+  justify-content: center;
+  height: 1.75em;
+  white-space: nowrap;
+}
+
+.mushaf-line[data-full] {
+  justify-content: space-between;
+}
+
+.mushaf-word {
+  border-radius: 0.2em;
+  cursor: pointer;
+}
+
+.mushaf-word[data-current] {
+  background: var(--tint);
+  box-shadow: 0 0.12em 0 var(--gold);
+}
+
+.mushaf-surah {
+  position: relative;
+  display: flex;
+  height: 1.55em;
+  margin-block: 0.1em;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid currentColor;
+  outline: 1px solid currentColor;
+  outline-offset: -4px;
+}
+
+.mushaf-surah-name {
+  position: relative;
+  padding-inline: 1em;
+  background: var(--page);
+  font-family: "qcf-surah-names";
+  font-size: 1.15em;
+  line-height: 1.3;
 }
