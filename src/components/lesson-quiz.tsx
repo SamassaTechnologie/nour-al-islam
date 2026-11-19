@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { saveQuizAttempt } from "@/app/quiz-actions";
 import type { Dictionary, Locale } from "@/lib/dictionaries";
 import type { QuizQuestion } from "@/lib/quiz";
+import { optionOrder } from "@/lib/quiz-order";
 
 type Score = { score: number; total: number };
 
@@ -25,6 +26,7 @@ export function LessonQuiz({ questions, itemId, revisionId, slug, signedIn, best
   const [done, setDone] = useState(false);
   const [saved, setSaved] = useState<"idle" | "saved" | "error">("idle");
   const [bestScore, setBest] = useState(best);
+  const [attempt, setAttempt] = useState(0);
   const [pending, run] = useTransition();
   const started = useRef(false);
   const questionRef = useRef<HTMLDivElement>(null);
@@ -33,6 +35,7 @@ export function LessonQuiz({ questions, itemId, revisionId, slug, signedIn, best
   const q = questions[index];
   const answered = choice !== null;
   const correct = answered && choice === q.answer;
+  const order = optionOrder(q.id, q.options.length, attempt);
 
   // Le focus suit l'exercice : bouton suivant apres une reponse, nouvelle question, puis resultat.
   useEffect(() => {
@@ -68,6 +71,7 @@ export function LessonQuiz({ questions, itemId, revisionId, slug, signedIn, best
     setScore(0);
     setDone(false);
     setSaved("idle");
+    setAttempt((value) => value + 1);
   };
   const optionClass = (option: number) => {
     const base = "min-h-11 w-full rounded-lg border px-3 py-2 text-start";
@@ -110,9 +114,9 @@ export function LessonQuiz({ questions, itemId, revisionId, slug, signedIn, best
             </figure>
           ) : null}
           <ul lang={contentLocale} className="mt-3 space-y-2">
-            {q.options.map((option, n) => (
+            {order.map((n) => (
               <li key={n}>
-                <button type="button" dir="auto" disabled={answered} aria-pressed={choice === n} data-option={n} onClick={() => pick(n)} className={optionClass(n)}>{option}</button>
+                <button type="button" dir="auto" disabled={answered} aria-pressed={choice === n} data-option={n} onClick={() => pick(n)} className={optionClass(n)}>{q.options[n]}</button>
               </li>
             ))}
           </ul>
