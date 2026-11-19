@@ -34,6 +34,7 @@ CANDIDATES = {
  'sommeil-conscience-et-toucher': [('abudawud', '203'), ('nasai', '447'), ('ibnmajah', '483')],
  'naissance-et-enfance': [('muslim', '2276'), ('muslim', '1162'), ('bukhari', '2262')],
  'jeunesse-khadija-kaaba': [('bukhari', '3432')],
+ 'debut-de-la-revelation': [('bukhari', '3'), ('bukhari', '3851')],
 }
 SKIP = re.compile('[ً-ٰٟۖ-ۭـ‏‎"،؛؟.,:;«»()\\-]')
 LETTER = {'أ': 'ا', 'إ': 'ا', 'آ': 'ا', 'ٱ': 'ا', 'ى': 'ي'}
