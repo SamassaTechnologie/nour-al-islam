@@ -91,6 +91,7 @@ const fr = {
   },
   profile: {
     title: "Mon espace",
+    admin: "Administration",
     greeting: "Bonjour",
     progressTitle: "Ma progression",
     progressEmpty: "Votre dernière lecture du Coran apparaîtra ici.",
@@ -175,6 +176,15 @@ const fr = {
     audioError: "Audio indisponible",
     audioCredit: "Récitations fournies par Quran Foundation.",
     audioSource: "Récitations",
+  },
+  content: {
+    available: "Contenus validés",
+    back: "Tous les contenus",
+    kinds: { lesson: "Leçon", explanation: "Explication de savant", legal_opinion: "Avis juridique" },
+    opinions: "Avis des savants",
+    opinionsNote: "Ces avis sont présentés avec leurs références. Pour une situation personnelle, consultez un savant qualifié.",
+    references: "Références",
+    validated: "Contenu relu et validé par",
   },
   notFound: { title: "Cette page n’existe pas", action: "Retour à l’accueil" },
 };
@@ -262,6 +272,7 @@ const ar: Dictionary = {
   },
   profile: {
     title: "مساحتي",
+    admin: "الإدارة",
     greeting: "مرحبًا",
     progressTitle: "تقدمي",
     progressEmpty: "ستظهر هنا آخر قراءة لك في القرآن.",
@@ -346,6 +357,15 @@ const ar: Dictionary = {
     audioError: "الصوت غير متاح",
     audioCredit: "التلاوات مقدمة من Quran Foundation.",
     audioSource: "التلاوات",
+  },
+  content: {
+    available: "محتويات معتمدة",
+    back: "كل المحتويات",
+    kinds: { lesson: "درس", explanation: "شرح عالم", legal_opinion: "رأي فقهي" },
+    opinions: "أقوال العلماء",
+    opinionsNote: "تُعرض هذه الأقوال مع مراجعها. وفي المسائل الشخصية يُرجع إلى عالم مؤهل.",
+    references: "المراجع",
+    validated: "تمت مراجعة هذا المحتوى واعتماده من قبل",
   },
   notFound: { title: "هذه الصفحة غير موجودة", action: "العودة إلى الرئيسية" },
 };

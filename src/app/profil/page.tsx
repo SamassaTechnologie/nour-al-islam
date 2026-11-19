@@ -60,6 +60,7 @@ export default async function ProfilePage() {
             </div>
           ) : null}
         </dl>
+        {role !== "user" ? <Link href="/admin" className="mt-2 inline-flex min-h-11 items-center font-medium text-emerald underline underline-offset-4">{p.admin}</Link> : null}
       </section>
 
       <section className="mt-9">
