@@ -28,7 +28,7 @@ CANDIDATES = {
  'reunion-de-deux-prieres': [('bukhari', '1111')], 'priere-en-groupe': [('bukhari', '645')],
  'awra-dans-la-priere': [('bukhari', '359'), ('abudawud', '641')], 'raccourcir-la-priere-en-voyage': [('muslim', '686')],
  'priere-du-vendredi': [('muslim', '865'), ('bukhari', '934')], 'priere-description': [('bukhari', '631')],
- 'tashahhud-et-priere-sur-le-prophete': [('bukhari', '831'), ('bukhari', '3370')],
+ 'tashahhud-et-priere-sur-le-prophete': [('bukhari', '6265'), ('bukhari', '831'), ('bukhari', '3370')],
  'ablutions': [('bukhari', '135')], 'ablutions-obligations-et-avis': [('bukhari', '1')],
  'horaires-des-prieres': [('muslim', '612')], 'islam-iman-ihsan': [('muslim', '8')],
  'sommeil-conscience-et-toucher': [('abudawud', '203'), ('nasai', '447'), ('ibnmajah', '483')],
