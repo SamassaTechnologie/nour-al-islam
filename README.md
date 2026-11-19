@@ -23,6 +23,7 @@ Application en ligne : https://nour-al-islam.vercel.app
 - Circuit : brouillon, vérification des sources par une autre personne, relecture, publication par un réviseur seulement
 - Versions verrouillées après envoi, journal inaltérable, références obligatoires et contrôlées par la base
 - Test : `tests/phase3.mjs` (comptes d'essai à créer puis supprimer)
+- Test de la relecture IA : `tests/ai-review.mjs` (comptes `ai*` et contenu `essai-ia-validation` à créer puis supprimer)
 
 ## Phase 2 : lecture du Coran
 
