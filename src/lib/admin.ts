@@ -13,6 +13,10 @@ export type Reference = {
   verified_name?: string | null; verified_at?: string | null;
 };
 export type Opinion = { id: string; holder: string; opinion: string; source: string };
+export type Dhikr = {
+  id: string; revision_id: string; title: string; arabic: string; transliteration: string; meaning: string; repeat_count: number;
+  when_to_say: string | null; virtue: string | null; collection: string; hadith_number: string; grade: string; graded_by: string; url: string; note: string | null;
+};
 export type Question = {
   id: string; revision_id: string; prompt: string; display: string | null; surah: number | null; ayah: number | null;
   word_from: number | null; word_to: number | null; options: string[]; answer: number; explanation: string;
@@ -36,6 +40,7 @@ export const KIND_LABEL: Record<ContentKind, string> = { lesson: "Leçon", expla
 export const SECTION_LABEL: Record<string, string> = {
   aqida: "Croyance (Aqida)", purification: "Purification", priere: "Prière", jeune: "Jeûne", zakat: "Zakat", hajj: "Pèlerinage", fiqh: "Fiqh",
   sira: "Sira", hadith: "Hadith", tafsir: "Tafsir", tajwid: "Tajwid", arabe: "Lecture de l’arabe", adab: "Comportement", famille: "Famille",
+  adhkar: "Invocations (adhkār)",
 };
 export const ROLE_LABEL: Record<AppRole, string> = { user: "Utilisateur", editor: "Éditeur", reviewer: "Réviseur religieux", admin: "Administrateur" };
 export const ACTION_LABEL: Record<string, string> = {

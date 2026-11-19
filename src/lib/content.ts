@@ -1,5 +1,5 @@
 import { cache } from "react";
-import type { ContentKind, Item, Opinion, Question, Reference, Revision } from "@/lib/admin";
+import type { ContentKind, Dhikr, Item, Opinion, Question, Reference, Revision } from "@/lib/admin";
 import { createClient } from "@/lib/supabase/server";
 
 const REF_COLUMNS = "id,revision_id,kind,surah,ayah_from,ayah_to,collection,edition,hadith_number,grade,graded_by,source_title,author,locator,url,note";
@@ -8,16 +8,31 @@ export type PublishedCard = { id: string; slug: string; kind: ContentKind; secti
 const SECTION_ORDER = ["arabe", "tajwid", "aqida", "purification", "priere", "jeune", "zakat", "hajj", "fiqh", "sira", "hadith", "tafsir", "adab", "famille"];
 const sectionRank = (section: string) => (SECTION_ORDER.includes(section) ? SECTION_ORDER.indexOf(section) : SECTION_ORDER.length);
 
-export const getPublishedList = cache(async (): Promise<PublishedCard[]> => {
+/** Rubrique des invocations : affichee dans « Prière », pas dans « Apprendre ». */
+export const ADHKAR_SECTION = "adhkar";
+
+const getAllPublished = cache(async (): Promise<PublishedCard[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase.from("content_items")
     .select("id,slug,kind,section,position,published_revision_id,content_revisions!content_items_published_revision_id_fkey!inner(title,summary,published_at,review_kind)")
-    .not("published_revision_id", "is", null).limit(200);
+    .not("published_revision_id", "is", null).limit(300);
   if (error) throw new Error(error.message);
   type Row = { id: string; slug: string; kind: ContentKind; section: string; position: number | null; published_revision_id: string; content_revisions: { title: string; summary: string; published_at: string; review_kind: string | null } };
   return (data as unknown as Row[]).sort((a, b) => sectionRank(a.section) - sectionRank(b.section) || a.section.localeCompare(b.section)
       || (a.position ?? 1000) - (b.position ?? 1000) || b.content_revisions.published_at.localeCompare(a.content_revisions.published_at))
     .map((row) => ({ id: row.id, slug: row.slug, kind: row.kind, section: row.section, position: row.position, revisionId: row.published_revision_id, title: row.content_revisions.title, summary: row.content_revisions.summary, provisional: row.content_revisions.review_kind === "ai" }));
+});
+
+export const getPublishedList = cache(async () => (await getAllPublished()).filter((item) => item.section !== ADHKAR_SECTION));
+export const getAdhkarList = cache(async () => (await getAllPublished()).filter((item) => item.section === ADHKAR_SECTION));
+
+export const getPublishedAdhkar = cache(async (slug: string) => {
+  const data = await getPublishedContent(slug);
+  if (!data || data.item.section !== ADHKAR_SECTION) return null;
+  const { data: adhkar } = await (await createClient()).from("content_adhkar")
+    .select("id,revision_id,title,arabic,transliteration,meaning,repeat_count,when_to_say,virtue,collection,hadith_number,grade,graded_by,url,note")
+    .eq("revision_id", data.revision.id).order("ord").returns<Dhikr[]>();
+  return { ...data, adhkar: adhkar ?? [] };
 });
 
 export const getPublishedContent = cache(async (slug: string) => {

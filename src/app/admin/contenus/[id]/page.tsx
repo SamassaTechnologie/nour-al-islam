@@ -3,7 +3,7 @@ import { setPosition, addOpinion, addQuestion, addReference, contentAction, newR
 import { AdminForm, inputClass } from "@/components/admin-form";
 import { ArabicVerse } from "@/components/quran-view";
 import { Paragraphs, referenceText } from "@/components/content-view";
-import { ACTION_LABEL, KIND_LABEL, SECTION_LABEL, formatDate, statusText, requireStaff, type AuditEntry, type Item, type Opinion, type Question, type Reference, type Revision } from "@/lib/admin";
+import { ACTION_LABEL, KIND_LABEL, SECTION_LABEL, formatDate, statusText, requireStaff, type AuditEntry, type Dhikr, type Item, type Opinion, type Question, type Reference, type Revision } from "@/lib/admin";
 import { withExcerpts } from "@/lib/quiz";
 import { getSurahs, getSurahVerses, verseBody } from "@/lib/quran";
 
@@ -24,11 +24,12 @@ export default async function ContentDetail({ params }: { params: Promise<{ id: 
   const { data: revisions } = await supabase.from("content_revisions").select("*").eq("item_id", id).order("number", { ascending: false }).returns<Revision[]>();
   const rev = revisions?.[0];
   if (!rev) notFound();
-  const [{ data: refs }, { data: opinions }, { data: log }, { data: rawQuestions }] = await Promise.all([
+  const [{ data: refs }, { data: opinions }, { data: log }, { data: rawQuestions }, { data: adhkar }] = await Promise.all([
     supabase.from("content_references").select("*").eq("revision_id", rev.id).order("ord").returns<Reference[]>(),
     supabase.from("content_opinions").select("id,holder,opinion,source").eq("revision_id", rev.id).order("ord").returns<Opinion[]>(),
     supabase.from("audit_log").select("*").eq("item_id", id).order("id", { ascending: false }).limit(50).returns<AuditEntry[]>(),
     supabase.from("content_questions").select("*").eq("revision_id", rev.id).order("ord").returns<Question[]>(),
+    supabase.from("content_adhkar").select("*").eq("revision_id", rev.id).order("ord").returns<Dhikr[]>(),
   ]);
   const questions = await withExcerpts(rawQuestions ?? []);
   const references = refs ?? [];
@@ -125,6 +126,25 @@ export default async function ContentDetail({ params }: { params: Promise<{ id: 
           </ul>
           {editable ? <details className="mt-3 rounded-lg border border-line p-3"><summary className="min-h-8 font-medium">Ajouter un avis</summary><AdminForm action={addOpinion} submit="Ajouter l’avis" tone="plain" className="mt-3">{ids}
             <label className={label}>Savant ou école<input name="holder" required className={inputClass} /></label><label className={label}>Avis<textarea name="opinion" required rows={3} className={inputClass} /></label><label className={label}>Référence<input name="source" required className={inputClass} /></label></AdminForm></details> : null}
+        </section>
+      ) : null}
+
+      {adhkar?.length ? (
+        <section>
+          <h2 className="text-xl">Invocations ({adhkar.length})</h2>
+          <p className="text-base text-muted">Texte arabe découpé automatiquement dans le recueil cité (scripts/adhkar), jamais saisi à la main.</p>
+          <ol className="mt-2 divide-y divide-line border-y border-line">
+            {adhkar.map((d, n) => (
+              <li key={d.id} className="py-3" data-dhikr-admin>
+                <p className="font-medium">{n + 1}. {d.title}{d.when_to_say ? ` (${d.when_to_say})` : ""}</p>
+                <p lang="ar" dir="rtl" className="quran-text">{d.arabic}</p>
+                <p className="italic">{d.transliteration}</p>
+                <p>{d.meaning}</p>
+                <p className="text-base">Répétitions : {d.repeat_count}{d.virtue ? `. Mérite : ${d.virtue}` : ""}</p>
+                <p className="text-base text-muted">{d.collection}, n° {d.hadith_number}. Degré : {d.grade} ({d.graded_by}). <a href={d.url} rel="noreferrer" target="_blank" className="text-emerald underline">{d.url}</a>{d.note ? ` ${d.note}` : ""}</p>
+              </li>
+            ))}
+          </ol>
         </section>
       ) : null}
 

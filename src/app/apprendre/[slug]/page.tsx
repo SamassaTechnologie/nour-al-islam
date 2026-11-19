@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ArabicVerse } from "@/components/quran-view";
 import { Paragraphs, referenceText } from "@/components/content-view";
 import { LessonQuiz } from "@/components/lesson-quiz";
@@ -20,6 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PublishedContent({ params }: Props) {
   const data = await getPublishedContent((await params).slug);
   if (!data) notFound();
+  if (data.item.section === "adhkar") redirect(`/priere/invocations/${data.item.slug}`);
   const { item, revision, references, opinions } = data;
   const [{ t, locale }, surahs, session, questions] = await Promise.all([getPreferences(), getSurahs(), getSession(), withExcerpts(data.questions)]);
   const c = t.content;
