@@ -12,6 +12,10 @@ Application en ligne : https://nour-al-islam.vercel.app
 - Mode clair, sombre et automatique
 - Interface conçue pour l'iPhone 13 mini (375 × 812), puis élargie
 
+## Phase 4 : école et mémorisation (en cours)
+
+- Mémorisation verset par verset sur le texte verrouillé : écoute répétée, mots masqués, révisions espacées et progression par compte
+
 ## Phase 3 : administration et validation
 
 - Rôles : éditeur, réviseur religieux, administrateur. La double authentification est obligatoire pour les réviseurs et administrateurs

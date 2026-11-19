@@ -24,3 +24,11 @@ export async function saveReading(surah: number, ayahId: number) {
     { onConflict: "user_id,surah" },
   );
 }
+
+export async function rateHifdh(ayahId: number, known: boolean) {
+  const session = await getSession();
+  if (!session || !validAyah(ayahId)) return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("hifdh_rate", { p_ayah: ayahId, p_known: known === true });
+  return error || !data?.[0] ? null : (data[0] as { level: number; next_review: string });
+}

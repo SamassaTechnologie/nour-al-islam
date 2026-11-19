@@ -9,6 +9,10 @@ export default async function Page() {
   const [{ t }, items] = await Promise.all([getPreferences(), getPublishedList()]);
   return (
     <ComingSection section={t.soon.learn} t={t.soon}>
+      <Link href="/apprendre/memorisation" className="mt-6 block rounded-lg bg-emerald px-4 py-3 text-on-emerald">
+        <span className="block font-medium">{t.hifdh.open}</span>
+        <span className="block text-base">{t.hifdh.openNote}</span>
+      </Link>
       {items.length ? (
         <section className="mt-6">
           <h2 className="text-xl">{t.content.available}</h2>
