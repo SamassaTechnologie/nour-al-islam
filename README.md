@@ -12,6 +12,13 @@ Application en ligne : https://nour-al-islam.vercel.app
 - Mode clair, sombre et automatique
 - Interface conçue pour l'iPhone 13 mini (375 × 812), puis élargie
 
+## Phase 3 : administration et validation
+
+- Rôles : éditeur, réviseur religieux, administrateur. La double authentification est obligatoire pour les réviseurs et administrateurs
+- Circuit : brouillon, vérification des sources par une autre personne, relecture, publication par un réviseur seulement
+- Versions verrouillées après envoi, journal inaltérable, références obligatoires et contrôlées par la base
+- Test : `tests/phase3.mjs` (comptes d'essai à créer puis supprimer)
+
 ## Phase 2 : lecture du Coran
 
 - Texte Tanzil Uthmani 1.1 et traduction de Rachid Maach (QuranEnc, version 1.0.3), importés sans saisie et verrouillés dans la base

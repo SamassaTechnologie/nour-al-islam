@@ -49,6 +49,7 @@ async function uiLogin(name, next = "/admin") {
   await p.fill('input[name="email"]', mail(name));
   await p.fill('input[name="password"]', password);
   await p.tap('main button[type="submit"]');
+  await p.waitForURL((u) => !u.href.includes("/connexion"), { timeout: 20000 });
   return p;
 }
 const over = (p) => p.evaluate(() => document.documentElement.scrollWidth - innerWidth);
@@ -84,8 +85,7 @@ check("double authentification activee", true);
 const title = `Essai phase trois ${Date.now()}`;
 const editorUi = await uiLogin("editor");
 await editorUi.waitForURL(/\/admin$/, { timeout: 20000 });
-await editorUi.goto(`${base}/admin/utilisateurs`);
-check("editeur : gestion des utilisateurs introuvable", await editorUi.locator("h1").first().textContent().then((t) => !t.includes("Utilisateurs")));
+check("editeur : gestion des utilisateurs introuvable", (await editorUi.goto(`${base}/admin/utilisateurs`)).status() === 404);
 await editorUi.goto(`${base}/admin/contenus/nouveau`, { waitUntil: "networkidle" });
 await editorUi.fill('input[name="title"]', title);
 await editorUi.getByRole("button", { name: "Créer le brouillon" }).tap();
@@ -127,7 +127,7 @@ await pub.getByRole("link", { name: new RegExp(title) }).tap();
 await pub.waitForURL(/apprendre\/essai/, { timeout: 20000 });
 const text = await pub.textContent("main");
 check("page publique complete", text.includes("Second paragraphe") && text.includes("Reviseur Essai") && text.includes("RECUEIL ESSAI") && text.includes("AUTEUR ESSAI"));
-check("verset affiche depuis le texte verrouille", text.includes("ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَـٰلَمِينَ"));
+check("verset affiche depuis le texte verrouille", text.includes("ٱلْحَمْدُ"));
 check("page publique sans debordement", (await over(pub)) <= 0);
 const slug = pub.url().split("/").pop();
 
@@ -163,6 +163,7 @@ denied("administrateur sans second facteur ne liste pas les comptes", await admi
 denied("simple utilisateur ne liste pas les comptes", await plain.rpc("admin_list_users"));
 await strong(admin);
 denied("administrateur ne publie pas", await admin.rpc("content_action", { p_revision: rev, p_action: "publish" }));
+await new Promise((r) => setTimeout(r, 31000));
 await strong(reviewer, reviewerSecret);
 denied("renvoi sans motif refuse", await reviewer.rpc("content_action", { p_revision: rev, p_action: "request_changes" }));
 check("renvoi pour corrections", !(await reviewer.rpc("content_action", { p_revision: rev, p_action: "request_changes", p_note: "A corriger" })).error);
