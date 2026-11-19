@@ -7,7 +7,7 @@ let failed = 0;
 const check = (label, ok, detail = "") => { if (!ok) failed++; console.log(`${ok ? "OK   " : "ECHEC"} ${label}${detail ? ` : ${detail}` : ""}`); };
 const editor = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
 await editor.auth.signInWithPassword({ email: `exeditor@${domain}`, password });
-const browser = await chromium.launch({ channel: "chrome" });
+const browser = await chromium.launch(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {});
 const errors = [];
 const page = await (await browser.newContext({ viewport: { width: 320, height: 800 }, locale: "fr-FR" })).newPage();
 page.on("pageerror", (e) => errors.push(e.message));
@@ -18,7 +18,7 @@ await page.click('main button[type="submit"]');
 await page.waitForURL((u) => !u.href.includes("/connexion"), { timeout: 20000 });
 
 const arabicStart = /^[؀-ۿ]/;
-for (const slug of ["tashahhud-et-priere-sur-le-prophete", "voyelles-sukun-chadda", "ablutions", "prosternation-de-l-oubli", "awra-dans-la-priere"]) {
+for (const slug of ["tashahhud-et-priere-sur-le-prophete", "voyelles-sukun-chadda", "ablutions", "prosternation-de-l-oubli", "awra-dans-la-priere", "horaires-des-prieres"]) {
   const item = (await editor.from("content_items").select("published_revision_id").eq("slug", slug).single()).data;
   const body = (await editor.from("content_revisions").select("body").eq("id", item.published_revision_id).single()).data.body;
   const parts = body.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);

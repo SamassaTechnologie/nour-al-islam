@@ -10,7 +10,7 @@ let failed = 0;
 const check = (label, ok, detail = "") => { if (!ok) failed++; console.log(`${ok ? "OK   " : "ECHEC"} ${label}${detail ? ` : ${detail}` : ""}`); };
 const db = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
 await db.auth.signInWithPassword({ email: `exeditor@${domain}`, password });
-const browser = await chromium.launch({ channel: "chrome" });
+const browser = await chromium.launch(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {});
 const errors = [];
 const page = await (await browser.newContext({ viewport: { width: 375, height: 800 }, locale: "fr-FR" })).newPage();
 page.on("pageerror", (e) => errors.push(e.message));
@@ -22,7 +22,7 @@ await page.click('main button[type="submit"]');
 await page.waitForURL((u) => !u.href.includes("/connexion"), { timeout: 20000 });
 
 let firstIsAnswer = 0, total = 0;
-for (const slug of ["prosternation-de-l-oubli", "tashahhud-et-priere-sur-le-prophete"]) {
+for (const slug of ["prosternation-de-l-oubli", "tashahhud-et-priere-sur-le-prophete", "horaires-des-prieres"]) {
   const item = (await db.from("content_items").select("published_revision_id").eq("slug", slug).single()).data;
   const questions = (await db.from("content_questions").select("id, options, answer").eq("revision_id", item.published_revision_id).order("ord")).data;
   await page.goto(`${base}/apprendre/${slug}`, { waitUntil: "networkidle" });
