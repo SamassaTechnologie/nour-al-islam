@@ -22,7 +22,7 @@ await page.click('main button[type="submit"]');
 await page.waitForURL((u) => !u.href.includes("/connexion"), { timeout: 20000 });
 
 let firstIsAnswer = 0, total = 0;
-for (const slug of ["prosternation-de-l-oubli", "tashahhud-et-priere-sur-le-prophete", "horaires-des-prieres", "moments-interdits-pour-prier", "reunion-de-deux-prieres"]) {
+for (const slug of ["prosternation-de-l-oubli", "tashahhud-et-priere-sur-le-prophete", "horaires-des-prieres", "moments-interdits-pour-prier", "reunion-de-deux-prieres", "raccourcir-la-priere-en-voyage"]) {
   const item = (await db.from("content_items").select("published_revision_id").eq("slug", slug).single()).data;
   const questions = (await db.from("content_questions").select("id, options, answer, surah, ayah, word_from, word_to").eq("revision_id", item.published_revision_id).order("ord")).data;
   await page.goto(`${base}/apprendre/${slug}`, { waitUntil: "networkidle" });
@@ -53,7 +53,7 @@ for (const slug of ["prosternation-de-l-oubli", "tashahhud-et-priere-sur-le-prop
 }
 await page.goto(`${base}/apprendre`, { waitUntil: "networkidle" });
 const priere = await page.$$eval('[data-section="priere"] [data-lesson]', (els) => els.map((e) => e.getAttribute("data-lesson")));
-check("ordre de la rubrique Prière : horaires en 2e, réunion en 9e", priere[1] === "horaires-des-prieres" && priere[8] === "reunion-de-deux-prieres", priere.join(", "));
+check("ordre de la rubrique Prière : horaires en 2e, réunion en 9e, raccourcissement en 10e", priere[1] === "horaires-des-prieres" && priere[8] === "reunion-de-deux-prieres" && priere[9] === "raccourcir-la-priere-en-voyage", priere.join(", "));
 check("la bonne réponse n'est plus presque toujours en premier", firstIsAnswer / total < 0.6, `${firstIsAnswer}/${total}`);
 check("aucune erreur (dont décalage serveur/navigateur)", errors.length === 0, errors.slice(0, 2).join(" | "));
 await browser.close();
