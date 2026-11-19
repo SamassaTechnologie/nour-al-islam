@@ -17,7 +17,7 @@ export default async function Page() {
         <section className="mt-6">
           <h2 className="text-xl">{t.content.available}</h2>
           <ul className="mt-2 divide-y divide-line border-y border-line">
-            {items.map((item) => <li key={item.slug}><Link href={`/apprendre/${item.slug}`} className="block py-3"><span className="font-medium">{item.title}</span><span className="block text-base text-muted">{t.content.kinds[item.kind]}{item.summary ? `. ${item.summary}` : ""}</span></Link></li>)}
+            {items.map((item) => <li key={item.slug}><Link href={`/apprendre/${item.slug}`} className="block py-3"><span className="font-medium">{item.title}</span>{item.provisional ? <span data-provisional className="ms-2 inline-block rounded border border-gold px-1.5 text-base">{t.content.provisionalTag}</span> : null}<span className="block text-base text-muted">{t.content.kinds[item.kind]}{item.summary ? `. ${item.summary}` : ""}</span></Link></li>)}
           </ul>
         </section>
       ) : null}

@@ -3,7 +3,7 @@ import { addOpinion, addReference, contentAction, newRevision, removeOpinion, re
 import { AdminForm, inputClass } from "@/components/admin-form";
 import { ArabicVerse } from "@/components/quran-view";
 import { Paragraphs, referenceText } from "@/components/content-view";
-import { ACTION_LABEL, KIND_LABEL, SECTION_LABEL, STATUS_LABEL, formatDate, requireStaff, type AuditEntry, type Item, type Opinion, type Reference, type Revision } from "@/lib/admin";
+import { ACTION_LABEL, KIND_LABEL, SECTION_LABEL, formatDate, statusText, requireStaff, type AuditEntry, type Item, type Opinion, type Reference, type Revision } from "@/lib/admin";
 import { getSurahs, getSurahVerses, verseBody } from "@/lib/quran";
 
 const label = "block font-medium";
@@ -34,6 +34,8 @@ export default async function ContentDetail({ params }: { params: Promise<{ id: 
   const editable = canWrite && (rev.status === "draft" || rev.status === "changes_requested");
   const canVerify = rev.status === "source_check" && !isAuthor;
   const canReview = rev.status === "in_review" && role === "reviewer" && !isAuthor;
+  const awaitingScholar = rev.status === "published" && rev.review_kind === "ai";
+  const canValidate = awaitingScholar && role === "reviewer" && !isAuthor;
   const ids = <>{hidden("item", id)}{hidden("revision", rev.id)}</>;
   const action = (name: string) => hidden("action", name);
   const lastNote = log?.find((entry) => entry.action === "request_changes" && rev.status === "changes_requested")?.note;
@@ -43,9 +45,10 @@ export default async function ContentDetail({ params }: { params: Promise<{ id: 
       <header>
         <p className="text-muted">{KIND_LABEL[item.kind]}, {SECTION_LABEL[item.section]}</p>
         <h1 className="text-3xl break-words">{rev.title}</h1>
-        <p className="mt-1 font-medium" data-status={rev.status}>{STATUS_LABEL[rev.status]}, version {rev.number}</p>
+        <p className="mt-1 font-medium" data-status={rev.status} data-review={rev.review_kind ?? ""}>{statusText(rev.status, rev.review_kind)}, version {rev.number}</p>
         <p className="text-base text-muted">Auteur : {rev.author_name}{rev.ai_assisted ? ". Préparé avec l’aide de l’IA" : ""}</p>
-        {item.published_revision_id ? <a href={`/apprendre/${item.slug}`} className="inline-flex min-h-11 items-center font-medium text-emerald underline underline-offset-4">Voir la version publique</a> : null}
+        {item.published_revision_id ? <a href={`/apprendre/${item.slug}`} className="inline-flex min-h-11 items-center font-medium text-emerald underline underline-offset-4">{awaitingScholar ? "Voir la version provisoire" : "Voir la version publique"}</a> : null}
+        {awaitingScholar ? <p role="status" className="mt-2 border-s-2 border-gold ps-3">Relu par {rev.reviewer_name}{rev.published_at ? `, ${formatDate(rev.published_at)}` : ""}. Visible seulement par l’équipe tant qu’un réviseur religieux ne l’a pas validé.</p> : null}
       </header>
 
       {lastNote ? <p role="status" className="border-s-2 border-gold ps-3"><span className="font-medium">Corrections demandées : </span>{lastNote}</p> : null}
@@ -122,6 +125,8 @@ export default async function ContentDetail({ params }: { params: Promise<{ id: 
         {rev.status === "source_check" && isAuthor ? <p className="text-muted">Une autre personne doit vérifier vos références.</p> : null}
         {rev.status === "in_review" && !canReview ? <p className="text-muted">{isAuthor && role === "reviewer" ? "Un autre réviseur doit relire votre texte." : "En attente d’un réviseur religieux."}</p> : null}
         {canReview ? <AdminForm action={contentAction} submit="Approuver et publier">{ids}{action("publish")}<p>Sources confirmées par {rev.source_checked_name}. Votre nom sera affiché avec ce contenu.</p></AdminForm> : null}
+        {canValidate ? <AdminForm action={contentAction} submit="Valider ce contenu">{ids}{action("validate")}<p>Relu et corrigé par l’assistant IA. Votre validation rendra ce contenu visible par tous, avec votre nom.</p><label className={label}>Remarque (facultatif)<textarea name="note" rows={2} className={inputClass} /></label></AdminForm> : null}
+        {awaitingScholar && !canValidate ? <p className="text-muted">En attente de la validation d’un réviseur religieux.</p> : null}
         {canVerify || canReview ? <AdminForm action={contentAction} submit="Renvoyer pour corrections" tone="plain">{ids}{action("request_changes")}<label className={label}>Corrections demandées<textarea name="note" required rows={3} className={inputClass} /></label></AdminForm> : null}
         {rev.status === "published" && (role === "reviewer" || role === "admin") ? <AdminForm action={contentAction} submit="Retirer de la publication" tone="danger">{ids}{action("withdraw")}<label className={label}>Motif du retrait<textarea name="note" required rows={2} className={inputClass} /></label></AdminForm> : null}
         {canWrite && (rev.status === "published" || rev.status === "withdrawn" || rev.status === "superseded") ? <AdminForm action={newRevision} submit="Créer une nouvelle version" tone="plain">{hidden("item", id)}</AdminForm> : null}

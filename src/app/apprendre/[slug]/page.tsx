@@ -20,6 +20,7 @@ export default async function PublishedContent({ params }: Props) {
   const [{ t, locale }, surahs] = await Promise.all([getPreferences(), getSurahs()]);
   const c = t.content;
   const { item, revision, references, opinions } = data;
+  const provisional = revision.review_kind === "ai";
   const date = new Date(revision.published_at!).toLocaleDateString(locale === "ar" ? "ar" : "fr-FR", { dateStyle: "long", timeZone: "UTC" });
   return (
     <main className="mx-auto max-w-xl px-5 pt-6">
@@ -27,6 +28,7 @@ export default async function PublishedContent({ params }: Props) {
       <article lang={item.locale} dir={item.locale === "ar" ? "rtl" : "ltr"}>
         <p className="text-muted">{c.kinds[item.kind]}</p>
         <h1 className="text-3xl break-words">{revision.title}</h1>
+        {provisional ? <p role="note" data-provisional className="mt-3 border-s-2 border-gold ps-3 font-medium">{c.provisional}</p> : null}
         {revision.summary ? <p className="mt-3 font-medium">{revision.summary}</p> : null}
         <Paragraphs text={revision.body} />
       </article>
@@ -52,7 +54,7 @@ export default async function PublishedContent({ params }: Props) {
           }))}
         </ul>
       </section>
-      <p className="mt-5 border-s-2 border-gold ps-3 text-base">{c.validated} {revision.reviewer_name}, {date}.</p>
+      <p className="mt-5 border-s-2 border-gold ps-3 text-base">{provisional ? c.aiReviewed : `${c.validated} ${revision.reviewer_name}, ${date}.`}</p>
     </main>
   );
 }

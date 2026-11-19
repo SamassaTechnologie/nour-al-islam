@@ -205,7 +205,10 @@ const fr = {
     saveError: "Votre réponse n’a pas été enregistrée. Réessayez.",
   },
   content: {
-    available: "Contenus validés",
+    available: "Leçons et contenus",
+    provisional: "Version provisoire, visible seulement par l’équipe : relue par l’assistant IA, elle n’a pas encore été validée par des savants.",
+    provisionalTag: "Provisoire",
+    aiReviewed: "Relu par l’assistant IA de NOUR AL-ISLAM, en attente de validation par des savants.",
     back: "Tous les contenus",
     kinds: { lesson: "Leçon", explanation: "Explication de savant", legal_opinion: "Avis juridique" },
     opinions: "Avis des savants",
@@ -413,7 +416,10 @@ const ar: Dictionary = {
     saveError: "لم تُحفظ إجابتك. حاول مرة أخرى.",
   },
   content: {
-    available: "محتويات معتمدة",
+    available: "الدروس والمحتويات",
+    provisional: "نسخة مؤقتة لا يراها إلا فريق العمل: راجعها المساعد الذكي، ولم يعتمدها العلماء بعد.",
+    provisionalTag: "مؤقت",
+    aiReviewed: "راجعه المساعد الذكي لنور الإسلام، وهو في انتظار اعتماد العلماء.",
     back: "كل المحتويات",
     kinds: { lesson: "درس", explanation: "شرح عالم", legal_opinion: "رأي فقهي" },
     opinions: "أقوال العلماء",

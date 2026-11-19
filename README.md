@@ -14,6 +14,7 @@ Application en ligne : https://nour-al-islam.vercel.app
 
 ## Phase 4 : école et mémorisation (en cours)
 
+- Relecture provisoire par l'assistant IA : contenus marqués « Relu par l'IA, en attente des savants », visibles seulement par l'équipe jusqu'à la validation d'un réviseur humain (bouton « Valider ce contenu »). Fonctions réservées au propriétaire de la base : `private.ai_review`, `private.ai_request_changes`, `private.ai_log`
 - Mémorisation verset par verset sur le texte verrouillé : écoute répétée, mots masqués, révisions espacées et progression par compte
 
 ## Phase 3 : administration et validation
