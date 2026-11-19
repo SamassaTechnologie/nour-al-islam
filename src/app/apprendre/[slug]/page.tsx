@@ -58,7 +58,7 @@ export default async function PublishedContent({ params }: Props) {
               <li key={ref.id} className="py-3">
                 {verses.map((v) => <div key={v.id}><ArabicVerse text={verseBody(v.text_uthmani, v.bismillah_length)} />{v.translation ? <p className="mt-1">{v.translation.text}</p> : null}</div>)}
                 <p lang="fr" dir="ltr" className="text-start break-words text-base text-muted">{referenceText(ref, surahs)}</p>
-                {ref.url ? <a href={ref.url} rel="noreferrer" target="_blank" className="inline-flex min-h-11 items-center break-all text-emerald underline underline-offset-4">{ref.url}</a> : null}
+                {ref.url ? <a href={ref.url} rel="noreferrer" target="_blank" className="inline-flex min-h-11 items-center break-all text-emerald underline underline-offset-4" data-source-link>{c.openSource.replace("{site}", new URL(ref.url).hostname.replace(/^www\./, ""))}</a> : null}
               </li>
             );
           }))}
