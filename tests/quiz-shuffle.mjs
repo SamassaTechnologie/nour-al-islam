@@ -24,7 +24,7 @@ await page.waitForURL((u) => !u.href.includes("/connexion"), { timeout: 20000 })
 let firstIsAnswer = 0, total = 0;
 for (const slug of ["prosternation-de-l-oubli", "tashahhud-et-priere-sur-le-prophete", "horaires-des-prieres"]) {
   const item = (await db.from("content_items").select("published_revision_id").eq("slug", slug).single()).data;
-  const questions = (await db.from("content_questions").select("id, options, answer").eq("revision_id", item.published_revision_id).order("ord")).data;
+  const questions = (await db.from("content_questions").select("id, options, answer, surah, ayah, word_from, word_to").eq("revision_id", item.published_revision_id).order("ord")).data;
   await page.goto(`${base}/apprendre/${slug}`, { waitUntil: "networkidle" });
   const shown0 = [];
   for (const [i, q] of questions.entries()) {
@@ -33,6 +33,11 @@ for (const slug of ["prosternation-de-l-oubli", "tashahhud-et-priere-sur-le-prop
     const expected = optionOrder(q.id, q.options.length, 0);
     if (i === 0) check(`${slug} : texte des propositions conservé`, (await page.$$eval("[data-option]", (b) => b.map((x) => x.textContent.trim()))).join("|") === expected.map((n) => q.options[n]).join("|"));
     check(`${slug} q${i + 1} : ordre affiché = ordre calculé`, shown.join() === expected.join(), shown.join());
+    if (q.surah) {
+      const verse = (await db.from("ayahs").select("text_uthmani, bismillah_length").eq("surah", q.surah).eq("number", q.ayah).single()).data;
+      const expectedWords = verse.text_uthmani.slice(verse.bismillah_length).trim().split(" ").slice(q.word_from - 1, q.word_to).join(" ");
+      check(`${slug} q${i + 1} : extrait coranique lu dans le texte verrouillé`, (await page.textContent("[data-excerpt]")).trim() === expectedWords);
+    }
     if (shown[0] === q.answer) firstIsAnswer++;
     total++;
     await page.click(`[data-option="${q.answer}"]`);
