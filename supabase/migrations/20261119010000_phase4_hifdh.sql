@@ -2,7 +2,7 @@ create table public.hifdh_progress (
   user_id uuid not null references auth.users (id) on delete cascade,
   ayah_id smallint not null references public.ayahs (id),
   surah smallint not null references public.surahs (number),
-  level smallint not null default 0 check (level between 0 and 5),
+  level smallint not null default 0 check (level between -1 and 5),
   reviews integer not null default 0 check (reviews >= 0),
   next_review date not null default current_date,
   last_reviewed_at timestamptz not null default now(),
@@ -29,7 +29,7 @@ language sql security invoker set search_path = '' as $$
     left join public.hifdh_progress h on h.ayah_id = a.id and h.user_id = (select auth.uid())
     where a.id = p_ayah
   ), rated as (
-    select v.*, case when p_known then least(coalesce(v.old_level + 1, 0), 5)::smallint else 0::smallint end as new_level from verse v
+    select v.*, case when p_known then least(coalesce(v.old_level, -1) + 1, 5)::smallint else (-1)::smallint end as new_level from verse v
   )
   insert into public.hifdh_progress as p (user_id, ayah_id, surah, level, reviews, next_review, last_reviewed_at)
   select (select auth.uid()), r.id, r.surah, r.new_level, r.old_reviews + 1,
