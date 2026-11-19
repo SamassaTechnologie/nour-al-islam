@@ -22,7 +22,7 @@ await page.click('main button[type="submit"]');
 await page.waitForURL((u) => !u.href.includes("/connexion"), { timeout: 20000 });
 
 let firstIsAnswer = 0, total = 0;
-for (const slug of ["prosternation-de-l-oubli", "tashahhud-et-priere-sur-le-prophete", "horaires-des-prieres"]) {
+for (const slug of ["prosternation-de-l-oubli", "tashahhud-et-priere-sur-le-prophete", "horaires-des-prieres", "moments-interdits-pour-prier", "reunion-de-deux-prieres"]) {
   const item = (await db.from("content_items").select("published_revision_id").eq("slug", slug).single()).data;
   const questions = (await db.from("content_questions").select("id, options, answer, surah, ayah, word_from, word_to").eq("revision_id", item.published_revision_id).order("ord")).data;
   await page.goto(`${base}/apprendre/${slug}`, { waitUntil: "networkidle" });
@@ -51,6 +51,9 @@ for (const slug of ["prosternation-de-l-oubli", "tashahhud-et-priere-sur-le-prop
   const changed = questions.filter((q, i) => optionOrder(q.id, q.options.length, 1).join() !== shown0[i]).length;
   check(`${slug} : l'ordre change pour la plupart des questions`, changed >= questions.length / 2, `${changed}/${questions.length}`);
 }
+await page.goto(`${base}/apprendre`, { waitUntil: "networkidle" });
+const priere = await page.$$eval('[data-section="priere"] [data-lesson]', (els) => els.map((e) => e.getAttribute("data-lesson")));
+check("ordre de la rubrique Prière : horaires en 2e, réunion en 9e", priere[1] === "horaires-des-prieres" && priere[8] === "reunion-de-deux-prieres", priere.join(", "));
 check("la bonne réponse n'est plus presque toujours en premier", firstIsAnswer / total < 0.6, `${firstIsAnswer}/${total}`);
 check("aucune erreur (dont décalage serveur/navigateur)", errors.length === 0, errors.slice(0, 2).join(" | "));
 await browser.close();
