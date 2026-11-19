@@ -61,7 +61,8 @@ for (const [slug, count] of [[LETTERS, 8], [NUN, 12]]) {
 }
 for (const q of lesson[NUN].questions.filter((x) => x.surah)) {
   const ref = `${q.surah}:${q.ayah}`;
-  check(`extrait ${ref} conforme au texte verrouille`, (await words(q.surah, q.ayah, q.word_from, q.word_to)) === EXPECTED[ref]);
+  // Comparaison a equivalence canonique pres : l'ordre chadda/voyelle du texte source est conserve tel quel a l'affichage.
+  check(`extrait ${ref} : les mots voulus`, (await words(q.surah, q.ayah, q.word_from, q.word_to)).normalize("NFC") === EXPECTED[ref].normalize("NFC"));
 }
 check("huit extraits coraniques dans la lecon 2", lesson[NUN].questions.filter((x) => x.surah).length === 8);
 check("aucun extrait dans la lecon 1", lesson[LETTERS].questions.every((x) => !x.surah));
@@ -131,7 +132,7 @@ await qform.locator('input[name="option_2"]').fill("Deuxième choix");
 await qform.locator('input[name="option_4"]').fill("Quatrième choix");
 await qform.locator('select[name="answer"]').selectOption("4");
 await qform.locator('textarea[name="explanation"]').fill("Explication du formulaire.");
-await qform.locator('button[type="submit"]').click();
+await qform.getByRole("button", { name: "Ajouter la question" }).click();
 await staff.waitForFunction(() => document.querySelectorAll("[data-question-admin]").length === 2, null, { timeout: 15000 }).catch(() => {});
 const added = rows(await editor.from("content_questions").select("*").eq("revision_id", draft).order("ord"))[1];
 check("formulaire : choix vides retires et bonne reponse conservee", JSON.stringify(added?.options) === JSON.stringify(["Premier choix", "Deuxième choix", "Quatrième choix"]) && added?.answer === 2);
