@@ -3,9 +3,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArabicVerse } from "@/components/quran-view";
 import { Paragraphs, referenceText } from "@/components/content-view";
+import { LessonQuiz } from "@/components/lesson-quiz";
 import { getPublishedContent } from "@/lib/content";
 import { getPreferences } from "@/lib/preferences";
+import { withExcerpts } from "@/lib/quiz";
 import { getSurahs, getSurahVerses, verseBody } from "@/lib/quran";
+import { createClient, getSession } from "@/lib/supabase/server";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -17,9 +20,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PublishedContent({ params }: Props) {
   const data = await getPublishedContent((await params).slug);
   if (!data) notFound();
-  const [{ t, locale }, surahs] = await Promise.all([getPreferences(), getSurahs()]);
-  const c = t.content;
   const { item, revision, references, opinions } = data;
+  const [{ t, locale }, surahs, session, questions] = await Promise.all([getPreferences(), getSurahs(), getSession(), withExcerpts(data.questions)]);
+  const c = t.content;
+  type Score = { score: number; total: number };
+  let best: Score | null = null;
+  if (session && questions.length) {
+    const { data: attempts } = await (await createClient()).from("quiz_attempts").select("score,total").eq("item_id", item.id).order("created_at", { ascending: false }).limit(50).returns<Score[]>();
+    best = (attempts ?? []).reduce<Score | null>((top, row) => (!top || row.score / row.total > top.score / top.total ? row : top), null);
+  }
   const provisional = revision.review_kind === "ai";
   const date = new Date(revision.published_at!).toLocaleDateString(locale === "ar" ? "ar" : "fr-FR", { dateStyle: "long", timeZone: "UTC" });
   return (
@@ -32,6 +41,7 @@ export default async function PublishedContent({ params }: Props) {
         {revision.summary ? <p className="mt-3 font-medium">{revision.summary}</p> : null}
         <Paragraphs text={revision.body} />
       </article>
+      {questions.length ? <LessonQuiz questions={questions} itemId={item.id} revisionId={revision.id} slug={item.slug} signedIn={!!session} best={best} contentLocale={item.locale} uiLocale={locale} t={t.quiz} /> : null}
       {opinions.length ? (
         <section className="mt-7">
           <h2 className="text-xl">{c.opinions}</h2>

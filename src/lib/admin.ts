@@ -13,6 +13,10 @@ export type Reference = {
   verified_name?: string | null; verified_at?: string | null;
 };
 export type Opinion = { id: string; holder: string; opinion: string; source: string };
+export type Question = {
+  id: string; revision_id: string; prompt: string; display: string | null; surah: number | null; ayah: number | null;
+  word_from: number | null; word_to: number | null; options: string[]; answer: number; explanation: string;
+};
 export type Revision = {
   id: string; item_id: string; number: number; title: string; summary: string; body: string; ai_assisted: boolean; status: ContentStatus;
   author_id: string | null; author_name: string; source_checked_name: string | null; source_checked_at: string | null;
@@ -36,7 +40,7 @@ export const SECTION_LABEL: Record<string, string> = {
 export const ROLE_LABEL: Record<AppRole, string> = { user: "Utilisateur", editor: "Éditeur", reviewer: "Réviseur religieux", admin: "Administrateur" };
 export const ACTION_LABEL: Record<string, string> = {
   created: "Création", new_version: "Nouvelle version", submit: "Envoi à la vérification", reference_verified: "Référence vérifiée", reference_unverified: "Vérification annulée",
-  confirm_sources: "Sources confirmées", ai_review: "Relecture par l’assistant IA", ai_corrected: "Corrections par l’assistant IA", validate: "Validation par un réviseur", request_changes: "Corrections demandées", publish: "Publication", withdraw: "Retrait", role_changed: "Rôle modifié",
+  confirm_sources: "Sources confirmées", ai_review: "Relecture par l’assistant IA", ai_corrected: "Corrections par l’assistant IA", validate: "Validation par un réviseur", ai_edited: "Modifications par l’assistant IA", request_changes: "Corrections demandées", publish: "Publication", withdraw: "Retrait", role_changed: "Rôle modifié",
 };
 export const formatDate = (value: string) => new Date(value).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short", timeZone: "UTC" }) + " UTC";
 

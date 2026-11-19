@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ProfileForm } from "@/components/forms";
 import { getReadingSummary, getSurahs } from "@/lib/quran";
 import { getPreferences, type Theme } from "@/lib/preferences";
-import { getSession } from "@/lib/supabase/server";
+import { createClient, getSession } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Mon espace" };
 
@@ -24,7 +24,8 @@ function Choice({ name, value, label, active }: { name: string; value: string; l
 export default async function ProfilePage() {
   const session = await getSession();
   if (!session) redirect("/connexion?suivant=/profil");
-  const [{ t, locale, theme }, reading, surahs] = await Promise.all([getPreferences(), getReadingSummary(), getSurahs()]);
+  const [{ t, locale, theme }, reading, surahs, attempts] = await Promise.all([getPreferences(), getReadingSummary(), getSurahs(), createClient().then((c) => c.from("quiz_attempts").select("item_id").limit(1000))]);
+  const exercised = new Set((attempts.data ?? []).map((row) => row.item_id)).size;
   const last = reading?.recent[0];
   const p = t.profile;
   const name = session.profile?.display_name ?? "";
@@ -43,6 +44,7 @@ export default async function ProfilePage() {
           </Link>
         ) : <p className="mt-1 text-muted">{p.progressEmpty}</p>}
         <Link href="/coran/signets" className="flex min-h-11 items-center text-muted underline underline-offset-4">{t.quran.progressBookmarks} : {reading?.bookmarkCount ?? 0}</Link>
+        <Link href="/apprendre" className="flex min-h-11 items-center text-muted underline underline-offset-4" data-exercised>{p.exercises.replace("{n}", String(exercised))}</Link>
       </section>
 
       <section className="mt-9">

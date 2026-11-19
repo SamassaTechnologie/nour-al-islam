@@ -66,7 +66,7 @@ export async function addReference(_: AdminState, form: FormData): Promise<Admin
   return { ok: true };
 }
 
-async function removeFrom(table: "content_references" | "content_opinions", form: FormData): Promise<AdminState> {
+async function removeFrom(table: "content_references" | "content_opinions" | "content_questions", form: FormData): Promise<AdminState> {
   const supabase = await createClient();
   const { data, error } = await supabase.from(table).delete().eq("id", field(form, "id")).select("id");
   if (error) return failure(error);
@@ -76,6 +76,25 @@ async function removeFrom(table: "content_references" | "content_opinions", form
 }
 export async function removeReference(_: AdminState, form: FormData) { return removeFrom("content_references", form); }
 export async function removeOpinion(_: AdminState, form: FormData) { return removeFrom("content_opinions", form); }
+export async function removeQuestion(_: AdminState, form: FormData) { return removeFrom("content_questions", form); }
+
+export async function addQuestion(_: AdminState, form: FormData): Promise<AdminState> {
+  const raw = [1, 2, 3, 4, 5].map((n) => field(form, `option_${n}`));
+  const chosen = Number(field(form, "answer")) - 1;
+  if (!raw[chosen]) return { error: "La bonne réponse doit correspondre à un choix rempli." };
+  const options = raw.filter(Boolean);
+  const surah = number(form, "surah");
+  const from = number(form, "word_from");
+  const supabase = await createClient();
+  const { error } = await supabase.from("content_questions").insert({
+    revision_id: field(form, "revision"), prompt: field(form, "prompt"), display: optional(form, "display"), explanation: field(form, "explanation"),
+    options, answer: raw.slice(0, chosen).filter(Boolean).length,
+    surah, ayah: surah ? number(form, "ayah") : null, word_from: surah ? from : null, word_to: surah ? (number(form, "word_to") ?? from) : null,
+  });
+  if (error) return failure(error);
+  refresh(field(form, "item"));
+  return { ok: true };
+}
 
 export async function addOpinion(_: AdminState, form: FormData): Promise<AdminState> {
   const supabase = await createClient();

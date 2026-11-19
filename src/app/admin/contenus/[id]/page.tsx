@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
-import { addOpinion, addReference, contentAction, newRevision, removeOpinion, removeReference, saveRevision, verifyReference } from "@/app/admin/actions";
+import { addOpinion, addQuestion, addReference, contentAction, newRevision, removeOpinion, removeQuestion, removeReference, saveRevision, verifyReference } from "@/app/admin/actions";
 import { AdminForm, inputClass } from "@/components/admin-form";
 import { ArabicVerse } from "@/components/quran-view";
 import { Paragraphs, referenceText } from "@/components/content-view";
-import { ACTION_LABEL, KIND_LABEL, SECTION_LABEL, formatDate, statusText, requireStaff, type AuditEntry, type Item, type Opinion, type Reference, type Revision } from "@/lib/admin";
+import { ACTION_LABEL, KIND_LABEL, SECTION_LABEL, formatDate, statusText, requireStaff, type AuditEntry, type Item, type Opinion, type Question, type Reference, type Revision } from "@/lib/admin";
+import { withExcerpts } from "@/lib/quiz";
 import { getSurahs, getSurahVerses, verseBody } from "@/lib/quran";
 
 const label = "block font-medium";
@@ -23,11 +24,13 @@ export default async function ContentDetail({ params }: { params: Promise<{ id: 
   const { data: revisions } = await supabase.from("content_revisions").select("*").eq("item_id", id).order("number", { ascending: false }).returns<Revision[]>();
   const rev = revisions?.[0];
   if (!rev) notFound();
-  const [{ data: refs }, { data: opinions }, { data: log }] = await Promise.all([
+  const [{ data: refs }, { data: opinions }, { data: log }, { data: rawQuestions }] = await Promise.all([
     supabase.from("content_references").select("*").eq("revision_id", rev.id).order("ord").returns<Reference[]>(),
     supabase.from("content_opinions").select("id,holder,opinion,source").eq("revision_id", rev.id).order("ord").returns<Opinion[]>(),
     supabase.from("audit_log").select("*").eq("item_id", id).order("id", { ascending: false }).limit(50).returns<AuditEntry[]>(),
+    supabase.from("content_questions").select("*").eq("revision_id", rev.id).order("ord").returns<Question[]>(),
   ]);
+  const questions = await withExcerpts(rawQuestions ?? []);
   const references = refs ?? [];
   const isAuthor = rev.author_id === userId;
   const canWrite = role === "editor" || role === "admin";
@@ -117,6 +120,38 @@ export default async function ContentDetail({ params }: { params: Promise<{ id: 
             <label className={label}>Savant ou école<input name="holder" required className={inputClass} /></label><label className={label}>Avis<textarea name="opinion" required rows={3} className={inputClass} /></label><label className={label}>Référence<input name="source" required className={inputClass} /></label></AdminForm></details> : null}
         </section>
       ) : null}
+
+      <section>
+        <h2 className="text-xl">Exercices</h2>
+        {questions.length ? (
+          <ol className="mt-2 divide-y divide-line border-y border-line">
+            {questions.map((q, n) => (
+              <li key={q.id} className="py-3" data-question-admin>
+                <p className="font-medium">{n + 1}. {q.prompt}</p>
+                {q.display ? <p lang="ar" dir="rtl" className="text-4xl">{q.display}</p> : null}
+                {q.excerpt ? <><p lang="ar" dir="rtl" className="quran-text" data-excerpt>{q.excerpt.text}</p><p className="text-base text-muted">Extrait du texte verrouillé : sourate {q.excerpt.name} ({q.excerpt.surah}), verset {q.excerpt.ayah}, mots {q.word_from} à {q.word_to}</p></> : null}
+                <ul className="mt-1">{q.options.map((option, i) => <li key={i} dir="auto" className={i === q.answer ? "font-medium text-emerald" : ""}>{i === q.answer ? "Bonne réponse : " : ""}{option}</li>)}</ul>
+                <p className="text-base text-muted">{q.explanation}</p>
+                {editable ? <AdminForm action={removeQuestion} submit="Retirer" tone="plain" className="mt-1">{hidden("item", id)}{hidden("id", q.id)}</AdminForm> : null}
+              </li>
+            ))}
+          </ol>
+        ) : <p className="mt-1 text-muted">Aucun exercice.</p>}
+        {editable ? (
+          <details className="mt-3 rounded-lg border border-line p-3"><summary className="min-h-8 font-medium">Ajouter une question</summary>
+            <AdminForm action={addQuestion} submit="Ajouter la question" tone="plain" className="mt-3">{ids}
+              <label className={label}>Question<input name="prompt" required maxLength={300} className={inputClass} /></label>
+              <label className={label}>Lettre ou mot arabe à afficher (facultatif, jamais un verset)<input name="display" dir="rtl" maxLength={40} className={inputClass} /></label>
+              <p className="text-base text-muted">Extrait coranique facultatif : il sera lu dans le texte verrouillé.</p>
+              <label className={label}>Sourate<select name="surah" className={inputClass}><option value="">Aucun extrait</option>{surahs.map((s) => <option key={s.number} value={s.number}>{s.number}. {s.name_translit}</option>)}</select></label>
+              <div className="grid grid-cols-3 gap-2"><label className={label}>Verset<input name="ayah" type="number" min={1} className={inputClass} /></label><label className={label}>Du mot<input name="word_from" type="number" min={1} className={inputClass} /></label><label className={label}>Au mot<input name="word_to" type="number" min={1} className={inputClass} /></label></div>
+              {[1, 2, 3, 4, 5].map((n) => <label key={n} className={label}>Choix {n}{n > 2 ? " (facultatif)" : ""}<input name={`option_${n}`} required={n <= 2} maxLength={200} dir="auto" className={inputClass} /></label>)}
+              <label className={label}>Bonne réponse<select name="answer" className={inputClass}>{[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>Choix {n}</option>)}</select></label>
+              <label className={label}>Explication<textarea name="explanation" required rows={2} maxLength={600} className={inputClass} /></label>
+            </AdminForm>
+          </details>
+        ) : null}
+      </section>
 
       <section className="space-y-4">
         <h2 className="text-xl">Étape suivante</h2>
