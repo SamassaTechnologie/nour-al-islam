@@ -30,7 +30,7 @@ export const getPublishedAdhkar = cache(async (slug: string) => {
   const data = await getPublishedContent(slug);
   if (!data || data.item.section !== ADHKAR_SECTION) return null;
   const { data: adhkar } = await (await createClient()).from("content_adhkar")
-    .select("id,revision_id,title,arabic,transliteration,meaning,repeat_count,when_to_say,virtue,collection,hadith_number,grade,graded_by,url,note")
+    .select("id,revision_id,title,arabic,transliteration,meaning,repeat_count,when_to_say,virtue,collection,hadith_number,grade,graded_by,url,note,surah,ayah_from,ayah_to")
     .eq("revision_id", data.revision.id).order("ord").returns<Dhikr[]>();
   return { ...data, adhkar: adhkar ?? [] };
 });

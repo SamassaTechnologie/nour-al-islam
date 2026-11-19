@@ -5,6 +5,7 @@ import { Paragraphs } from "@/components/content-view";
 import { DhikrCounter } from "@/components/dhikr-counter";
 import { getPublishedAdhkar } from "@/lib/content";
 import { getPreferences } from "@/lib/preferences";
+import { getSurahs, getSurahVerses, verseBody } from "@/lib/quran";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -18,8 +19,11 @@ const host = (url: string) => new URL(url).hostname.replace(/^www\./, "");
 export default async function Page({ params }: Props) {
   const data = await getPublishedAdhkar((await params).slug);
   if (!data) notFound();
-  const { t, locale } = await getPreferences();
+  const [{ t, locale }, surahs] = await Promise.all([getPreferences(), getSurahs()]);
   const { revision, adhkar } = data;
+  // Invocations faites de versets : texte et traduction lus dans le texte coranique verrouille.
+  const verses = new Map(await Promise.all(adhkar.filter((d) => d.surah).map(async (d) =>
+    [d.id, (await getSurahVerses(d.surah!)).filter((v) => v.number >= d.ayah_from! && v.number <= d.ayah_to!)] as const)));
   const a = t.adhkar;
   const c = t.content;
   const provisional = revision.review_kind === "ai";
@@ -37,9 +41,24 @@ export default async function Page({ params }: Props) {
             <li key={d.id} className="rounded-lg border border-line p-4" data-dhikr={d.id}>
               <h2 className="text-xl"><span className="text-muted">{n + 1}. </span>{d.title}</h2>
               {d.when_to_say ? <p className="mt-1 text-base text-muted"><span className="font-medium">{a.when} : </span>{d.when_to_say}</p> : null}
-              <p lang="ar" dir="rtl" className="quran-text mt-3" data-arabic>{d.arabic}</p>
-              <p className="mt-3"><span className="font-medium">{a.transliteration} : </span><span className="italic" data-translit>{d.transliteration}</span></p>
-              <p className="mt-2"><span className="font-medium">{a.meaning} : </span>{d.meaning}</p>
+              {d.surah ? (
+                <div className="mt-3" data-quran={`${d.surah}:${d.ayah_from}-${d.ayah_to}`}>
+                  <p className="text-base text-muted">{a.verses.replace("{surah}", `${surahs[d.surah - 1]?.name_translit} (${d.surah})`).replace("{verses}", d.ayah_from === d.ayah_to ? String(d.ayah_from) : `${d.ayah_from} à ${d.ayah_to}`)}</p>
+                  {(verses.get(d.id) ?? []).map((v) => (
+                    <div key={v.id} className="mt-2" data-verse={`${v.surah}:${v.number}`}>
+                      <p lang="ar" dir="rtl" className="quran-text" data-verse-text>{verseBody(v.text_uthmani, v.bismillah_length)} <span className="text-base">({v.number})</span></p>
+                      {v.translation ? <p className="mt-1"><span className="font-medium">{a.meaning} : </span>{v.translation.text}</p> : null}
+                    </div>
+                  ))}
+                  <p className="mt-2"><span className="font-medium">{a.transliteration} : </span><span className="italic" data-translit>{d.transliteration}</span></p>
+                </div>
+              ) : (
+                <>
+                  <p lang="ar" dir="rtl" className="quran-text mt-3" data-arabic>{d.arabic}</p>
+                  <p className="mt-3"><span className="font-medium">{a.transliteration} : </span><span className="italic" data-translit>{d.transliteration}</span></p>
+                  <p className="mt-2"><span className="font-medium">{a.meaning} : </span>{d.meaning}</p>
+                </>
+              )}
               <p className="mt-2 font-medium" data-repeat={d.repeat_count}>{d.repeat_count > 1 ? a.repeat.replace("{n}", String(d.repeat_count)) : a.once}</p>
               {d.repeat_count > 1 ? <DhikrCounter total={d.repeat_count} t={a} /> : null}
               {d.virtue ? <p className="mt-3 border-s-2 border-gold ps-3"><span className="font-medium">{a.virtue} : </span>{d.virtue}</p> : null}

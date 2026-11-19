@@ -137,9 +137,9 @@ export default async function ContentDetail({ params }: { params: Promise<{ id: 
             {adhkar.map((d, n) => (
               <li key={d.id} className="py-3" data-dhikr-admin>
                 <p className="font-medium">{n + 1}. {d.title}{d.when_to_say ? ` (${d.when_to_say})` : ""}</p>
-                <p lang="ar" dir="rtl" className="quran-text">{d.arabic}</p>
+                {d.surah ? <p className="font-medium">Versets lus dans le texte coranique verrouillé : sourate {d.surah}, versets {d.ayah_from} à {d.ayah_to}</p> : <p lang="ar" dir="rtl" className="quran-text">{d.arabic}</p>}
                 <p className="italic">{d.transliteration}</p>
-                <p>{d.meaning}</p>
+                {d.meaning ? <p>{d.meaning}</p> : null}
                 <p className="text-base">Répétitions : {d.repeat_count}{d.virtue ? `. Mérite : ${d.virtue}` : ""}</p>
                 <p className="text-base text-muted">{d.collection}, n° {d.hadith_number}. Degré : {d.grade} ({d.graded_by}). <a href={d.url} rel="noreferrer" target="_blank" className="text-emerald underline">{d.url}</a>{d.note ? ` ${d.note}` : ""}</p>
               </li>

@@ -14,7 +14,8 @@ export type Reference = {
 };
 export type Opinion = { id: string; holder: string; opinion: string; source: string };
 export type Dhikr = {
-  id: string; revision_id: string; title: string; arabic: string; transliteration: string; meaning: string; repeat_count: number;
+  id: string; revision_id: string; title: string; arabic: string | null; transliteration: string; meaning: string | null; repeat_count: number;
+  surah: number | null; ayah_from: number | null; ayah_to: number | null;
   when_to_say: string | null; virtue: string | null; collection: string; hadith_number: string; grade: string; graded_by: string; url: string; note: string | null;
 };
 export type Question = {

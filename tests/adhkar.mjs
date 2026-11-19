@@ -45,12 +45,21 @@ const shownTexts = [];
 for (const slug of SLUGS) {
   await page.goto(`${base}/priere/invocations/${slug}`, { waitUntil: "networkidle" });
   const cards = await page.$$eval("[data-dhikr]", (els) => els.map((e) => {
-    const ar = e.querySelector("[data-arabic]");
-    return { arabic: ar.textContent, dir: getComputedStyle(ar).direction, lang: ar.getAttribute("lang"), translit: !!e.querySelector("[data-translit]")?.textContent.trim(), repeat: Number(e.querySelector("[data-repeat]").dataset.repeat), counter: !!e.querySelector("[data-counter]"), source: e.querySelector("[data-source]")?.textContent ?? "", link: e.querySelector("[data-source-link]")?.getAttribute("href") ?? "" };
+    const ar = e.querySelector("[data-arabic]") ?? e.querySelector("[data-verse-text]");
+    const verses = [...e.querySelectorAll("[data-verse]")].map((v) => ({ ref: v.dataset.verse, text: v.querySelector("[data-verse-text]").firstChild.textContent.trim() }));
+    return { quran: e.querySelector("[data-quran]")?.dataset.quran ?? null, verses, arabic: e.querySelector("[data-arabic]")?.textContent ?? null, dir: getComputedStyle(ar).direction, lang: ar.getAttribute("lang"), translit: !!e.querySelector("[data-translit]")?.textContent.trim(), repeat: Number(e.querySelector("[data-repeat]").dataset.repeat), counter: !!e.querySelector("[data-counter]"), source: e.querySelector("[data-source]")?.textContent ?? "", link: e.querySelector("[data-source-link]")?.getAttribute("href") ?? "" };
   }));
-  shownTexts.push(...cards.map((c) => c.arabic));
+  const hadithCards = cards.filter((c) => !c.quran);
+  const quranCards = cards.filter((c) => c.quran);
+  shownTexts.push(...hadithCards.map((c) => c.arabic));
   check(`${slug} : ${cards.length} invocations affichées`, cards.length > 0);
-  check(`${slug} : texte arabe identique, caractère par caractère, au texte de la source`, cards.every((c) => sourceTexts.has(c.arabic)), cards.filter((c) => !sourceTexts.has(c.arabic)).map((c) => c.arabic.slice(0, 20)).join(" | "));
+  check(`${slug} : texte arabe identique, caractère par caractère, au texte de la source`, hadithCards.every((c) => sourceTexts.has(c.arabic)), hadithCards.filter((c) => !sourceTexts.has(c.arabic)).map((c) => c.arabic.slice(0, 20)).join(" | "));
+  for (const c of quranCards) {
+    const [surah, range] = c.quran.split(":"); const [from, to] = range.split("-").map(Number);
+    const { data: ayahs } = await anon.from("ayahs").select("number,text_uthmani,bismillah_length").eq("surah", Number(surah)).gte("number", from).lte("number", to).order("number");
+    const expected = (ayahs ?? []).map((a) => a.text_uthmani.slice(a.bismillah_length).trim());
+    check(`${slug} : versets ${c.quran} lus dans le texte coranique verrouillé`, expected.length === to - from + 1 && c.verses.length === expected.length && c.verses.every((v, i) => v.text === expected[i] && v.ref === `${surah}:${from + i}`), `${c.verses.length}/${expected.length}`);
+  }
   check(`${slug} : arabe de droite à gauche`, cards.every((c) => c.dir === "rtl" && c.lang === "ar"));
   check(`${slug} : phonétique présente`, cards.every((c) => c.translit));
   check(`${slug} : source avec degré d'authenticité et lien sunnah.com`, cards.every((c) => /Degré d’authenticité/.test(c.source) && c.link.startsWith("https://sunnah.com/")));
