@@ -190,11 +190,13 @@ const wide = await page(1280);
 await signIn(wide, "exeditor", `/apprendre/${NUN}`);
 await wide.goto(`${base}/apprendre/${NUN}`, { waitUntil: "networkidle" });
 check("ordinateur : quiz sans debordement", (await wide.locator("[data-quiz]").count()) === 1 && (await over(wide)) <= 0);
-const arabic = await page(375, [{ name: "nour_locale", value: "ar", url: base }]);
+const arabic = await page(375);
 await signIn(arabic, "exeditor", `/apprendre/${NUN}`);
+// La connexion reprend la langue du profil : on choisit l'arabe ensuite.
+await arabic.context().addCookies([{ name: "nour_locale", value: "ar", url: base }]);
 await arabic.goto(`${base}/apprendre/${NUN}`, { waitUntil: "networkidle" });
 const arText = await arabic.textContent("[data-quiz]");
-check("interface arabe : quiz traduit", arText.includes("تمارين") && arText.includes("السؤال 1 من 12"));
+check("interface arabe : quiz traduit", arText.includes("تمارين") && arText.includes("السؤال 1 من 12"), arText.slice(0, 60));
 
 // 5. Parcours humain : publication avec questions, verrou, quiz public, nouvelle version.
 const ref = (await editor.from("content_references").insert({ revision_id: draft, kind: "quran", surah: 1, ayah_from: 7, ayah_to: 7 }).select("id").single()).data.id;
@@ -216,8 +218,8 @@ await pub.goto(`${base}/apprendre/${slug}`, { waitUntil: "networkidle" });
 const pubQuestions = rows(await a.from("content_questions").select("*").eq("revision_id", draft).order("ord"));
 await runQuiz(pub, pubQuestions);
 check("public : resultat sans enregistrement, invitation a se connecter", (await pub.textContent("[data-score]")).includes("1 / 1") && (await pub.locator("[data-saved]").count()) === 0 && (await pub.locator('a[href*="/connexion"]').count()) >= 1);
-const next = await editor.rpc("new_revision", { p_item: itemId });
-check("nouvelle version : questions reprises", !next.error && rows(await editor.from("content_questions").select("id").eq("revision_id", next.data)).length === 1);
+const next = await editor.rpc("new_content_revision", { p_item: itemId });
+check("nouvelle version : questions reprises", !next.error && next.data && rows(await editor.from("content_questions").select("id").eq("revision_id", next.data)).length === 1);
 check("aucune erreur JavaScript", errors.length === 0, errors.slice(0, 2).join(" | "));
 await browser.close();
 console.log("ESSAI", slug, draft);
