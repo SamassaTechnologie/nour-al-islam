@@ -18,7 +18,7 @@ await page.click('main button[type="submit"]');
 await page.waitForURL((u) => !u.href.includes("/connexion"), { timeout: 20000 });
 
 const arabicStart = /^[؀-ۿ]/;
-for (const slug of ["tashahhud-et-priere-sur-le-prophete", "voyelles-sukun-chadda", "ablutions", "prosternation-de-l-oubli", "awra-dans-la-priere", "horaires-des-prieres", "moments-interdits-pour-prier", "reunion-de-deux-prieres", "raccourcir-la-priere-en-voyage", "priere-en-groupe", "priere-du-vendredi", "islam-iman-ihsan", "six-piliers-de-la-foi", "le-tawhid", "sommeil-conscience-et-toucher", "la-qalqala"]) {
+for (const slug of ["tashahhud-et-priere-sur-le-prophete", "voyelles-sukun-chadda", "ablutions", "prosternation-de-l-oubli", "awra-dans-la-priere", "horaires-des-prieres", "moments-interdits-pour-prier", "reunion-de-deux-prieres", "raccourcir-la-priere-en-voyage", "priere-en-groupe", "priere-du-vendredi", "islam-iman-ihsan", "six-piliers-de-la-foi", "le-tawhid", "sommeil-conscience-et-toucher", "la-qalqala", "naissance-et-enfance"]) {
   const item = (await editor.from("content_items").select("published_revision_id").eq("slug", slug).single()).data;
   const body = (await editor.from("content_revisions").select("body").eq("id", item.published_revision_id).single()).data.body;
   const parts = body.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);

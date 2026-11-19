@@ -16,7 +16,7 @@ def call(path, data=None, token=None):
     req.add_header('Authorization', 'Bearer ' + (token or KEY))
     return json.load(urllib.request.urlopen(req))
 token = call('/auth/v1/token?grant_type=password', {'email': os.environ['EMAIL'], 'password': os.environ['PASSWORD']})['access_token']
-items = call('/rest/v1/content_items?select=slug,section,published_revision_id&published_revision_id=not.is.null&section=in.(aqida,priere,purification)', token=token)
+items = call('/rest/v1/content_items?select=slug,section,published_revision_id&published_revision_id=not.is.null&section=in.(aqida,priere,purification,sira)', token=token)
 bodies = {}
 for it in items:
     rev = call(f"/rest/v1/content_revisions?select=body&id=eq.{it['published_revision_id']}", token=token)[0]
@@ -32,6 +32,7 @@ CANDIDATES = {
  'ablutions': [('bukhari', '135')], 'ablutions-obligations-et-avis': [('bukhari', '1')],
  'horaires-des-prieres': [('muslim', '612')], 'islam-iman-ihsan': [('muslim', '8')],
  'sommeil-conscience-et-toucher': [('abudawud', '203'), ('nasai', '447'), ('ibnmajah', '483')],
+ 'naissance-et-enfance': [('muslim', '2276'), ('muslim', '1162'), ('bukhari', '2262')],
 }
 SKIP = re.compile('[ً-ٰٟۖ-ۭـ‏‎"،؛؟.,:;«»()\\-]')
 LETTER = {'أ': 'ا', 'إ': 'ا', 'آ': 'ا', 'ٱ': 'ا', 'ى': 'ي'}
