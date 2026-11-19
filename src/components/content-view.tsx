@@ -10,4 +10,4 @@ export function referenceText(ref: Reference, surahs: Surah[]) {
   return `${ref.author}, ${ref.source_title}, ${ref.locator}`;
 }
 
-export const Paragraphs = ({ text }: { text: string }) => text.split(/\n\s*\n/).filter((part) => part.trim()).map((part, index) => <p key={index} className="mt-3 whitespace-pre-line">{part.trim()}</p>);
+export const Paragraphs = ({ text }: { text: string }) => text.split(/\n\s*\n/).filter((part) => part.trim()).map((part, index) => <p key={index} dir="auto" className="mt-3 whitespace-pre-line text-start">{part.trim()}</p>);
