@@ -16,6 +16,8 @@ Application en ligne : https://nour-al-islam.vercel.app
 
 - Relecture provisoire par l'assistant IA : contenus marqués « Relu par l'IA, en attente des savants », visibles seulement par l'équipe jusqu'à la validation d'un réviseur humain (bouton « Valider ce contenu »). Fonctions réservées au propriétaire de la base : `private.ai_review`, `private.ai_request_changes`, `private.ai_log`
 - Mémorisation verset par verset sur le texte verrouillé : écoute répétée, mots masqués, révisions espacées et progression par compte
+- Exercices des leçons : questions à choix rattachées à une version (relues, comprises dans l'empreinte et verrouillées avec elle). Un extrait coranique est désigné par sourate, verset et numéros de mots, puis lu dans le texte verrouillé : il n'est jamais saisi à la main. Résultats enregistrés par compte, meilleur résultat affiché, compteur dans Mon espace. Nouvelle version rédigée par l'assistant IA : `private.ai_new_revision`
+- Test des exercices : `tests/exercises.mjs` (comptes `explain`, `exeditor`, `exreviewer`, `exadmin` et contenus `essai-exercices-*` à créer puis supprimer)
 
 ## Phase 3 : administration et validation
 
