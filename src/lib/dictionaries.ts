@@ -232,6 +232,14 @@ const fr = {
     opinionsNote: "Ces avis sont présentés avec leurs références. Pour une situation personnelle, consultez un savant qualifié.",
     references: "Références",
     validated: "Contenu relu et validé par",
+    step: "Étape {n} :",
+    exercisesDone: "Exercices faits, meilleur résultat : {score} / {total}",
+    exercisesTodo: "Exercices à faire",
+    exercisesAvailable: "Avec exercices",
+    sections: {
+      arabe: "Lire l’arabe", tajwid: "Tajwid", aqida: "Croyance (Aqida)", purification: "Purification", priere: "Prière", jeune: "Jeûne", zakat: "Zakat",
+      hajj: "Pèlerinage", fiqh: "Fiqh", sira: "Vie du Prophète ﷺ", hadith: "Hadith", tafsir: "Tafsir", adab: "Bonnes manières", famille: "Famille",
+    },
   },
   notFound: { title: "Cette page n’existe pas", action: "Retour à l’accueil" },
 };
@@ -460,6 +468,14 @@ const ar: Dictionary = {
     opinionsNote: "تُعرض هذه الأقوال مع مراجعها. وفي المسائل الشخصية يُرجع إلى عالم مؤهل.",
     references: "المراجع",
     validated: "تمت مراجعة هذا المحتوى واعتماده من قبل",
+    step: "المرحلة {n}:",
+    exercisesDone: "أُنجزت التمارين، أفضل نتيجة: {score} / {total}",
+    exercisesTodo: "تمارين لم تُنجز بعد",
+    exercisesAvailable: "مع تمارين",
+    sections: {
+      arabe: "قراءة العربية", tajwid: "التجويد", aqida: "العقيدة", purification: "الطهارة", priere: "الصلاة", jeune: "الصيام", zakat: "الزكاة",
+      hajj: "الحج", fiqh: "الفقه", sira: "السيرة النبوية", hadith: "الحديث", tafsir: "التفسير", adab: "الآداب", famille: "الأسرة",
+    },
   },
   notFound: { title: "هذه الصفحة غير موجودة", action: "العودة إلى الرئيسية" },
 };

@@ -121,6 +121,18 @@ export async function contentAction(_: AdminState, form: FormData): Promise<Admi
   return { ok: true };
 }
 
+export async function setPosition(_: AdminState, form: FormData): Promise<AdminState> {
+  const raw = field(form, "position");
+  const position = raw ? Number(raw) : null;
+  if (position !== null && (!Number.isInteger(position) || position < 1 || position > 999)) return { error: "Indiquez une place entre 1 et 999, ou laissez vide." };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_content_position", { p_item: field(form, "item"), p_position: position });
+  if (error) return failure(error);
+  refresh(field(form, "item"));
+  revalidatePath("/apprendre");
+  return { ok: true };
+}
+
 export async function newRevision(_: AdminState, form: FormData): Promise<AdminState> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("new_content_revision", { p_item: field(form, "item") });
