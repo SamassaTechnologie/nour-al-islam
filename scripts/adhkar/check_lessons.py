@@ -35,6 +35,7 @@ CANDIDATES = {
  'naissance-et-enfance': [('muslim', '2276'), ('muslim', '1162'), ('bukhari', '2262')],
  'jeunesse-khadija-kaaba': [('bukhari', '3432')],
  'debut-de-la-revelation': [('bukhari', '3'), ('bukhari', '3851')],
+ 'premiers-musulmans-predication-secrete': [('bukhari', '3660'), ('muslim', '832')],
 }
 SKIP = re.compile('[ً-ٰٟۖ-ۭـ‏‎"،؛؟.,:;«»()\\-]')
 LETTER = {'أ': 'ا', 'إ': 'ا', 'آ': 'ا', 'ٱ': 'ا', 'ى': 'ي'}
