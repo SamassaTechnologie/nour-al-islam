@@ -62,7 +62,12 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
   const url = new URL(request.url);
-  if (url.origin !== self.location.origin || PRIVATE.test(url.pathname) || url.pathname === "/sw.js") return;
+  if (url.origin !== self.location.origin || url.pathname === "/sw.js") return;
+  if (PRIVATE.test(url.pathname)) {
+    // Jamais gardee ; hors connexion, on affiche la page « Pas de connexion ».
+    if (request.mode === "navigate") event.respondWith(fetch(request).catch(async () => (await caches.match(OFFLINE_URL)) ?? Response.error()));
+    return;
+  }
   if (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/") || /\.(woff2?|ttf|svg|png|webp|css)$/.test(url.pathname)) {
     event.respondWith(staleWhileRevalidate(request));
     return;
