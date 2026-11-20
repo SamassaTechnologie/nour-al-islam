@@ -1,16 +1,19 @@
 // Service worker de NOUR AL-ISLAM : hors connexion et rappels (notifications Web Push).
 // Hors connexion : les pages deja ouvertes (Coran, lecons, invocations, horaires) restent lisibles sans internet.
 // Pages personnelles, administration et connexion : jamais gardees sur l'appareil.
-const VERSION = "nour-v1";
+const VERSION = "nour-v2";
 const PAGES = `${VERSION}-pages`;
 const ASSETS = `${VERSION}-assets`;
+const SHELL = `${VERSION}-shell`; // page « Pas de connexion » : jamais effacee avec les pages
 const OFFLINE_URL = "/hors-ligne";
-const PRECACHE = [OFFLINE_URL, "/", "/coran", "/priere", "/priere/horaires", "/priere/invocations", "/manifest.webmanifest", "/icons/icon-192.png", "/favicon.svg"];
+const PRECACHE = ["/", "/coran", "/priere", "/priere/horaires", "/priere/invocations"];
 const PRIVATE = /^\/(admin|profil|favoris|connexion|inscription|auth|api)(\/|$)/;
 const MAX_PAGES = 400;
 
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
+    const shell = await caches.open(SHELL);
+    await Promise.all([OFFLINE_URL, "/manifest.webmanifest", "/icons/icon-192.png", "/favicon.svg"].map((url) => shell.add(url).catch(() => {})));
     const cache = await caches.open(PAGES);
     await Promise.all(PRECACHE.map((url) => cache.add(new Request(url, { credentials: "same-origin" })).catch(() => {})));
     await self.skipWaiting();
@@ -42,7 +45,7 @@ async function networkFirst(request, fallbackToOffline) {
   } catch {
     const cached = await cache.match(request, { ignoreVary: true });
     if (cached) return cached;
-    if (fallbackToOffline) return (await cache.match(OFFLINE_URL)) ?? Response.error();
+    if (fallbackToOffline) return (await caches.match(OFFLINE_URL)) ?? Response.error();
     return Response.error();
   }
 }

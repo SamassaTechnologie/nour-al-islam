@@ -99,7 +99,7 @@ const fr = {
     save: "Garder tout le Coran sur cet appareil",
     saving: "Enregistrement… {n} sourates sur 114",
     saved: "Le Coran est gardé sur cet appareil ✓ (mettre à jour)",
-    note: "Pour lire les 114 sourates sans internet (environ 15 Mo). L’écoute de la récitation demande une connexion.",
+    note: "Pour lire les 114 sourates sans internet (environ 20 Mo). L’écoute de la récitation demande une connexion.",
     error: "L’enregistrement n’a pas abouti. Réessayez avec une connexion.",
   },
   reminders: {
@@ -479,7 +479,7 @@ const ar: Dictionary = {
     save: "احفظ القرآن كاملًا على هذا الجهاز",
     saving: "جارٍ الحفظ… {n} من 114 سورة",
     saved: "القرآن محفوظ على هذا الجهاز ✓ (تحديث)",
-    note: "لقراءة السور الـ114 دون إنترنت (نحو 15 م.ب). الاستماع إلى التلاوة يحتاج إلى اتصال.",
+    note: "لقراءة السور الـ114 دون إنترنت (نحو 20 م.ب). الاستماع إلى التلاوة يحتاج إلى اتصال.",
     error: "لم يكتمل الحفظ. أعد المحاولة مع اتصال.",
   },
   reminders: {
