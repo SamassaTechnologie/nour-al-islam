@@ -4,33 +4,17 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import type { Dictionary } from "@/lib/dictionaries";
+import { type ChapterAudio, type ChapterReciter, RECITER_KEY, defaultReciter, fetchChapter, fetchReciters, reciterLabel, store, stored, verseAt } from "@/lib/chapter-audio";
 
 type T = Dictionary["quran"];
-type Recitation = { id: number; name: string; style: string | null };
-type AudioFile = { number: number; url: string };
 type Position = { surah: number; verse: number };
 
 const LAST_PAGE = 604;
-const RECITATION_KEY = "nour_recitation";
 const SPEED_KEY = "nour_audio_speed";
 const AUTO_KEY = "nour_mushaf_auto";
 const SPEEDS = [0.75, 1, 1.25, 1.5];
 const AUTO = [0, 1, 2, 3];
 
-const stored = (key: string) => {
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    return null;
-  }
-};
-const store = (key: string, value: string) => {
-  try {
-    localStorage.setItem(key, value);
-  } catch {
-    // Reglage conserve seulement pendant la visite.
-  }
-};
 const verseKey = (p: Position) => `${p.surah}:${p.verse}`;
 const parseKey = (key: string): Position => {
   const [surah, verse] = key.split(":").map(Number);
@@ -41,12 +25,14 @@ export function MushafReader({ t, names, children }: { t: T; names: string[]; ch
   const router = useRouter();
   const page = Number(usePathname().split("/").pop()) || 1;
   const audio = useRef<HTMLAudioElement>(null);
-  const cache = useRef(new Map<string, AudioFile[]>());
+  const cache = useRef(new Map<string, ChapterAudio>());
+  const loaded = useRef<{ surah: number; chapter: ChapterAudio } | null>(null);
+  const pendingSeek = useRef<number | null>(null);
   const playingRef = useRef(false);
   const posRef = useRef<Position | null>(null);
   const turning = useRef(0);
   const touch = useRef<{ x: number; y: number } | null>(null);
-  const [recitations, setRecitations] = useState<Recitation[]>([]);
+  const [recitations, setRecitations] = useState<ChapterReciter[]>([]);
   const [recitation, setRecitation] = useState<number | null>(null);
   const [pos, setPos] = useState<Position | null>(null);
   const [playing, setPlaying] = useState(false);
@@ -69,27 +55,35 @@ export function MushafReader({ t, names, children }: { t: T; names: string[]; ch
     return words.length > 0;
   }, []);
 
-  const filesFor = useCallback(async (surah: number) => {
+  const chapterFor = useCallback(async (surah: number) => {
+    if (recitation === null) throw new Error("audio");
     const key = `${recitation}:${surah}`;
     const known = cache.current.get(key);
     if (known) return known;
-    const res = await fetch(`/api/audio?recitation=${recitation}&surah=${surah}`);
-    if (!res.ok) throw new Error("audio");
-    const files = ((await res.json()) as { files: AudioFile[] }).files;
-    cache.current.set(key, files);
-    return files;
+    const chapter = await fetchChapter(recitation, surah);
+    cache.current.set(key, chapter);
+    return chapter;
   }, [recitation]);
 
+  // Un seul fichier par sourate : la lecture continue ecran eteint et en arriere-plan.
   const select = useCallback(async (position: Position, autoplay: boolean) => {
     posRef.current = position;
     setPos(position);
     try {
-      const file = (await filesFor(position.surah)).find((item) => item.number === position.verse);
+      const chapter = await chapterFor(position.surah);
       const element = audio.current;
-      if (!file || !element || posRef.current !== position) return;
-      if (element.src !== file.url) {
-        element.src = file.url;
+      const timing = chapter.timings.find((item) => item.number === position.verse);
+      if (!element || posRef.current !== position) return;
+      const at = (timing?.from ?? 0) / 1000;
+      if (element.src !== chapter.url) {
+        loaded.current = { surah: position.surah, chapter };
+        pendingSeek.current = at;
+        element.src = chapter.url;
         element.load();
+      } else if (element.readyState >= 1) {
+        element.currentTime = at;
+      } else {
+        pendingSeek.current = at;
       }
       element.playbackRate = speed;
       setFailed(false);
@@ -97,19 +91,17 @@ export function MushafReader({ t, names, children }: { t: T; names: string[]; ch
     } catch {
       setFailed(true);
     }
-  }, [filesFor, speed]);
+  }, [chapterFor, speed]);
 
   useEffect(() => {
     setSpeed(SPEEDS.includes(Number(stored(SPEED_KEY))) ? Number(stored(SPEED_KEY)) : 1);
     setAuto(AUTO.includes(Number(stored(AUTO_KEY))) ? Number(stored(AUTO_KEY)) : 0);
     const root = document.documentElement;
     root.setAttribute("data-reading", "");
-    fetch("/api/audio")
-      .then((res) => (res.ok ? res.json() : Promise.reject(new Error("audio"))))
-      .then((data: { recitations: Recitation[] }) => {
-        const saved = Number(stored(RECITATION_KEY));
-        setRecitations(data.recitations);
-        setRecitation(data.recitations.some((r) => r.id === saved) ? saved : (data.recitations.find((r) => /afasy/i.test(r.name)) ?? data.recitations[0]).id);
+    fetchReciters()
+      .then((list) => {
+        setRecitations(list);
+        setRecitation(defaultReciter(list));
       })
       .catch(() => setFailed(true));
     return () => root.removeAttribute("data-reading");
@@ -118,6 +110,15 @@ export function MushafReader({ t, names, children }: { t: T; names: string[]; ch
   useEffect(() => {
     if (audio.current) audio.current.playbackRate = speed;
   }, [speed]);
+
+  // Changement de recitant pendant l'ecoute : on reprend au meme verset avec la nouvelle voix.
+  const lastRecitation = useRef<number | null>(null);
+  useEffect(() => {
+    if (recitation === null) return;
+    const changed = lastRecitation.current !== null && lastRecitation.current !== recitation;
+    lastRecitation.current = recitation;
+    if (changed && playingRef.current && posRef.current) void select(posRef.current, true);
+  }, [recitation, select]);
 
   useEffect(() => {
     document.cookie = `nour_mushaf_page=${page}; path=/; max-age=31536000; samesite=lax${location.protocol === "https:" ? "; secure" : ""}`;
@@ -174,27 +175,64 @@ export function MushafReader({ t, names, children }: { t: T; names: string[]; ch
     return () => window.removeEventListener("keydown", onKey);
   }, [goPage, page]);
 
-  const onEnded = async () => {
-    const current = posRef.current;
-    if (!current) return;
-    let next: Position | null = null;
-    try {
-      const files = await filesFor(current.surah);
-      const index = files.findIndex((file) => file.number === current.verse);
-      next = files[index + 1] ? { surah: current.surah, verse: files[index + 1].number } : current.surah < 114 ? { surah: current.surah + 1, verse: 1 } : null;
-    } catch {
-      setFailed(true);
+  const follow = useCallback((next: Position) => {
+    if (!highlight(next) && playingRef.current && page < LAST_PAGE && turning.current !== page + 1) {
+      turning.current = page + 1;
+      goPage(page + 1);
     }
-    if (!next) {
+  }, [goPage, highlight, page]);
+
+  // Le verset en cours suit la position dans le fichier de la sourate.
+  const onTime = () => {
+    const element = audio.current;
+    const current = loaded.current;
+    if (!element || !current || element.src !== current.chapter.url || pendingSeek.current !== null) return;
+    const at = verseAt(current.chapter.timings, element.currentTime * 1000);
+    if (!at || (posRef.current?.surah === current.surah && posRef.current.verse === at.number)) return;
+    const next = { surah: current.surah, verse: at.number };
+    posRef.current = next;
+    setPos(next);
+    if (!element.paused) follow(next);
+  };
+
+  const onEnded = async () => {
+    const current = loaded.current;
+    if (!current || current.surah >= 114) {
       setPlaying(false);
       playingRef.current = false;
       return;
     }
+    const next = { surah: current.surah + 1, verse: 1 };
     playingRef.current = true;
     await select(next, true);
-    if (!highlight(next) && page < LAST_PAGE && turning.current !== page + 1) {
-      turning.current = page + 1;
-      goPage(page + 1);
+    follow(next);
+  };
+
+  useEffect(() => {
+    if (!("mediaSession" in navigator) || !pos) return;
+    const reciterName = recitations.find((r) => r.id === recitation)?.name ?? "";
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: `${names[pos.surah - 1] ?? ""} · ${pos.surah}:${pos.verse}`,
+      artist: reciterName,
+      album: "NOUR AL-ISLAM",
+      artwork: [{ src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }, { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" }],
+    });
+    const timings = loaded.current?.surah === pos.surah ? loaded.current.chapter.timings : [];
+    const index = timings.findIndex((item) => item.number === pos.verse);
+    const session = navigator.mediaSession;
+    session.setActionHandler("play", () => { playingRef.current = true; void audio.current?.play(); });
+    session.setActionHandler("pause", () => { playingRef.current = false; audio.current?.pause(); });
+    session.setActionHandler("previoustrack", index > 0 ? () => void select({ surah: pos.surah, verse: timings[index - 1].number }, true) : null);
+    session.setActionHandler("nexttrack", index >= 0 && index + 1 < timings.length ? () => void select({ surah: pos.surah, verse: timings[index + 1].number }, true) : null);
+  }, [names, pos, recitation, recitations, select]);
+
+  const positionState = () => {
+    const element = audio.current;
+    if (!element || !("mediaSession" in navigator) || !Number.isFinite(element.duration) || element.duration <= 0) return;
+    try {
+      navigator.mediaSession.setPositionState({ duration: element.duration, playbackRate: element.playbackRate, position: Math.min(element.currentTime, element.duration) });
+    } catch {
+      // Etat non accepte par ce navigateur.
     }
   };
 
@@ -245,14 +283,30 @@ export function MushafReader({ t, names, children }: { t: T; names: string[]; ch
       <div className="mushaf-stage" onClick={onClick} onTouchStart={(event) => { const p = event.touches[0]; touch.current = { x: p.clientX, y: p.clientY }; }} onTouchEnd={onTouchEnd}>{children}</div>
       <p className="shrink-0 py-1 text-center text-base text-muted">{t.mushafPage} <span data-page-number>{page}</span></p>
       <section aria-label={t.audioPlayer} className="audio-bar fixed inset-x-0 z-20 border-t border-line bg-page">
-        <audio ref={audio} preload="auto" playsInline onPlay={() => { playingRef.current = true; setPlaying(true); }} onPause={() => { if (!audio.current?.ended) playingRef.current = false; setPlaying(false); }} onEnded={() => void onEnded()} onError={() => { if (audio.current?.getAttribute("src")) setFailed(true); }} onCanPlay={() => setFailed(false)} />
+        <audio
+          ref={audio}
+          preload="metadata"
+          playsInline
+          onLoadedMetadata={() => {
+            const element = audio.current;
+            if (element && pendingSeek.current !== null) element.currentTime = pendingSeek.current;
+            pendingSeek.current = null;
+            if (element) element.playbackRate = speed;
+            positionState();
+          }}
+          onTimeUpdate={onTime}
+          onSeeked={positionState}
+          onRateChange={positionState}
+          onPlay={() => { playingRef.current = true; setPlaying(true); positionState(); }}
+          onPause={() => { if (!audio.current?.ended) playingRef.current = false; setPlaying(false); }}
+          onEnded={() => void onEnded()} onError={() => { if (audio.current?.getAttribute("src")) setFailed(true); }} onCanPlay={() => setFailed(false)} />
         <div className="mx-auto max-w-xl px-3">
           {open ? (
             <div className="space-y-3 border-b border-line py-3">
               <label className="block text-base font-medium">
                 {t.reciter}
-                <select value={recitation ?? ""} onChange={(event) => { const id = Number(event.target.value); store(RECITATION_KEY, String(id)); setRecitation(id); }} className="mt-1 block min-h-11 w-full rounded-lg border border-line bg-page px-2 font-normal">
-                  {recitations.map((r) => <option key={r.id} value={r.id}>{r.style ? `${r.name} (${r.style})` : r.name}</option>)}
+                <select value={recitation ?? ""} onChange={(event) => { const id = Number(event.target.value); store(RECITER_KEY, String(id)); cache.current.clear(); loaded.current = null; setRecitation(id); }} className="mt-1 block min-h-11 w-full rounded-lg border border-line bg-page px-2 font-normal">
+                  {recitations.map((r) => <option key={r.id} value={r.id}>{reciterLabel(r)}</option>)}
                 </select>
               </label>
               <fieldset>

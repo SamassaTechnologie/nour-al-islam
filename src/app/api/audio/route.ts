@@ -32,6 +32,6 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     const status = error instanceof AudioUnavailable ? error.status : 500;
     console.error("Audio indisponible", error instanceof Error ? error.message : "erreur inconnue");
-    return NextResponse.json({ error: "Audio indisponible", upstream: status }, { status: 503, headers: { "Cache-Control": "no-store" } });
+    return NextResponse.json({ error: "Audio indisponible", upstream: status }, { status: status === 404 ? 404 : 503, headers: { "Cache-Control": "no-store" } });
   }
 }

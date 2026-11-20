@@ -1,7 +1,8 @@
 // Service worker de NOUR AL-ISLAM : hors connexion et rappels (notifications Web Push).
 // Hors connexion : les pages deja ouvertes (Coran, lecons, invocations, horaires) restent lisibles sans internet.
 // Pages personnelles, administration et connexion : jamais gardees sur l'appareil.
-const VERSION = "nour-v2";
+const VERSION = "nour-v3";
+const AUDIO = "nour-audio"; // recitations telechargees a la demande : gardees d'une version a l'autre
 const PAGES = `${VERSION}-pages`;
 const ASSETS = `${VERSION}-assets`;
 const SHELL = `${VERSION}-shell`; // page « Pas de connexion » : jamais effacee avec les pages
@@ -22,7 +23,7 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil((async () => {
-    for (const name of await caches.keys()) if (!name.startsWith(VERSION)) await caches.delete(name);
+    for (const name of await caches.keys()) if (!name.startsWith(VERSION) && name !== AUDIO) await caches.delete(name);
     await self.clients.claim();
   })());
 });
@@ -61,10 +62,33 @@ async function staleWhileRevalidate(request) {
   return cached ?? fresh;
 }
 
+// Recitation telechargee : servie depuis l'appareil, y compris par morceaux (requetes Range du lecteur audio).
+async function cachedAudio(request) {
+  const cache = await caches.open(AUDIO);
+  const cached = await cache.match(request.url, { ignoreVary: true, ignoreSearch: false });
+  if (!cached) return fetch(request);
+  const range = /^bytes=(\d*)-(\d*)$/.exec(request.headers.get("Range") || "");
+  const blob = await cached.blob();
+  const type = cached.headers.get("Content-Type") || "audio/mpeg";
+  if (!range) return new Response(blob, { status: 200, headers: { "Content-Type": type, "Content-Length": String(blob.size), "Accept-Ranges": "bytes" } });
+  let start = range[1] === "" ? Math.max(0, blob.size - Number(range[2])) : Number(range[1]);
+  let end = range[1] !== "" && range[2] !== "" ? Number(range[2]) : blob.size - 1;
+  end = Math.min(end, blob.size - 1);
+  if (start > end || start >= blob.size) return new Response(null, { status: 416, headers: { "Content-Range": `bytes */${blob.size}` } });
+  return new Response(blob.slice(start, end + 1), {
+    status: 206,
+    headers: { "Content-Type": type, "Content-Length": String(end - start + 1), "Content-Range": `bytes ${start}-${end}/${blob.size}`, "Accept-Ranges": "bytes" },
+  });
+}
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
   const url = new URL(request.url);
+  if (url.hostname === "download.quranicaudio.com") {
+    event.respondWith(cachedAudio(request));
+    return;
+  }
   if (url.origin !== self.location.origin || url.pathname === "/sw.js") return;
   if (PRIVATE.test(url.pathname)) {
     // Jamais gardee ; hors connexion, on affiche la page « Pas de connexion ».
