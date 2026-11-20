@@ -34,6 +34,9 @@ export function AppHeader({ t, locale, theme, signedIn }: { t: Dictionary; local
           ))}
         </nav>
         <div className="ms-auto flex items-center">
+          <Link href="/recherche" aria-label={t.search.open} className="grid h-11 w-11 place-items-center rounded-md hover:bg-white/10" data-search-link>
+            <Icon name="search" className="h-5 w-5" />
+          </Link>
           <form action={setPreference}>
             <input type="hidden" name="key" value="locale" />
             <input type="hidden" name="value" value={locale === "fr" ? "ar" : "fr"} />

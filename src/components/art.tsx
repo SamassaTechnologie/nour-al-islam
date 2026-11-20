@@ -33,7 +33,7 @@ const stroke = {
   strokeLinejoin: "round" as const,
 };
 
-export type IconName = "home" | "quran" | "learn" | "prayer" | "profile" | "sun" | "moon" | "auto";
+export type IconName = "home" | "quran" | "learn" | "prayer" | "profile" | "sun" | "moon" | "auto" | "search";
 
 export function Icon({ name, className = "h-6 w-6" }: { name: IconName; className?: string }) {
   const paths: Record<IconName, React.ReactNode> = {
@@ -45,6 +45,7 @@ export function Icon({ name, className = "h-6 w-6" }: { name: IconName; classNam
     sun: <path d="M12 16.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19" />,
     moon: <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5Z" />,
     auto: <path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 0v18M12 8l4.5-3.5M12 13l8-5M12 18l7-4" />,
+    search: <path d="M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13ZM15.2 15.2 20 20" />,
   };
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" className={className} {...stroke}>
