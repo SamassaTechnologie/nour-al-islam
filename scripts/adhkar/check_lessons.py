@@ -59,7 +59,7 @@ RUN = re.compile('[؀-ۿ][؀-ۿ ،ۖۗۚ]*[؀-ۿ]')
 report = []
 for slug, body in sorted(bodies.items()):
     for k, m in enumerate(RUN.finditer(body)):
-        text = m.group(0)
+        text = m.group(0).strip('، ')  # une virgule arabe en bordure n'appartient pas au passage
         if len(text) <= 8: continue
         entry = {'slug': slug, 'index': k, 'lesson': text, 'found': None}
         n = norm(text)
@@ -70,7 +70,7 @@ for slug, body in sorted(bodies.items()):
                 at = ns.find(n)
                 if at < 0: continue
                 a = pos[at]; b = pos[at + len(n) - 1] + 1
-                while b < len(src) and SKIP.match(src[b]) and src[b] not in '‏"،.,:;': b += 1
+                while b < len(src) and SKIP.match(src[b]) and src[b] not in '‏"،.,:;؛-': b += 1
                 exact = src[a:b]
                 entry['found'] = {'collection': c, 'number': num, 'exact': exact, 'identical': exact == text}
                 break
