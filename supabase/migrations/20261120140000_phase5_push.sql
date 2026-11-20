@@ -2,7 +2,7 @@
 -- Les abonnements ne sont lus et ecrits que par la fonction Edge « push » (role service) : aucun acces direct.
 -- Position arrondie a 0,01° (environ 1 km), seulement pour calculer les heures.
 create extension if not exists pg_cron;
-create extension if not exists pg_net;
+create extension if not exists pg_net with schema extensions;
 
 create table public.push_subscriptions (
   id uuid primary key default gen_random_uuid(),
