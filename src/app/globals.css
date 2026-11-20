@@ -251,7 +251,7 @@ html[data-reading] .page-bottom {
   display: grid;
   flex: 1 1 0;
   min-height: 0;
-  margin-inline: 0.75rem;
+  margin-inline: 0.5rem;
   place-items: center;
   container-type: size;
   touch-action: pan-y;
@@ -264,14 +264,22 @@ html[data-reading] .page-bottom {
   -webkit-user-select: none;
 }
 
+/* --mushaf-em : largeur reelle de la plus longue ligne de la page (mesuree une fois la police chargee).
+   La page occupe ainsi toute la largeur de l'ecran, sans marge perdue. */
 .mushaf-lines {
-  --mushaf-size: min(calc(100cqw / 15.2), calc(100cqh / 24.3), 3.5rem);
+  --mushaf-size: min(calc(100cqw / var(--mushaf-em, 15.2)), calc(100cqh / 24.3), 3.5rem);
   --mushaf-line: clamp(calc(var(--mushaf-size) * 1.6), calc(100cqh / 15.6), calc(var(--mushaf-size) * 1.85));
-  width: calc(var(--mushaf-size) * 15.2);
+  width: calc(var(--mushaf-size) * var(--mushaf-em, 15.2));
   margin-inline: auto;
   color: var(--ink);
   font-size: var(--mushaf-size);
   line-height: var(--mushaf-line);
+}
+
+/* Al-Fatiha et le debut d'Al-Baqara : peu de lignes, ecriture plus grande comme dans le Mushaf imprime. */
+.mushaf-page[data-opening] .mushaf-lines {
+  --mushaf-size: min(calc(100cqw / var(--mushaf-em, 15.2)), calc(100cqh / 13), 3.5rem);
+  --mushaf-line: calc(var(--mushaf-size) * 1.75);
 }
 
 @media (max-height: 520px) {
@@ -281,7 +289,7 @@ html[data-reading] .page-bottom {
   }
 
   .mushaf-lines {
-    --mushaf-size: min(calc(100cqw / 15.2), 1.75rem);
+    --mushaf-size: min(calc(100cqw / var(--mushaf-em, 15.2)), 1.75rem);
     --mushaf-line: calc(var(--mushaf-size) * 1.7);
   }
 }

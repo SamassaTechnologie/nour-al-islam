@@ -132,10 +132,17 @@ export function MushafReader({ t, names, children }: { t: T; names: string[]; ch
       const sample = article.querySelector<HTMLElement>(".mushaf-word")?.textContent ?? undefined;
       await Promise.all([document.fonts.load(`20px "qcf-p${page}"`, sample), document.fonts.load(`20px "qcf-surah-names"`, "001")]).catch(() => undefined);
       if (!active) return;
-      article.querySelectorAll<HTMLElement>(".mushaf-line").forEach((line) => {
-        const used = Array.from(line.children).reduce((sum, child) => sum + child.getBoundingClientRect().width, 0);
-        line.toggleAttribute("data-full", used / parseFloat(getComputedStyle(line).fontSize) > 12.5);
+      const lines = Array.from(article.querySelectorAll<HTMLElement>(".mushaf-line"));
+      let widest = 0;
+      lines.forEach((line) => {
+        const used = Array.from(line.children).reduce((sum, child) => sum + child.getBoundingClientRect().width, 0) / parseFloat(getComputedStyle(line).fontSize);
+        widest = Math.max(widest, used);
+        line.toggleAttribute("data-full", used > 12.5);
       });
+      // Largeur de la page : la plus longue ligne, avec une petite marge (au moins 13,6 em pour garder une taille reguliere).
+      const opening = lines.length <= 8;
+      article.toggleAttribute("data-opening", opening);
+      if (widest > 0) article.style.setProperty("--mushaf-em", String(Math.min(15.2, opening ? widest + 0.4 : Math.max(widest + 0.25, 13.6))));
       article.setAttribute("data-ready", "");
     };
     const wait = () => {
