@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import type { Dictionary } from "@/lib/dictionaries";
 import { type ChapterAudio, type ChapterReciter, RECITER_KEY, defaultReciter, fetchChapter, fetchReciters, reciterLabel, store, stored, verseAt } from "@/lib/chapter-audio";
+import { useWakeLock } from "@/lib/use-wake-lock";
 
 type T = Dictionary["quran"];
 type Position = { surah: number; verse: number };
@@ -40,6 +41,9 @@ export function MushafReader({ t, names, children }: { t: T; names: string[]; ch
   const [open, setOpen] = useState(false);
   const [speed, setSpeed] = useState(1);
   const [auto, setAuto] = useState(0);
+
+  // Ecran allume pendant la recitation ou quand les pages tournent seules.
+  useWakeLock(playing || auto > 0);
 
   const goPage = useCallback((target: number) => {
     if (target >= 1 && target <= LAST_PAGE) router.push(`/coran/mushaf/${target}`);

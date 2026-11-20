@@ -6,6 +6,7 @@ const BASE = process.env.BASE_URL ?? "https://nour-al-islam.vercel.app";
 const VIEWPORTS = [
   { name: "telephone", width: 396, height: 859, standalone: true },
   { name: "petit", width: 360, height: 740, standalone: true },
+  { name: "horizontal", width: 937, height: 396, standalone: true },
   { name: "tablette", width: 820, height: 1180, standalone: false },
 ];
 const PAGES = [1, 2, 50, 300, 604];

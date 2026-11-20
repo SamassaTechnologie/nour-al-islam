@@ -19,6 +19,7 @@ import {
   syncDownloads,
   verseAt,
 } from "@/lib/chapter-audio";
+import { useWakeLock } from "@/lib/use-wake-lock";
 
 type T = Dictionary["quran"];
 
@@ -47,6 +48,8 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState<number | null>(null);
   const [saveFailed, setSaveFailed] = useState(false);
+
+  useWakeLock(playing);
 
   const timings = chapter?.timings ?? [];
   const current = reciters.find((r) => r.id === reciter);

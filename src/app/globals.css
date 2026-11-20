@@ -289,8 +289,13 @@ html[data-reading] .page-bottom {
   }
 
   .mushaf-lines {
-    --mushaf-size: min(calc(100cqw / var(--mushaf-em, 15.2)), 1.75rem);
+    /* Telephone a l'horizontale : la page prend toute la largeur et se lit en faisant defiler. */
+    --mushaf-size: min(calc(100cqw / var(--mushaf-em, 15.2)), 3.25rem);
     --mushaf-line: calc(var(--mushaf-size) * 1.7);
+  }
+
+  .mushaf-page[data-opening] .mushaf-lines {
+    --mushaf-size: min(calc(100cqw / var(--mushaf-em, 15.2)), 3.25rem);
   }
 }
 
