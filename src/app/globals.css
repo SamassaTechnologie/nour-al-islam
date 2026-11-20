@@ -129,6 +129,13 @@ html[data-theme="dark"] {
   overflow-wrap: anywhere;
 }
 
+.arabic-text {
+  font-family: "Noto Naskh Arabic", serif;
+  font-size: 1.3rem;
+  line-height: 2.1;
+  overflow-wrap: anywhere;
+}
+
 .surah-name {
   font-family: "Noto Naskh Arabic", serif;
   font-size: 1.25rem;

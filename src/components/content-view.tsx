@@ -10,4 +10,10 @@ export function referenceText(ref: Reference, surahs: Surah[]) {
   return `${ref.author}, ${ref.source_title}, ${ref.locator}`;
 }
 
-export const Paragraphs = ({ text }: { text: string }) => text.split(/\n\s*\n/).filter((part) => part.trim()).map((part, index) => <p key={index} dir="auto" className="mt-3 whitespace-pre-line text-start">{part.trim()}</p>);
+/** Paragraphe commencant par de l'arabe (texte d'un hadith, par exemple) : police arabe, plus grande, de droite a gauche. */
+const ARABIC_START = /^[\u0600-\u06FF]/;
+
+export const Paragraphs = ({ text }: { text: string }) => text.split(/\n\s*\n/).filter((part) => part.trim()).map((part, index) => {
+  const arabic = ARABIC_START.test(part.trim());
+  return <p key={index} dir="auto" lang={arabic ? "ar" : undefined} className={`mt-3 whitespace-pre-line text-start ${arabic ? "arabic-text" : ""}`}>{part.trim()}</p>;
+});
