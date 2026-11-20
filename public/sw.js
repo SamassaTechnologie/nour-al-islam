@@ -1,6 +1,101 @@
-// Service worker de NOUR AL-ISLAM : affichage des rappels (notifications Web Push).
-self.addEventListener("install", () => self.skipWaiting());
-self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
+// Service worker de NOUR AL-ISLAM : hors connexion et rappels (notifications Web Push).
+// Hors connexion : les pages deja ouvertes (Coran, lecons, invocations, horaires) restent lisibles sans internet.
+// Pages personnelles, administration et connexion : jamais gardees sur l'appareil.
+const VERSION = "nour-v1";
+const PAGES = `${VERSION}-pages`;
+const ASSETS = `${VERSION}-assets`;
+const OFFLINE_URL = "/hors-ligne";
+const PRECACHE = [OFFLINE_URL, "/", "/coran", "/priere", "/priere/horaires", "/priere/invocations", "/manifest.webmanifest", "/icons/icon-192.png", "/favicon.svg"];
+const PRIVATE = /^\/(admin|profil|favoris|connexion|inscription|auth|api)(\/|$)/;
+const MAX_PAGES = 400;
+
+self.addEventListener("install", (event) => {
+  event.waitUntil((async () => {
+    const cache = await caches.open(PAGES);
+    await Promise.all(PRECACHE.map((url) => cache.add(new Request(url, { credentials: "same-origin" })).catch(() => {})));
+    await self.skipWaiting();
+  })());
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil((async () => {
+    for (const name of await caches.keys()) if (!name.startsWith(VERSION)) await caches.delete(name);
+    await self.clients.claim();
+  })());
+});
+
+async function trim(cache) {
+  const keys = await cache.keys();
+  for (let i = 0; i < keys.length - MAX_PAGES; i++) await cache.delete(keys[i]);
+}
+
+// Page ou donnees de navigation : d'abord le reseau (contenu a jour), sinon la copie gardee.
+async function networkFirst(request, fallbackToOffline) {
+  const cache = await caches.open(PAGES);
+  try {
+    const response = await fetch(request);
+    if (response.ok && response.type === "basic" && !response.headers.get("Cache-Control")?.includes("no-store-sw")) {
+      await cache.put(request, response.clone());
+      trim(cache);
+    }
+    return response;
+  } catch {
+    const cached = await cache.match(request, { ignoreVary: true });
+    if (cached) return cached;
+    if (fallbackToOffline) return (await cache.match(OFFLINE_URL)) ?? Response.error();
+    return Response.error();
+  }
+}
+
+// Fichiers de l'application (scripts, styles, polices, icones) : la copie gardee, mise a jour en arriere-plan.
+async function staleWhileRevalidate(request) {
+  const cache = await caches.open(ASSETS);
+  const cached = await cache.match(request);
+  const fresh = fetch(request).then((response) => {
+    if (response.ok) cache.put(request, response.clone());
+    return response;
+  }).catch(() => cached ?? Response.error());
+  return cached ?? fresh;
+}
+
+self.addEventListener("fetch", (event) => {
+  const { request } = event;
+  if (request.method !== "GET") return;
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin || PRIVATE.test(url.pathname) || url.pathname === "/sw.js") return;
+  if (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/") || /\.(woff2?|ttf|svg|png|webp|css)$/.test(url.pathname)) {
+    event.respondWith(staleWhileRevalidate(request));
+    return;
+  }
+  if (request.mode === "navigate") {
+    event.respondWith(networkFirst(request, true));
+    return;
+  }
+  if (request.headers.get("RSC") === "1" || url.searchParams.has("_rsc")) {
+    event.respondWith(networkFirst(request, false));
+  }
+});
+
+// Enregistrer une liste de pages pour la lecture hors connexion (ex. : tout le Coran).
+self.addEventListener("message", (event) => {
+  const data = event.data || {};
+  if (data.type === "save-pages" && Array.isArray(data.urls)) {
+    event.waitUntil((async () => {
+      const cache = await caches.open(PAGES);
+      let done = 0;
+      for (const path of data.urls) {
+        if (typeof path !== "string" || !path.startsWith("/") || PRIVATE.test(path)) continue;
+        try {
+          const response = await fetch(path, { credentials: "same-origin" });
+          if (response.ok) await cache.put(path, response);
+        } catch { /* on continue avec les suivantes */ }
+        done++;
+        if (done % 5 === 0 || done === data.urls.length) event.source?.postMessage({ type: "save-progress", done, total: data.urls.length });
+      }
+    })());
+  }
+  if (data.type === "clear-pages") event.waitUntil(caches.delete(PAGES));
+});
 
 self.addEventListener("push", (event) => {
   let data = {};

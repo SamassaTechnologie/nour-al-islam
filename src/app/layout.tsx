@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import { OfflineSupport } from "@/components/offline";
 import { AppHeader, BottomNav } from "@/components/shell";
 import { getPreferences } from "@/lib/preferences";
 import { getSession } from "@/lib/supabase/server";
@@ -33,6 +34,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     <html lang={locale} dir={locale === "ar" ? "rtl" : "ltr"} data-theme={theme}>
       <body className="min-h-dvh">
         <AppHeader t={t} locale={locale} theme={theme} signedIn={Boolean(session)} />
+        <OfflineSupport signedIn={Boolean(session)} label={t.offline.banner} />
         <div className="page-bottom">{children}</div>
         <BottomNav t={t} signedIn={Boolean(session)} />
       </body>
