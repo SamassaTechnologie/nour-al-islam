@@ -22,7 +22,7 @@ await page.click('main button[type="submit"]');
 await page.waitForURL((u) => !u.href.includes("/connexion"), { timeout: 20000 });
 
 let firstIsAnswer = 0, total = 0;
-for (const slug of ["prosternation-de-l-oubli", "tashahhud-et-priere-sur-le-prophete", "horaires-des-prieres", "moments-interdits-pour-prier", "reunion-de-deux-prieres", "raccourcir-la-priere-en-voyage", "priere-en-groupe", "priere-du-vendredi", "islam-iman-ihsan", "six-piliers-de-la-foi", "le-tawhid", "sommeil-conscience-et-toucher", "la-qalqala", "naissance-et-enfance", "jeunesse-khadija-kaaba", "debut-de-la-revelation", "premiers-musulmans-predication-secrete"]) {
+for (const slug of ["prosternation-de-l-oubli", "tashahhud-et-priere-sur-le-prophete", "horaires-des-prieres", "moments-interdits-pour-prier", "reunion-de-deux-prieres", "raccourcir-la-priere-en-voyage", "priere-en-groupe", "priere-du-vendredi", "islam-iman-ihsan", "six-piliers-de-la-foi", "le-tawhid", "sommeil-conscience-et-toucher", "la-qalqala", "naissance-et-enfance", "jeunesse-khadija-kaaba", "debut-de-la-revelation", "premiers-musulmans-predication-secrete", "debut-predication-publique", "persecutions-a-la-mecque", "emigration-en-abyssinie"]) {
   const item = (await db.from("content_items").select("published_revision_id").eq("slug", slug).single()).data;
   const questions = (await db.from("content_questions").select("id, options, answer, surah, ayah, word_from, word_to").eq("revision_id", item.published_revision_id).order("ord")).data;
   await page.goto(`${base}/apprendre/${slug}`, { waitUntil: "networkidle" });
