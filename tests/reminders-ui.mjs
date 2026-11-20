@@ -8,8 +8,14 @@ const browser = await chromium.launch(process.env.PW_CHANNEL ? { channel: proces
 const errors = [];
 const watch = (p) => { p.on("pageerror", (e) => errors.push(e.message)); };
 
-// Navigateur courant : section affichee, choix coches par defaut, bouton d'activation.
-const ctx = await browser.newContext({ locale: "fr-FR", timezoneId: "Africa/Bamako" });
+// Notifications bloquees pour le site : message expliquant comment les autoriser.
+const blocked = await (await browser.newContext({ locale: "fr-FR" })).newPage(); watch(blocked);
+await blocked.goto(`${base}/priere/horaires`, { waitUntil: "networkidle" });
+await blocked.waitForSelector('[data-reminders="denied"]');
+check("notifications bloquées : message pour les autoriser", (await blocked.textContent('[data-reminders] [role="alert"]')).includes("Autorisez-les"));
+
+// Navigateur compatible, notifications permises : choix coches par defaut, bouton d'activation.
+const ctx = await browser.newContext({ locale: "fr-FR", timezoneId: "Africa/Bamako", permissions: ["notifications"] });
 const page = await ctx.newPage(); watch(page);
 await page.goto(`${base}/priere/horaires`, { waitUntil: "networkidle" });
 await page.waitForSelector('[data-reminders="off"], [data-reminders="unsupported"]');
