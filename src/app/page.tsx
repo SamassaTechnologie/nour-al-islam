@@ -3,6 +3,9 @@ import { Lattice, Star } from "@/components/art";
 import { getPreferences } from "@/lib/preferences";
 import { getSession } from "@/lib/supabase/server";
 
+const STEP_LINKS = ["/apprendre#rubrique-arabe", "/apprendre#rubrique-tajwid", "/apprendre/memorisation", "/coran/1/tafsir", "/priere"];
+const QUICK_LINKS = ["/coran", "/coran/mushaf", "/coran/1/tafsir", "/priere/horaires", "/priere/invocations", "/apprendre/memorisation", "/assistant", "/recherche"];
+
 const arch = "M.5 150V132C.5 88 92 56 160 5c68 51 159.5 83 159.5 127v18";
 
 export default async function HomePage() {
@@ -44,17 +47,33 @@ export default async function HomePage() {
         <p className="mt-2 text-muted">{h.pathIntro}</p>
         <ol className="mt-6">
           {h.steps.map(([title, text], index) => (
-            <li key={title} className="relative flex gap-4 pb-6 last:pb-0">
-              {index < h.steps.length - 1 ? <span aria-hidden="true" className="absolute start-[0.6875rem] top-6 bottom-0 w-px bg-gold" /> : null}
-              <Star className="h-6 w-6 shrink-0 text-gold" />
-              <div>
-                <h3 className="text-lg">{title}</h3>
-                <p className="text-muted">{text}</p>
-              </div>
+            <li key={title} className="relative pb-2 last:pb-0" data-step={index + 1}>
+              {index < h.steps.length - 1 ? <span aria-hidden="true" className="absolute start-[1.4375rem] top-9 bottom-0 w-px bg-gold" /> : null}
+              <Link href={STEP_LINKS[index]} className="relative flex items-center gap-4 rounded-lg px-2 py-2 hover:bg-tint">
+                <Star className="h-6 w-6 shrink-0 text-gold" />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-lg font-display">{title}</span>
+                  <span className="block text-muted">{text}</span>
+                </span>
+                <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-muted rtl:-scale-x-100"><path d="m9 5 7 7-7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </Link>
             </li>
           ))}
         </ol>
-        <p className="mt-5 text-base text-gold-ink">{h.inPreparation}</p>
+      </section>
+
+      <section className="mx-auto max-w-xl px-6 pt-10" aria-labelledby="acces-rapide">
+        <h2 id="acces-rapide" className="text-2xl">{h.quickTitle}</h2>
+        <ul className="mt-4 grid grid-cols-2 gap-3 min-[520px]:grid-cols-4">
+          {h.quick.map(([title, text], index) => (
+            <li key={title}>
+              <Link href={QUICK_LINKS[index]} className="flex h-full min-h-20 flex-col justify-center rounded-lg border border-line px-3 py-3 hover:border-gold" data-quick={QUICK_LINKS[index]}>
+                <span className="font-medium text-emerald">{title}</span>
+                <span className="text-base leading-snug text-muted">{text}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="mt-10 bg-tint">

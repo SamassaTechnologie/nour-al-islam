@@ -100,3 +100,42 @@ export const getAudioFiles = unstable_cache(
   ["qf-audio-files-v1"],
   { revalidate: DAY },
 );
+
+// Recitation par sourate entiere : un seul fichier continu et les reperes de chaque verset.
+// Un fichier long permet la lecture ecran eteint et en arriere-plan sur telephone.
+export type ChapterReciter = { id: number; name: string; style: string | null };
+export type VerseTiming = { number: number; from: number; to: number };
+export type ChapterAudio = { url: string; size: number | null; timings: VerseTiming[] };
+
+type RawChapterReciter = { id: number; name?: string; reciter_name?: string; translated_name?: { name?: string } | null; style?: string | { name?: string } | null };
+
+export const getChapterReciters = unstable_cache(
+  async (): Promise<ChapterReciter[]> => {
+    const data = await api<{ reciters: RawChapterReciter[] }>("/resources/chapter_reciters?language=en");
+    return data.reciters
+      .map((r) => ({
+        id: r.id,
+        name: r.translated_name?.name || r.name || r.reciter_name || `#${r.id}`,
+        style: typeof r.style === "string" ? r.style : r.style?.name ?? null,
+      }))
+      .sort((a, b) => rank(a.name) - rank(b.name) || a.name.localeCompare(b.name));
+  },
+  ["qf-chapter-reciters-v1"],
+  { revalidate: DAY },
+);
+
+export const getChapterAudio = unstable_cache(
+  async (reciter: number, surah: number): Promise<ChapterAudio> => {
+    const data = await api<{ audio_file: { audio_url: string; file_size?: number; timestamps?: { verse_key: string; timestamp_from: number; timestamp_to: number }[] } }>(
+      `/chapter_recitations/${reciter}/${surah}?segments=true`,
+    );
+    const file = data.audio_file;
+    const timings = (file.timestamps ?? [])
+      .map((t) => ({ number: Number(t.verse_key.split(":")[1]), from: t.timestamp_from, to: t.timestamp_to }))
+      .filter((t) => Number.isFinite(t.number) && Number.isFinite(t.from) && Number.isFinite(t.to))
+      .sort((a, b) => a.number - b.number);
+    return { url: audioUrl(file.audio_url), size: file.file_size ?? null, timings };
+  },
+  ["qf-chapter-audio-v1"],
+  { revalidate: DAY },
+);
