@@ -13,6 +13,8 @@ type Position = { surah: number; verse: number };
 const LAST_PAGE = 604;
 const SPEED_KEY = "nour_audio_speed";
 const AUTO_KEY = "nour_mushaf_auto";
+const ZOOM_KEY = "nour_mushaf_zoom";
+const ZOOMS = [0.7, 0.8, 0.9, 1, 1.15, 1.3, 1.45, 1.6];
 const SPEEDS = [0.75, 1, 1.25, 1.5];
 const AUTO = [0, 1, 2, 3];
 
@@ -41,6 +43,23 @@ export function MushafReader({ t, names, children }: { t: T; names: string[]; ch
   const [open, setOpen] = useState(false);
   const [speed, setSpeed] = useState(1);
   const [auto, setAuto] = useState(0);
+  const [zoom, setZoom] = useState(1);
+  const [landscape, setLandscape] = useState(false);
+
+  // Telephone a l'horizontale (meme seuil que la feuille de style) : la taille de l'ecriture se regle.
+  useEffect(() => {
+    const query = window.matchMedia("(max-height: 520px)");
+    const update = () => setLandscape(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
+  const changeZoom = (step: number) => {
+    const next = ZOOMS[Math.min(ZOOMS.length - 1, Math.max(0, ZOOMS.indexOf(zoom) + step))];
+    store(ZOOM_KEY, String(next));
+    setZoom(next);
+  };
 
   // Ecran allume pendant la recitation ou quand les pages tournent seules.
   useWakeLock(playing || auto > 0);
@@ -100,6 +119,7 @@ export function MushafReader({ t, names, children }: { t: T; names: string[]; ch
   useEffect(() => {
     setSpeed(SPEEDS.includes(Number(stored(SPEED_KEY))) ? Number(stored(SPEED_KEY)) : 1);
     setAuto(AUTO.includes(Number(stored(AUTO_KEY))) ? Number(stored(AUTO_KEY)) : 0);
+    setZoom(ZOOMS.includes(Number(stored(ZOOM_KEY))) ? Number(stored(ZOOM_KEY)) : 1);
     const root = document.documentElement;
     root.setAttribute("data-reading", "");
     fetchReciters()
@@ -286,7 +306,7 @@ export function MushafReader({ t, names, children }: { t: T; names: string[]; ch
   const arrow = "M15 5 8 12l7 7";
 
   return (
-    <main className="mushaf-screen">
+    <main className="mushaf-screen" style={{ "--mushaf-zoom": zoom } as React.CSSProperties}>
       <div className="mx-auto flex min-h-11 w-full max-w-xl shrink-0 items-center justify-between px-3 text-base">
         <Link href="/coran" className="inline-flex min-h-11 items-center text-muted underline underline-offset-4">{t.allSurahs}</Link>
         {pos ? <span className="text-muted">{names[pos.surah - 1]}</span> : null}
@@ -332,6 +352,16 @@ export function MushafReader({ t, names, children }: { t: T; names: string[]; ch
                   {AUTO.map((n) => <button key={n} type="button" aria-pressed={auto === n} onClick={() => { store(AUTO_KEY, String(n)); setAuto(n); }} className={choice(auto === n)}>{n ? `${n} ${t.minutes}` : t.autoOff}</button>)}
                 </div>
               </fieldset>
+              {landscape ? (
+                <fieldset data-mushaf-zoom>
+                  <legend className="text-base font-medium">{t.textSize}</legend>
+                  <div className="mt-1 flex items-center gap-1 rounded-lg bg-tint p-1">
+                    <button type="button" aria-label={t.smaller} disabled={zoom <= ZOOMS[0]} onClick={() => changeZoom(-1)} className="min-h-11 flex-1 rounded-md text-base disabled:opacity-40" data-zoom-out>A−</button>
+                    <span className="min-w-16 text-center text-base font-medium" aria-live="polite" data-zoom-value>{Math.round(zoom * 100)} %</span>
+                    <button type="button" aria-label={t.larger} disabled={zoom >= ZOOMS[ZOOMS.length - 1]} onClick={() => changeZoom(1)} className="min-h-11 flex-1 rounded-md text-lg font-medium disabled:opacity-40" data-zoom-in>A+</button>
+                  </div>
+                </fieldset>
+              ) : null}
               <p className="text-sm text-muted">{t.mushafCredit} {t.audioCredit}</p>
             </div>
           ) : null}
