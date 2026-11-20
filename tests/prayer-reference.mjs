@@ -21,7 +21,13 @@ for (const when of dates) for (const [label, lat, lng, tz, method, asr] of cases
   const day = localDate(when, tz);
   const ours = computeTimes({ lat, lng }, day, method, asr);
   const url = `https://api.aladhan.com/v1/timings/${String(day.day).padStart(2, "0")}-${String(day.month).padStart(2, "0")}-${day.year}?latitude=${lat}&longitude=${lng}&method=${ALADHAN[method]}&school=${asr === "hanafi" ? 1 : 0}&timezonestring=${tz}`;
-  const ref = (await (await fetch(url)).json()).data.timings;
+  // Le service limite le nombre d'appels : pause entre les appels et nouvelles tentatives.
+  let ref = null;
+  for (let attempt = 0; attempt < 5 && !ref; attempt++) {
+    await new Promise((r) => setTimeout(r, 1500 * (attempt + 1)));
+    ref = (await (await fetch(url)).json().catch(() => null))?.data?.timings ?? null;
+  }
+  if (!ref) { check(`${label} : service de référence indisponible`, false); continue; }
   const fmt = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: tz });
   const diffs = Object.entries(keys).map(([k, rk]) => {
     const [h, m] = ref[rk].split(":").map(Number);
