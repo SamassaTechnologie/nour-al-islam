@@ -40,6 +40,7 @@ export default async function Page() {
         <span className="block font-medium">{t.hifdh.open}</span>
         <span className="block text-base">{t.hifdh.openNote}</span>
       </Link>
+      <Link href="/assistant" className="mt-3 flex min-h-12 items-center justify-center rounded-lg border border-line px-4 font-medium text-emerald" data-open-assistant>{t.assistant.open}</Link>
       {groups.map((group) => (
         <section key={group.section} className="mt-7" aria-labelledby={`rubrique-${group.section}`} data-section={group.section}>
           <h2 id={`rubrique-${group.section}`} className="text-xl">{sections[group.section] ?? group.section}</h2>
