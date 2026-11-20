@@ -98,14 +98,14 @@ with it as (insert into public.content_items (slug, kind, section, locale, posit
             values ({q(L['slug'])}, 'lesson', 'hadith', 'fr', {L['n']}) returning id),
 rv as (insert into public.content_revisions (item_id, number, title, summary, body, ai_assisted, author_name)
        select id, 1, {q(L['title'])}, {q(L['summary'])}, private.nawawi_fill({q(body)}), true, {q(AUTHOR)} from it returning id, item_id, md5(body) as h),
-r as (insert into public.content_references (revision_id, ord, {', '.join(COLS)})
-      select rv.id, (select coalesce(max(ord), 0) from public.content_references) + v.k, {', '.join('v.' + c for c in COLS)}
+r as (insert into public.content_references (revision_id, {', '.join(COLS)})
+      select rv.id, {', '.join('v.' + c for c in COLS)}
       from rv, (values
-  {refs}) v(k, {', '.join(COLS)}) returning 1),
-qq as (insert into public.content_questions (revision_id, ord, prompt, options, answer, explanation)
-       select rv.id, (select coalesce(max(ord), 0) from public.content_questions) + v.k, v.p, v.o, v.a, v.e
+  {refs}) v(k, {', '.join(COLS)}) order by v.k returning 1),
+qq as (insert into public.content_questions (revision_id, prompt, options, answer, explanation)
+       select rv.id, v.p, v.o, v.a, v.e
        from rv, (values
-  {qs}) v(k, p, o, a, e) returning 1)
+  {qs}) v(k, p, o, a, e) order by v.k returning 1)
 select private.ai_log(rv.item_id, rv.id, 'created', null, null, {q(f"Brouillon rédigé par l'IA : hadith {L['n']} d'an-Nawawī")}),
        rv.h = '{md5}' as arabe_identique,
        (select count(*) from r) as refs, (select count(*) from qq) as questions from rv;

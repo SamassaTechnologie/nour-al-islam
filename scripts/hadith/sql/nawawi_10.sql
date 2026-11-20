@@ -25,22 +25,22 @@ Allah est bon et pur, exempt de tout défaut, et décrit par des attributs de pe
 - Manger l'illicite fait partie de ce qui empêche l'exaucement des invocations.
 
 Exercice : citez trois causes de l'exaucement de l'invocation mentionnées dans la leçon, puis répondez aux questions.$x$), true, $x$Claude (assistant IA)$x$ from it returning id, item_id, md5(body) as h),
-r as (insert into public.content_references (revision_id, ord, kind, surah, ayah_from, ayah_to, collection, edition, hadith_number, grade, graded_by, source_title, author, locator, url, note)
-      select rv.id, (select coalesce(max(ord), 0) from public.content_references) + v.k, v.kind, v.surah, v.ayah_from, v.ayah_to, v.collection, v.edition, v.hadith_number, v.grade, v.graded_by, v.source_title, v.author, v.locator, v.url, v.note
+r as (insert into public.content_references (revision_id, kind, surah, ayah_from, ayah_to, collection, edition, hadith_number, grade, graded_by, source_title, author, locator, url, note)
+      select rv.id, v.kind, v.surah, v.ayah_from, v.ayah_to, v.collection, v.edition, v.hadith_number, v.grade, v.graded_by, v.source_title, v.author, v.locator, v.url, v.note
       from rv, (values
   (1, $x$hadith$x$::reference_kind, null::int, null::int, null::int, $x$Les Quarante hadiths d'an-Nawawī$x$, $x$Numérotation de sunnah.com$x$, $x$10$x$, $x$Authentique (ṣaḥīḥ)$x$, $x$Muslim$x$, $x$Allah est bon et n'accepte que ce qui est bon, d'après Abū Hurayra$x$, null, null, $x$https://sunnah.com/nawawi40:10$x$, $x$Texte arabe copié tel quel de l'édition de sunnah.com (base hadith-api).$x$),
   (2, $x$hadith$x$::reference_kind, null::int, null::int, null::int, $x$Ṣaḥīḥ Muslim$x$, $x$Numérotation de sunnah.com$x$, $x$1015$x$, $x$Authentique (ṣaḥīḥ)$x$, $x$Recueil authentique de Muslim$x$, $x$Livre de la zakat$x$, null, null, $x$https://sunnah.com/muslim:1015$x$, null),
   (3, $x$quran$x$::reference_kind, 23::int, 51::int, 51::int, null, null, null, null, null, null, null, null, null, null),
   (4, $x$quran$x$::reference_kind, 2::int, 172::int, 172::int, null, null, null, null, null, null, null, null, null, null),
-  (5, $x$book$x$::reference_kind, null::int, null::int, null::int, null, null, null, null, null, $x$Encyclopédie des hadiths traduits (HadeethEnc), hadith n° 66518$x$, $x$HadeethEnc$x$, $x$Explication et enseignements$x$, $x$https://hadeethenc.com/fr/browse/hadith/66518$x$, null)) v(k, kind, surah, ayah_from, ayah_to, collection, edition, hadith_number, grade, graded_by, source_title, author, locator, url, note) returning 1),
-qq as (insert into public.content_questions (revision_id, ord, prompt, options, answer, explanation)
-       select rv.id, (select coalesce(max(ord), 0) from public.content_questions) + v.k, v.p, v.o, v.a, v.e
+  (5, $x$book$x$::reference_kind, null::int, null::int, null::int, null, null, null, null, null, $x$Encyclopédie des hadiths traduits (HadeethEnc), hadith n° 66518$x$, $x$HadeethEnc$x$, $x$Explication et enseignements$x$, $x$https://hadeethenc.com/fr/browse/hadith/66518$x$, null)) v(k, kind, surah, ayah_from, ayah_to, collection, edition, hadith_number, grade, graded_by, source_title, author, locator, url, note) order by v.k returning 1),
+qq as (insert into public.content_questions (revision_id, prompt, options, answer, explanation)
+       select rv.id, v.p, v.o, v.a, v.e
        from rv, (values
   (1, $x$Que signifie « inna llāha ṭayyib » ?$x$, array[$x$Allah est bon$x$, $x$Allah est proche$x$, $x$Allah est puissant$x$]::text[], 0, $x$Allah est bon et pur, exempt de tout défaut.$x$),
   (2, $x$Qu'est-ce qu'Allah a ordonné à la fois aux messagers et aux croyants ?$x$, array[$x$Manger de ce qui est bon et faire le bien$x$, $x$Voyager souvent$x$, $x$Jeûner chaque jour$x$]::text[], 0, $x$Sourate 23, verset 51 et sourate 2, verset 172.$x$),
   (3, $x$Pourquoi l'homme du hadith n'est-il pas exaucé ?$x$, array[$x$Sa nourriture, sa boisson et son vêtement sont illicites$x$, $x$Il n'a pas levé les mains$x$, $x$Il n'a pas voyagé assez longtemps$x$]::text[], 0, $x$L'illicite empêche l'exaucement, même si d'autres causes sont réunies.$x$),
   (4, $x$Laquelle de ces choses est une cause d'exaucement de l'invocation citée dans la leçon ?$x$, array[$x$Lever les mains vers le ciel$x$, $x$Crier très fort$x$, $x$Invoquer en se plaignant d'Allah$x$]::text[], 0, $x$Lever les mains vers le ciel fait partie des causes relevées par HadeethEnc.$x$),
-  (5, $x$Quelles œuvres Allah accepte-t-Il ?$x$, array[$x$Celles faites sincèrement pour Lui et conformes à la Sunna$x$, $x$Toutes les œuvres sans exception$x$, $x$Seulement les œuvres difficiles$x$]::text[], 0, $x$C'est le sens de « n'accepte que ce qui est bon ».$x$)) v(k, p, o, a, e) returning 1)
+  (5, $x$Quelles œuvres Allah accepte-t-Il ?$x$, array[$x$Celles faites sincèrement pour Lui et conformes à la Sunna$x$, $x$Toutes les œuvres sans exception$x$, $x$Seulement les œuvres difficiles$x$]::text[], 0, $x$C'est le sens de « n'accepte que ce qui est bon ».$x$)) v(k, p, o, a, e) order by v.k returning 1)
 select private.ai_log(rv.item_id, rv.id, 'created', null, null, $x$Brouillon rédigé par l'IA : hadith 10 d'an-Nawawī$x$),
        rv.h = '8bacb2c5ff3339dd8fadfc6258b51084' as arabe_identique,
        (select count(*) from r) as refs, (select count(*) from qq) as questions from rv;
