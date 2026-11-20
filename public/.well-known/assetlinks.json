@@ -1,0 +1,10 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.samassatechnologie.nouralislam",
+      "sha256_cert_fingerprints": ["03:AE:99:40:5E:F5:68:23:EE:64:0F:C8:81:79:A8:1F:07:85:D8:AF:9A:FA:3C:BD:F6:D2:8D:82:CD:15:5F:15"]
+    }
+  }
+]

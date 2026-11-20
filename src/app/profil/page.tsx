@@ -67,6 +67,7 @@ export default async function ProfilePage() {
           ) : null}
         </dl>
         {role !== "user" ? <Link href="/admin" className="mt-2 inline-flex min-h-11 items-center font-medium text-emerald underline underline-offset-4">{p.admin}</Link> : null}
+        <Link href="/application-android" data-android-link className="mt-2 flex min-h-11 items-center font-medium text-emerald underline underline-offset-4">{t.android.profileLink}</Link>
       </section>
 
       <section className="mt-9">
