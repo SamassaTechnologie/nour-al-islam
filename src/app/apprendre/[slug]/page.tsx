@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArabicVerse } from "@/components/quran-view";
 import { Paragraphs, referenceText } from "@/components/content-view";
+import { FavoriteButton } from "@/components/favorite-button";
 import { LessonQuiz } from "@/components/lesson-quiz";
 import { getPublishedContent } from "@/lib/content";
 import { getPreferences } from "@/lib/preferences";
@@ -26,9 +27,15 @@ export default async function PublishedContent({ params }: Props) {
   const c = t.content;
   type Score = { score: number; total: number };
   let best: Score | null = null;
-  if (session && questions.length) {
-    const { data: attempts } = await (await createClient()).from("quiz_attempts").select("score,total").eq("item_id", item.id).order("created_at", { ascending: false }).limit(50).returns<Score[]>();
+  let favorite = false;
+  if (session) {
+    const supabase = await createClient();
+    const [{ data: attempts }, fav] = await Promise.all([
+      questions.length ? supabase.from("quiz_attempts").select("score,total").eq("item_id", item.id).order("created_at", { ascending: false }).limit(50).returns<Score[]>() : Promise.resolve({ data: [] as Score[] }),
+      supabase.from("favorites").select("item_id").eq("item_id", item.id).maybeSingle(),
+    ]);
     best = (attempts ?? []).reduce<Score | null>((top, row) => (!top || row.score / row.total > top.score / top.total ? row : top), null);
+    favorite = Boolean(fav.data);
   }
   const provisional = revision.review_kind === "ai";
   const date = new Date(revision.published_at!).toLocaleDateString(locale === "ar" ? "ar" : "fr-FR", { dateStyle: "long", timeZone: "UTC" });
@@ -40,6 +47,7 @@ export default async function PublishedContent({ params }: Props) {
         <h1 className="text-3xl break-words">{revision.title}</h1>
         {provisional ? <p role="note" data-provisional className="mt-3 border-s-2 border-gold ps-3 font-medium">{c.provisional}</p> : null}
         {revision.summary ? <p className="mt-3 font-medium">{revision.summary}</p> : null}
+        {session ? <FavoriteButton itemId={item.id} initial={favorite} t={t.favorites} /> : null}
         <Paragraphs text={revision.body} />
       </article>
       {questions.length ? <LessonQuiz questions={questions} itemId={item.id} revisionId={revision.id} slug={item.slug} signedIn={!!session} best={best} contentLocale={item.locale} uiLocale={locale} t={t.quiz} /> : null}

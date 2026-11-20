@@ -3,9 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Paragraphs } from "@/components/content-view";
 import { DhikrCounter } from "@/components/dhikr-counter";
+import { FavoriteButton } from "@/components/favorite-button";
 import { getPublishedAdhkar } from "@/lib/content";
 import { getPreferences } from "@/lib/preferences";
 import { getSurahs, getSurahVerses, verseBody } from "@/lib/quran";
+import { createClient, getSession } from "@/lib/supabase/server";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -19,7 +21,8 @@ const host = (url: string) => new URL(url).hostname.replace(/^www\./, "");
 export default async function Page({ params }: Props) {
   const data = await getPublishedAdhkar((await params).slug);
   if (!data) notFound();
-  const [{ t, locale }, surahs] = await Promise.all([getPreferences(), getSurahs()]);
+  const [{ t, locale }, surahs, session] = await Promise.all([getPreferences(), getSurahs(), getSession()]);
+  const favorite = session ? Boolean((await (await createClient()).from("favorites").select("item_id").eq("item_id", data.item.id).maybeSingle()).data) : false;
   const { revision, adhkar } = data;
   // Invocations faites de versets : texte et traduction lus dans le texte coranique verrouille.
   const verses = new Map(await Promise.all(adhkar.filter((d) => d.surah).map(async (d) =>
@@ -35,6 +38,7 @@ export default async function Page({ params }: Props) {
         <h1 className="text-3xl break-words">{revision.title}</h1>
         {provisional ? <p role="note" data-provisional className="mt-3 border-s-2 border-gold ps-3 font-medium">{c.provisional}</p> : null}
         {revision.summary ? <p className="mt-3 font-medium">{revision.summary}</p> : null}
+        {session ? <FavoriteButton itemId={data.item.id} initial={favorite} t={t.favorites} /> : null}
         <Paragraphs text={revision.body} />
         <ol className="mt-6 space-y-5">
           {adhkar.map((d, n) => (

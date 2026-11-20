@@ -10,12 +10,13 @@ export async function getDashboard() {
   const supabase = await createClient();
   const today = dayKey(new Date());
   const lessons = await getPublishedList();
-  const [activity, questions, attempts, memorised, due] = await Promise.all([
+  const [activity, questions, attempts, memorised, due, favorites] = await Promise.all([
     supabase.from("user_activity_days").select("day,exercises,reviews,readings").order("day", { ascending: false }).limit(400).returns<ActivityRow[]>(),
     lessons.length ? supabase.from("content_questions").select("revision_id").in("revision_id", lessons.map((l) => l.revisionId)) : Promise.resolve({ data: [] as { revision_id: string }[] }),
     supabase.from("quiz_attempts").select("item_id").limit(2000),
     supabase.from("hifdh_progress").select("ayah_id", { count: "exact", head: true }),
     supabase.from("hifdh_progress").select("ayah_id", { count: "exact", head: true }).lte("next_review", today),
+    supabase.from("favorites").select("item_id", { count: "exact", head: true }),
   ]);
   const rows = activity.data ?? [];
   const active = rows.filter((r) => r.exercises + r.reviews + r.readings > 0).map((r) => r.day);
@@ -45,5 +46,6 @@ export async function getDashboard() {
     lessonsTotal: path.length,
     memorised: memorised.count ?? 0,
     due: due.count ?? 0,
+    favorites: favorites.count ?? 0,
   };
 }

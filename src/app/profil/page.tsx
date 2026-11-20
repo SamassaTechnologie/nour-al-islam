@@ -45,6 +45,7 @@ export default async function ProfilePage() {
           </Link>
         ) : <p className="mt-1 text-muted">{p.progressEmpty}</p>}
         <Link href="/coran/signets" className="flex min-h-11 items-center text-muted underline underline-offset-4">{t.quran.progressBookmarks} : {reading?.bookmarkCount ?? 0}</Link>
+        <Link href="/favoris" className="flex min-h-11 items-center text-muted underline underline-offset-4" data-favorites-link>{t.favorites.count.replace("{n}", String(dashboard.favorites))}</Link>
         <Link href="/apprendre" className="flex min-h-11 items-center text-muted underline underline-offset-4" data-exercised>{p.exercises.replace("{n}", String(dashboard.lessonsDone))}</Link>
       </section>
 
