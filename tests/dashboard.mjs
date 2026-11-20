@@ -25,7 +25,7 @@ await page.goto(`${base}/connexion?suivant=/profil`, { waitUntil: "networkidle" 
 await page.fill('input[name="email"]', `exeditor@${domain}`);
 await page.fill('input[name="password"]', password);
 await page.click('main button[type="submit"]');
-await page.waitForURL((u) => u.href.includes("/profil"), { timeout: 20000 });
+await page.waitForURL((u) => u.pathname === "/profil", { timeout: 20000 });
 await page.waitForSelector("[data-dashboard]");
 
 const read = () => page.evaluate(() => ({

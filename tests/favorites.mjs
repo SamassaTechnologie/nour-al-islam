@@ -25,7 +25,7 @@ await page.goto(`${base}/connexion?suivant=/favoris`, { waitUntil: "networkidle"
 await page.fill('input[name="email"]', `exeditor@${domain}`);
 await page.fill('input[name="password"]', password);
 await page.click('main button[type="submit"]');
-await page.waitForURL((u) => u.href.includes("/favoris"), { timeout: 20000 });
+await page.waitForURL((u) => u.pathname === "/favoris", { timeout: 20000 });
 await page.waitForLoadState("networkidle");
 check("compte neuf : aucun favori", await page.locator("[data-favorites-empty]").count() === 1);
 
