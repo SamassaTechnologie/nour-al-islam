@@ -1,4 +1,5 @@
 // Rappels : interface sur la page des horaires (etats, aide iPhone, service worker).
+// Lancer avec PW_CHANNEL=chromium (Chromium complet : la version « headless shell » bloque toujours les notifications).
 import { chromium } from "playwright";
 
 const base = process.env.BASE_URL;
@@ -9,7 +10,9 @@ const errors = [];
 const watch = (p) => { p.on("pageerror", (e) => errors.push(e.message)); };
 
 // Notifications bloquees pour le site : message expliquant comment les autoriser.
-const blocked = await (await browser.newContext({ locale: "fr-FR" })).newPage(); watch(blocked);
+const blockedCtx = await browser.newContext({ locale: "fr-FR" });
+await blockedCtx.addInitScript(() => { Object.defineProperty(Notification, "permission", { get: () => "denied" }); });
+const blocked = await blockedCtx.newPage(); watch(blocked);
 await blocked.goto(`${base}/priere/horaires`, { waitUntil: "networkidle" });
 await blocked.waitForSelector('[data-reminders="denied"]');
 check("notifications bloquées : message pour les autoriser", (await blocked.textContent('[data-reminders] [role="alert"]')).includes("Autorisez-les"));
