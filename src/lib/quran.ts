@@ -29,7 +29,7 @@ export type Verse = {
 
 export type Source = {
   id: string;
-  kind: "text" | "translation";
+  kind: "text" | "translation" | "tafsir";
   title: string;
   author: string | null;
   publisher: string;
@@ -108,6 +108,17 @@ export const getSources = cache(async (): Promise<Source[]> => {
     .select("id,kind,title,author,publisher,version,license,source_url,notice")
     .eq("is_default", true)
     .order("kind");
+  if (error) throw new Error(error.message);
+  return data as Source[];
+});
+
+/** Toutes les sources verrouillées (texte, traduction, tafsirs), pour la page des sources. */
+export const getAllSources = cache(async (): Promise<Source[]> => {
+  const { data, error } = await content()
+    .from("quran_sources")
+    .select("id,kind,title,author,publisher,version,license,source_url,notice")
+    .order("kind")
+    .order("id");
   if (error) throw new Error(error.message);
   return data as Source[];
 });

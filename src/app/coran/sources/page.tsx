@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { getSources } from "@/lib/quran";
+import { getAllSources } from "@/lib/quran";
 import { getPreferences } from "@/lib/preferences";
 
 export const metadata: Metadata = { title: "Sources du Coran" };
 
 export default async function SourcesPage() {
-  const [{ t }, sources] = await Promise.all([getPreferences(), getSources()]);
+  const [{ t }, sources] = await Promise.all([getPreferences(), getAllSources()]);
   return (
     <main className="mx-auto max-w-xl px-5 pt-6">
       <h1 className="text-3xl">{t.quran.sourcesTitle}</h1>
@@ -13,7 +13,7 @@ export default async function SourcesPage() {
         <section key={s.id} className="mt-6 border-t border-line pt-4">
           <h2 className="text-xl">{s.title}</h2>
           <dl className="mt-2 text-muted">
-            {s.author ? <div><dt className="inline">{t.quran.translator} : </dt><dd className="inline">{s.author}</dd></div> : null}
+            {s.author ? <div><dt className="inline">{s.kind === "tafsir" ? t.quran.author : t.quran.translator} : </dt><dd className="inline">{s.author}</dd></div> : null}
             <div><dt className="inline">{t.quran.publisher} : </dt><dd className="inline">{s.publisher}</dd></div>
             <div><dt className="inline">Version : </dt><dd className="inline">{s.version}</dd></div>
             <div><dt className="inline">{t.quran.license} : </dt><dd className="inline">{s.license}</dd></div>

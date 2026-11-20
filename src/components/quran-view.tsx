@@ -64,6 +64,7 @@ export async function VerseList({ verses, surahs, t, trackSurah, showHeadings = 
                     </button>
                   ) : null}
                   {bookmarks ? <BookmarkButton ayahId={verse.id} initial={bookmarks.has(verse.id)} t={t} /> : null}
+                  <Link href={`/coran/${verse.surah}/tafsir#t${verse.number}`} aria-label={`${t.tafsirVerse} ${verse.surah}:${verse.number}`} data-tafsir-link={`${verse.surah}:${verse.number}`} className="reader-chrome inline-flex min-h-11 items-center px-2 text-base font-medium text-emerald">{t.tafsir}</Link>
                 </span>
               </div>
               <ArabicVerse text={verseBody(verse.text_uthmani, verse.bismillah_length)} />

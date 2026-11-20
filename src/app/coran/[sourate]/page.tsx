@@ -35,7 +35,10 @@ export default async function SurahPage({ params }: Props) {
         <p lang="ar" dir="rtl" className="wordmark text-4xl leading-normal text-emerald">{surah.name_ar}</p>
         <h1 lang="en" dir="ltr" className="text-2xl">{surah.number}. {surah.name_translit}</h1>
         <p className="text-base text-muted">{place(q, surah)}, {surah.ayah_count} {q.verses}</p>
-        <Link href={`/coran/mushaf/${verses[0].page}`} className="reader-chrome mt-2 inline-flex min-h-11 items-center rounded-lg border border-line px-4 font-medium text-emerald">{q.mushafOpen}</Link>
+        <div className="reader-chrome mt-2 flex flex-wrap justify-center gap-2">
+          <Link href={`/coran/mushaf/${verses[0].page}`} className="inline-flex min-h-11 items-center rounded-lg border border-line px-4 font-medium text-emerald">{q.mushafOpen}</Link>
+          <Link href={`/coran/${surah.number}/tafsir`} data-surah-tafsir className="inline-flex min-h-11 items-center rounded-lg border border-line px-4 font-medium text-emerald">{q.tafsirOf}</Link>
+        </div>
       </header>
       <VerseList verses={verses} surahs={surahs} t={q} trackSurah={surah.number} />
       <nav aria-label={q.browse} className="reader-chrome mt-6 flex justify-between gap-3">
