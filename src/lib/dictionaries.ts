@@ -363,8 +363,6 @@ const fr = {
     downloadError: "Le téléchargement n’a pas abouti. Vérifiez la connexion et l’espace libre.",
     downloadNote: "Le fichier reste dans l’application, lisible sans internet. Il est vérifié chaque semaine auprès de Quran Foundation et retiré si la source le retire.",
     downloadsTitle: "Récitations téléchargées",
-    downloadsEmpty: "Aucune sourate téléchargée. Ouvrez une sourate, puis « Réglages de la récitation » › « Télécharger cette sourate ».",
-    downloadsSize: "Espace utilisé : {size}",
     reciterBy: "Récitation de {name}",
   },
   hifdh: {
@@ -814,8 +812,6 @@ const ar: Dictionary = {
     downloadError: "لم يكتمل التنزيل. تحقق من الاتصال ومن المساحة المتاحة.",
     downloadNote: "يبقى الملف داخل التطبيق ويمكن سماعه دون إنترنت. ويُتحقَّق منه كل أسبوع لدى Quran Foundation ويُحذف إذا حذفه المصدر.",
     downloadsTitle: "التلاوات المنزَّلة",
-    downloadsEmpty: "لا توجد سورة منزَّلة. افتح سورة ثم « إعدادات التلاوة » › « تنزيل هذه السورة ».",
-    downloadsSize: "المساحة المستخدمة: {size}",
     reciterBy: "تلاوة {name}",
   },
   hifdh: {
