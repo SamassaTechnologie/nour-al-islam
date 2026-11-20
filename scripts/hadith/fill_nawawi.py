@@ -8,7 +8,7 @@ Fichier attendu : /tmp/h/full-ara-nawawi.json (https://raw.githubusercontent.com
 """
 import json, os, re, sys, urllib.request
 
-URL, KEY = os.environ['SUPABASE_URL'], os.environ['SUPABASE_KEY']
+URL, KEY = os.environ.get('SUPABASE_URL', ''), os.environ.get('SUPABASE_KEY', '')
 def call(path, data=None, token=None, method=None):
     req = urllib.request.Request(URL + path, data=json.dumps(data).encode() if data is not None else None, method=method or ('POST' if data is not None else 'GET'))
     req.add_header('apikey', KEY); req.add_header('Content-Type', 'application/json'); req.add_header('Prefer', 'return=representation')
@@ -24,7 +24,8 @@ def norm(t):
         out.append(LETTER.get(ch, ch)); pos.append(i)
     return ''.join(out), pos
 
-texts = {h['hadithnumber']: h['text'] for h in json.load(open('/tmp/h/full-ara-nawawi.json'))['hadiths']}
+# Les balises HTML de l'édition (<br>) sont remplacées par une espace : aucun mot n'est modifié.
+texts = {h['hadithnumber']: re.sub(r'\s*<[^>]+>\s*', ' ', h['text']) for h in json.load(open('/tmp/h/full-ara-nawawi.json'))['hadiths']}
 def fragment(n, start, end):
     t = texts[n]; nt, pos = norm(t)
     i = nt.find(norm(start)[0]); j = nt.find(norm(end)[0], i) if i >= 0 else -1
@@ -37,6 +38,11 @@ def fill(body):
     body = re.sub(r'\{\{NAW:(\d+)\}\}', lambda m: texts[int(m.group(1))], body)
     return re.sub(r'\{\{NAWS:(\d+)\|([^|}]+)\|([^}]+)\}\}', lambda m: fragment(int(m.group(1)), m.group(2), m.group(3)), body)
 
+if os.environ.get('DRY'):
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); from build_nawawi_sql import load
+    for a in sys.argv[1:]:
+        new = fill(load(int(a))['body']); assert '{{NAW' not in new and '<' not in new; print(a, 'OK', [m for m in re.findall(r'« ([^»]*[؀-ۿ][^»]*) »', new)])
+    raise SystemExit
 token = call('/auth/v1/token?grant_type=password', {'email': os.environ['EMAIL'], 'password': os.environ['PASSWORD']})['access_token']
 for slug in sys.argv[1:]:
     item = call(f'/rest/v1/content_items?select=id&slug=eq.{slug}', token=token)[0]
