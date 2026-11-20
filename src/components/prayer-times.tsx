@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { CITIES, computeTimes, DEFAULT_METHOD, localDate, METHODS, nextPrayer, PRAYERS, type AsrSchool, type Method, type Place } from "@/lib/prayer-times";
 import type { Dictionary, Locale } from "@/lib/dictionaries";
+import { Reminders } from "@/components/reminders";
 
 type T = Dictionary["prayerTimes"];
 const KEY = "nour_prayer_settings";
@@ -19,7 +20,7 @@ function load(): Settings {
   } catch { return DEFAULTS; }
 }
 
-export function PrayerTimesView({ t, locale }: { t: T; locale: Locale }) {
+export function PrayerTimesView({ t, tr, locale }: { t: T; tr: Dictionary["reminders"]; locale: Locale }) {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [now, setNow] = useState(() => new Date());
   const [locating, setLocating] = useState(false);
@@ -107,6 +108,7 @@ export function PrayerTimesView({ t, locale }: { t: T; locale: Locale }) {
         ))}
       </fieldset>
       <p className="mt-5 border-s-2 border-gold ps-3 text-base" role="note">{t.note}</p>
+      <Reminders base={{ lat: settings.place.lat, lng: settings.place.lng, tz: settings.place.tz, method: settings.method, asr: settings.asr, locale }} placeLabel={settings.place.label} t={tr} />
     </div>
   );
 }
