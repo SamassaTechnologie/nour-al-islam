@@ -87,7 +87,7 @@ export function PrayerTimesView({ t, tr, locale }: { t: T; tr: Dictionary["remin
       <button type="button" onClick={locate} disabled={locating} className="mt-3 min-h-12 w-full rounded-lg border border-line px-4 font-medium" data-locate>
         {locating ? t.locating : t.useLocation}
       </button>
-      {geoError ? <p role="alert" className="mt-2 text-base">{geoError}</p> : null}
+      {geoError ? <p role="alert" className="mt-2 text-base" data-geo-error>{geoError}</p> : null}
       <label className="mt-4 block font-medium" htmlFor="pt-city">{t.city}</label>
       <select id="pt-city" className="mt-1 min-h-12 w-full rounded-lg border border-line bg-page px-3" value={CITIES.some((c) => c.label === settings.place.label) ? settings.place.label : ""}
         onChange={(e) => { const c = CITIES.find((x) => x.label === e.target.value); if (c) save({ ...settings, place: c }); }}>

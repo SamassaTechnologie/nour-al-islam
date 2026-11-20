@@ -1,5 +1,6 @@
 // Page des horaires de priere (/priere/horaires) : affichage, prochaine priere, reglages gardes, position.
-// Placer prayer-times.ts a cote (npm i adhan@4.4.6) ; lancer avec node --experimental-strip-types.
+// Placer prayer-times.ts a cote (npm i adhan@4.4.6) ; lancer avec node --experimental-strip-types
+// (navigateur « headless shell » par defaut : il refuse la position, ce que teste la fin du fichier).
 import { chromium } from "playwright";
 import { CITIES, computeTimes, localDate, nextPrayer } from "./prayer-times.ts";
 
@@ -81,8 +82,8 @@ check("version arabe : pas de débordement à 320 px", await page.evaluate(() =>
 const denied = await (await browser.newContext({ permissions: [] })).newPage();
 await denied.goto(`${base}/priere/horaires`, { waitUntil: "networkidle" });
 await denied.click("[data-locate]");
-await denied.waitForSelector('[role="alert"]', { timeout: 20000 });
-check("position refusée : message invitant à choisir une ville", (await denied.textContent('[role="alert"]')).includes("ville"));
+await denied.waitForSelector("[data-geo-error]", { timeout: 20000 });
+check("position refusée : message invitant à choisir une ville", (await denied.textContent("[data-geo-error]")).includes("ville"));
 
 check("aucune erreur JavaScript", errors.length === 0, errors.slice(0, 2).join(" | "));
 await browser.close();
