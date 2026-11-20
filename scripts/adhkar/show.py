@@ -1,6 +1,8 @@
-import json, sys
+import json, os, sys
 idx = {}
-for c in ['muslim','bukhari','abudawud','tirmidhi','nasai','ibnmajah']:
+# nawawi : les 40 hadiths d'an-Nawawi (edition de sunnah.com), si le fichier a ete telecharge.
+for c in ['muslim','bukhari','abudawud','tirmidhi','nasai','ibnmajah','nawawi']:
+    if not os.path.exists('/tmp/h/full-ara-'+c+'.json'): continue
     d = json.load(open('/tmp/h/full-ara-'+c+'.json'))
     e = json.load(open('/tmp/h/full-eng-'+c+'.json'))
     eg = {h['hadithnumber']: h for h in e['hadiths']}

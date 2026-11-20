@@ -16,7 +16,7 @@ def call(path, data=None, token=None):
     req.add_header('Authorization', 'Bearer ' + (token or KEY))
     return json.load(urllib.request.urlopen(req))
 token = call('/auth/v1/token?grant_type=password', {'email': os.environ['EMAIL'], 'password': os.environ['PASSWORD']})['access_token']
-items = call('/rest/v1/content_items?select=slug,section,published_revision_id&published_revision_id=not.is.null&section=in.(aqida,priere,purification,sira)', token=token)
+items = call('/rest/v1/content_items?select=slug,section,published_revision_id&published_revision_id=not.is.null&section=in.(aqida,priere,purification,sira,hadith)', token=token)
 bodies = {}
 for it in items:
     rev = call(f"/rest/v1/content_revisions?select=body&id=eq.{it['published_revision_id']}", token=token)[0]
@@ -39,6 +39,8 @@ CANDIDATES = {
  'debut-predication-publique': [('bukhari', '4770'), ('bukhari', '2753')],
  'persecutions-a-la-mecque': [('bukhari', '3856'), ('ibnmajah', '150'), ('bukhari', '3612')],
  'emigration-en-abyssinie': [('bukhari', '3877'), ('bukhari', '3876')],
+ 'nawawi-01-les-intentions': [('nawawi', '1')], 'nawawi-02-hadith-de-jibril': [('nawawi', '2')],
+ 'nawawi-03-les-cinq-piliers': [('nawawi', '3')], 'nawawi-04-creation-et-destin': [('nawawi', '4')],
 }
 SKIP = re.compile('[ً-ٰٟۖ-ۭـ‏‎"،؛؟.,:;«»()\\-]')
 LETTER = {'أ': 'ا', 'إ': 'ا', 'آ': 'ا', 'ٱ': 'ا', 'ى': 'ي'}
