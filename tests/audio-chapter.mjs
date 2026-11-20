@@ -48,7 +48,7 @@ await page.reload({ waitUntil: "load" }).catch(() => undefined);
 await page.waitForFunction(() => document.querySelector("[data-audio-verse]"), null, { timeout: 30000 }).catch(() => undefined);
 await page.click("[data-audio-toggle]").catch(() => undefined);
 const offline = await page.waitForFunction(() => { const a = document.querySelector("audio"); return a && !a.paused && a.currentTime > 0.5; }, null, { timeout: 20000 }).then(() => true).catch(() => false);
-check(offline, "ecoute sans internet");
+check(offline, "ecoute sans internet", offline ? "" : await page.evaluate(() => `${document.querySelector("[data-audio-status]")?.textContent} | ${document.querySelector("audio")?.src} | ${document.querySelector("audio")?.error?.code}`).catch((e) => String(e)));
 await page.evaluate(() => { const a = document.querySelector("audio"); a.currentTime = 9; });
 const seek = await page.waitForFunction(() => /112:(3|4)/.test(document.querySelector("[data-audio-verse]")?.textContent ?? ""), null, { timeout: 15000 }).then(() => true).catch(() => false);
 check(seek, "deplacement dans le fichier hors connexion (requetes partielles)");

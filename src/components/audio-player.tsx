@@ -11,6 +11,7 @@ import {
   fetchChapter,
   fetchReciters,
   findDownload,
+  listDownloads,
   reciterLabel,
   removeDownload,
   store,
@@ -65,7 +66,8 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
         // Hors connexion : on prend le recitant de la sourate telechargee, s'il y en a une.
         if (!active) return;
         const id = Number(stored(RECITER_KEY));
-        const item = id ? findDownload(id, surah) : null;
+        const here = listDownloads().filter((d) => d.surah === surah);
+        const item = here.find((d) => d.reciter === id) ?? here[0] ?? null;
         if (item) {
           setReciters([{ id: item.reciter, name: item.reciterName, style: null }]);
           setReciter(item.reciter);
