@@ -47,12 +47,21 @@ await page.goto(`${BASE}/priere/horaires`, { waitUntil: "networkidle" });
 check(await page.getAttribute("[data-prayer-times]", "data-place") === "Paris", "même lieu que les horaires de prière");
 
 // Sans capteur
-const p2 = await (await browser.newContext({ viewport: { width: 360, height: 800 } })).newPage();
+const c2 = await browser.newContext({ viewport: { width: 360, height: 800 } });
+await c2.grantPermissions(["accelerometer", "gyroscope", "magnetometer"], { origin: BASE });
+const p2 = await c2.newPage();
 await p2.goto(`${BASE}/priere/qibla`, { waitUntil: "networkidle" });
 await p2.click("[data-qibla-start]");
 await p2.waitForSelector("[data-qibla-none]", { timeout: 6000 }).then(() => check(true, "sans boussole : explication affichée")).catch(() => check(false, "sans boussole : explication affichée"));
 const overflow = await p2.evaluate(() => document.documentElement.scrollWidth > innerWidth);
 check(!overflow, "pas de débordement à 360 px");
+
+// Autorisation refusee : message explicite.
+const p4 = await (await browser.newContext({ viewport: { width: 360, height: 800 } })).newPage();
+await p4.goto(`${BASE}/priere/qibla`, { waitUntil: "networkidle" });
+await p4.click("[data-qibla-start]");
+await p4.waitForTimeout(3600);
+check(await p4.getAttribute("[data-qibla]", "data-state") === "denied", "boussole refusée : explication", await p4.getAttribute("[data-qibla]", "data-state"));
 
 // Arabe, liens
 const ar = await browser.newContext({ viewport: { width: 360, height: 800 } });
