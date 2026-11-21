@@ -73,9 +73,9 @@ def sql(L):
     refs = ',\n  '.join('(' + ', '.join([str(i + 1)] + [q(r.get(c)) + {'kind': '::public.reference_kind', 'surah': '::int', 'ayah_from': '::int', 'ayah_to': '::int'}.get(c, '') for c in COLS]) + ')'
                          for i, r in enumerate(L['refs']))
     qs = ',\n  '.join(f"({i + 1}, {q(p)}, array[{', '.join(q(o) for o in opts)}]::text[], {ans}, {q(ex)})" for i, (p, opts, ans, ex) in enumerate(L['questions']))
-    return md5, f"""-- Sira {L['position']} : {L['slug']}
+    return md5, f"""-- {L.get('label', 'Sira')} {L['position']} : {L['slug']}
 with it as (insert into public.content_items (slug, kind, section, locale, position)
-            values ({q(L['slug'])}, 'lesson', 'sira', 'fr', {L['position']}) returning id),
+            values ({q(L['slug'])}, 'lesson', {q(L.get('section', 'sira'))}, 'fr', {L['position']}) returning id),
 rv as (insert into public.content_revisions (item_id, number, title, summary, body, ai_assisted, author_name)
        select id, 1, {q(L['title'])}, {q(L['summary'])}, {q(body)}, true, {q(AUTHOR)} from it returning id, item_id, md5(body) as h),
 r as (insert into public.content_references (revision_id, {', '.join(COLS)})
@@ -86,7 +86,7 @@ qq as (insert into public.content_questions (revision_id, prompt, options, answe
        select rv.id, v.p, v.o, v.a, v.e
        from rv, (values
   {qs}) v(k, p, o, a, e) order by v.k returning 1)
-select private.ai_log(rv.item_id, rv.id, 'created', null, null, {q(f"Brouillon rédigé par l'IA : Sira {L['position']}")}),
+select private.ai_log(rv.item_id, rv.id, 'created', null, null, {q(f"Brouillon rédigé par l'IA : {L.get('label', 'Sira')} {L['position']}")}),
        rv.h = '{md5}' as arabe_identique,
        (select count(*) from r) as refs, (select count(*) from qq) as questions from rv;
 """
