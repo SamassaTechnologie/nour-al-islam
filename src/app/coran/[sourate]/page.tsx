@@ -5,6 +5,8 @@ import { AudioPlayer } from "@/components/audio-player";
 import { SourceNote, VerseList, place } from "@/components/quran-view";
 import { getSurahs, getSurahVerses } from "@/lib/quran";
 import { getPreferences } from "@/lib/preferences";
+import { getSession } from "@/lib/supabase/server";
+import { WordByWord } from "@/components/word-by-word";
 
 type Props = { params: Promise<{ sourate: string }> };
 
@@ -24,7 +26,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function SurahPage({ params }: Props) {
   const { surah, surahs } = await load(params);
-  const [{ t }, verses] = await Promise.all([getPreferences(), getSurahVerses(surah.number)]);
+  const [{ t }, verses, session] = await Promise.all([getPreferences(), getSurahVerses(surah.number), getSession()]);
+  // Mot a mot : equipe seulement tant que les savants ne l'ont pas valide.
+  const staff = Boolean(session?.profile && ["editor", "reviewer", "admin"].includes(session.profile.role));
   const q = t.quran;
   const previous = surahs[surah.number - 2];
   const next = surahs[surah.number];
@@ -38,6 +42,7 @@ export default async function SurahPage({ params }: Props) {
         <div className="reader-chrome mt-2 flex flex-wrap justify-center gap-2">
           <Link href={`/coran/mushaf/${verses[0].page}`} className="inline-flex min-h-11 items-center rounded-lg border border-line px-4 font-medium text-emerald">{q.mushafOpen}</Link>
           <Link href={`/coran/${surah.number}/tafsir`} data-surah-tafsir className="inline-flex min-h-11 items-center rounded-lg border border-line px-4 font-medium text-emerald">{q.tafsirOf}</Link>
+          {staff ? <WordByWord surah={surah.number} t={q} /> : null}
         </div>
       </header>
       <VerseList verses={verses} surahs={surahs} t={q} trackSurah={surah.number} />
