@@ -66,6 +66,15 @@ export default async function TafsirPage({ params, searchParams }: Props) {
         {tab("fr", q.tafsirFr)}
         {tab("saadi", q.tafsirAr)}
       </nav>
+      {/* Audio : lecteur officiel de QuranEnc (site externe), en attendant leur accord pour l'integrer. */}
+      <a href="https://quranenc.com/ar/audio/player/arabic_mokhtasar" target="_blank" rel="noopener noreferrer" className="mt-3 flex min-h-12 items-center gap-3 rounded-lg border border-line px-4 hover:border-gold" data-tafsir-audio>
+        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-6 w-6 shrink-0 text-gold-ink" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2M4 14h3v6H5a1 1 0 0 1-1-1zM20 14h-3v6h2a1 1 0 0 0 1-1z" /></svg>
+        <span className="min-w-0 flex-1">
+          <span className="block font-medium">{q.tafsirAudio}</span>
+          <span className="block text-base text-muted">{q.tafsirAudioNote}</span>
+        </span>
+        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-muted"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      </a>
 
       {key === "fr" ? (
         <ol className="mt-4" data-tafsir="fr">
