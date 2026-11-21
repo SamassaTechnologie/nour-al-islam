@@ -7,7 +7,13 @@ export const metadata = { title: "Prière" };
 export default async function Page() {
   const { t } = await getPreferences();
   return (
-    <ComingSection section={t.soon.prayer} t={t.soon}>
+    <ComingSection
+      section={t.soon.prayer}
+      t={t.soon}
+      label={t.soon.prayer.label}
+      intro={t.soon.prayer.introOpen}
+      links={["/apprendre#rubrique-purification", "/apprendre#rubrique-priere", "/priere/horaires", "/priere/invocations"]}
+    >
       <Link href="/priere/horaires" className="mt-6 block rounded-lg bg-emerald px-4 py-3 text-on-emerald" data-open-times>
         <span className="block font-medium">{t.prayerTimes.open}</span>
         <span className="block text-base">{t.prayerTimes.openNote}</span>

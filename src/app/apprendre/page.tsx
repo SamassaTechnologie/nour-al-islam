@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ComingSection } from "@/components/coming-section";
+import { OpenSection } from "@/components/open-section";
 import { getPublishedList, type PublishedCard } from "@/lib/content";
 import { getPreferences } from "@/lib/preferences";
 import { createClient, getSession } from "@/lib/supabase/server";
@@ -35,16 +36,30 @@ export default async function Page() {
   const sections = c.sections as Record<string, string>;
 
   return (
-    <ComingSection section={t.soon.learn} t={t.soon}>
+    <ComingSection section={t.soon.learn} t={t.soon} label={t.soon.learn.label} intro={t.soon.learn.introOpen}>
+      <OpenSection />
       <Link href="/apprendre/memorisation" className="mt-6 block rounded-lg bg-emerald px-4 py-3 text-on-emerald">
         <span className="block font-medium">{t.hifdh.open}</span>
         <span className="block text-base">{t.hifdh.openNote}</span>
       </Link>
       <Link href="/assistant" className="mt-3 flex min-h-12 items-center justify-center rounded-lg border border-line px-4 font-medium text-emerald" data-open-assistant>{t.assistant.open}</Link>
       {groups.map((group) => (
-        <section key={group.section} className="mt-7" aria-labelledby={`rubrique-${group.section}`} data-section={group.section}>
-          <h2 id={`rubrique-${group.section}`} className="text-xl">{sections[group.section] ?? group.section}</h2>
-          <ol className="mt-2 divide-y divide-line border-y border-line">
+        // Rubrique pliable : touchez son titre pour voir ou cacher ses lecons.
+        <details key={group.section} id={`rubrique-${group.section}`} className="group mt-3 border-b border-line first-of-type:mt-7" data-section={group.section}>
+          <summary className="flex min-h-14 cursor-pointer list-none items-center gap-3 py-2 [&::-webkit-details-marker]:hidden">
+            <span className="min-w-0 flex-1">
+              <h2 className="text-xl">{sections[group.section] ?? group.section}</h2>
+              <span className="block text-base text-muted" data-section-count>
+                {group.items.length === 1 ? t.soon.learn.lesson : t.soon.learn.lessons.replace("{n}", String(group.items.length))}
+                {(() => {
+                  const done = group.items.filter((item) => best.has(item.id)).length;
+                  return session && done ? ` · ${c.exercisesDoneCount.replace("{n}", String(done))}` : "";
+                })()}
+              </span>
+            </span>
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-muted transition-transform group-open:rotate-180"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          </summary>
+          <ol className="mb-3 divide-y divide-line border-t border-line">
             {group.items.map((item) => {
               const score = best.get(item.id);
               return (
@@ -65,7 +80,7 @@ export default async function Page() {
               );
             })}
           </ol>
-        </section>
+        </details>
       ))}
     </ComingSection>
   );
