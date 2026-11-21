@@ -7,7 +7,7 @@ LESSON = dict(
 Au mīqāt, on entre en état sacré avec l'intention de la ʿumra et on répète la talbiya (voir les leçons 1 et 2). On évite ensuite les interdits de l'iḥrām jusqu'à la fin de la ʿumra.
 
 2. Le ṭawāf : sept tours autour de la Kaʿba
-Ibn ʿUmar dit que le Prophète ﷺ, arrivé à La Mecque, fit sept tours autour de la Maison, puis pria deux unités derrière la Station (maqām) d'Ibrāhīm, puis fit le parcours entre al-Ṣafā et al-Marwa ; et il récita : vous avez dans le Messager d'Allah un bel exemple (33:21) (al-Bukhārī n° 1623).
+Ibn ʿUmar dit que le Prophète ﷺ, arrivé à La Mecque, fit sept tours autour de la Maison, puis pria deux unités derrière la Station (maqām) d'Ibrāhīm, puis fit sept parcours entre al-Ṣafā et al-Marwa ; et il récita : vous avez dans le Messager d'Allah un bel exemple (33:21) (al-Bukhārī n° 1645).
 - Le pas pressé (ramal) : Ibn ʿUmar rapporte que lors du premier ṭawāf du ḥajj ou de la ʿumra, le Prophète ﷺ pressait le pas pendant trois tours et marchait pendant quatre (al-Bukhārī n° 1616).
 - La Pierre noire : ʿUmar l'embrassa et dit qu'il savait qu'elle n'est qu'une pierre qui ne nuit ni ne profite, et que s'il n'avait pas vu le Prophète ﷺ l'embrasser, il ne l'aurait pas embrassée (al-Bukhārī n° 1597). Le croyant suit la Sunna et ne croit pas qu'une pierre a un pouvoir.
 - Entre le coin yéménite et la Pierre noire, ʿAbd Allāh ibn al-Sā’ib entendit le Prophète ﷺ dire l'invocation : notre Seigneur, donne-nous une belle part en ce monde et une belle part dans l'au-delà, et protège-nous du châtiment du Feu (sourate al-Baqara, 2:201 ; Abū Dāwūd n° 1892, « ḥasan » selon al-Albānī).
@@ -20,7 +20,7 @@ Allah dit : al-Ṣafā et al-Marwa font partie des rites d'Allah (sourate al-Baq
 Jābir rapporte que le Prophète ﷺ, en approchant d'al-Ṣafā, récita ce verset et dit : « Je commence par ce par quoi Allah a commencé. » Il monta sur al-Ṣafā jusqu'à voir la Maison, se tourna vers la qibla, proclama l'unicité et la grandeur d'Allah et dit :
 « {{AR:muslim:2951|لا إله إلا الله وحده لا شريك له له الملك|وهزم الأحزاب وحده}} » (lā ilāha illa llāhu waḥdahu lā sharīka lah, lahu l-mulku wa lahu l-ḥamdu wa huwa ʿalā kulli shay’in qadīr, lā ilāha illa llāhu waḥdah, anjaza waʿdah, wa naṣara ʿabdah, wa hazama l-aḥzāba waḥdah).
 Sens : « Il n'y a de divinité qu'Allah, seul, sans associé ; à Lui la royauté et la louange, et Il est capable de toute chose. Il n'y a de divinité qu'Allah, seul ; Il a tenu Sa promesse, secouru Son serviteur et vaincu seul les coalisés. » Il invoqua entre ces paroles, et répéta cela trois fois ; puis il descendit vers al-Marwa ; au fond de la vallée il pressa le pas, puis il marcha jusqu'à al-Marwa, où il fit comme sur al-Ṣafā (Muslim n° 1218, d'après Jābir ; hadith authentique).
-Le même hadith dit que son dernier parcours se termina à al-Marwa : d'al-Ṣafā à al-Marwa compte pour un parcours, et le retour pour un autre, ce qui fait sept parcours terminés à al-Marwa.
+Le même hadith dit que son dernier parcours se termina à al-Marwa : d'al-Ṣafā à al-Marwa compte pour un parcours, et le retour pour un autre, et Ibn ʿUmar précise qu'ils sont sept (al-Bukhārī n° 1645).
 
 5. Raser ou raccourcir les cheveux
 Le Prophète ﷺ dit deux fois : « Ô Allah, fais miséricorde à ceux qui se rasent la tête. » On lui dit : et ceux qui raccourcissent ? La dernière fois, il dit : « et ceux qui raccourcissent » (al-Bukhārī n° 1727, d'après Ibn ʿUmar). Allah mentionne aussi les têtes rasées et les cheveux raccourcis (sourate al-Fatḥ, 48:27). Raser est donc meilleur pour l'homme ; raccourcir est permis.
@@ -37,8 +37,8 @@ Après cela, la ʿumra est terminée et les interdits de l'iḥrām sont levés.
 
 Exercice : apprenez l'invocation d'al-Ṣafā et l'ordre des étapes de la ʿumra, puis répondez aux questions.""",
     refs=[
-        coll('bukhari', 1623, 'Authentique (ṣaḥīḥ)', "Recueil authentique d'al-Bukhārī",
-             "Sept tours, deux unités derrière la Station, puis al-Ṣafā et al-Marwa, d'après Ibn ʿUmar"),
+        coll('bukhari', 1645, 'Authentique (ṣaḥīḥ)', "Recueil authentique d'al-Bukhārī",
+             "Sept tours, deux unités derrière la Station, puis sept parcours entre al-Ṣafā et al-Marwa, d'après Ibn ʿUmar"),
         quran(33, 21),
         coll('bukhari', 1616, 'Authentique (ṣaḥīḥ)', "Recueil authentique d'al-Bukhārī",
              "Le pas pressé des trois premiers tours, d'après Ibn ʿUmar"),
@@ -64,7 +64,7 @@ Exercice : apprenez l'invocation d'al-Ṣafā et l'ordre des étapes de la ʿumr
     ],
     questions=[
         ("Combien de tours fait-on autour de la Kaʿba ?", ["Sept", "Trois", "Dix"], 0,
-         "Al-Bukhārī n° 1623."),
+         "Al-Bukhārī n° 1645."),
         ("Pendant combien de tours le Prophète ﷺ pressait-il le pas lors du premier ṭawāf ?", ["Trois", "Sept", "Un"], 0,
          "Al-Bukhārī n° 1616."),
         ("Pourquoi ʿUmar embrassait-il la Pierre noire ?", ["Parce qu'il avait vu le Prophète ﷺ le faire", "Parce qu'elle protège", "Parce qu'elle guérit"], 0,

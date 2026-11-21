@@ -6,7 +6,7 @@ rv as (insert into public.content_revisions (item_id, number, title, summary, bo
 Au mīqāt, on entre en état sacré avec l'intention de la ʿumra et on répète la talbiya (voir les leçons 1 et 2). On évite ensuite les interdits de l'iḥrām jusqu'à la fin de la ʿumra.
 
 2. Le ṭawāf : sept tours autour de la Kaʿba
-Ibn ʿUmar dit que le Prophète ﷺ, arrivé à La Mecque, fit sept tours autour de la Maison, puis pria deux unités derrière la Station (maqām) d'Ibrāhīm, puis fit le parcours entre al-Ṣafā et al-Marwa ; et il récita : vous avez dans le Messager d'Allah un bel exemple (33:21) (al-Bukhārī n° 1623).
+Ibn ʿUmar dit que le Prophète ﷺ, arrivé à La Mecque, fit sept tours autour de la Maison, puis pria deux unités derrière la Station (maqām) d'Ibrāhīm, puis fit sept parcours entre al-Ṣafā et al-Marwa ; et il récita : vous avez dans le Messager d'Allah un bel exemple (33:21) (al-Bukhārī n° 1645).
 - Le pas pressé (ramal) : Ibn ʿUmar rapporte que lors du premier ṭawāf du ḥajj ou de la ʿumra, le Prophète ﷺ pressait le pas pendant trois tours et marchait pendant quatre (al-Bukhārī n° 1616).
 - La Pierre noire : ʿUmar l'embrassa et dit qu'il savait qu'elle n'est qu'une pierre qui ne nuit ni ne profite, et que s'il n'avait pas vu le Prophète ﷺ l'embrasser, il ne l'aurait pas embrassée (al-Bukhārī n° 1597). Le croyant suit la Sunna et ne croit pas qu'une pierre a un pouvoir.
 - Entre le coin yéménite et la Pierre noire, ʿAbd Allāh ibn al-Sā’ib entendit le Prophète ﷺ dire l'invocation : notre Seigneur, donne-nous une belle part en ce monde et une belle part dans l'au-delà, et protège-nous du châtiment du Feu (sourate al-Baqara, 2:201 ; Abū Dāwūd n° 1892, « ḥasan » selon al-Albānī).
@@ -19,7 +19,7 @@ Allah dit : al-Ṣafā et al-Marwa font partie des rites d'Allah (sourate al-Baq
 Jābir rapporte que le Prophète ﷺ, en approchant d'al-Ṣafā, récita ce verset et dit : « Je commence par ce par quoi Allah a commencé. » Il monta sur al-Ṣafā jusqu'à voir la Maison, se tourna vers la qibla, proclama l'unicité et la grandeur d'Allah et dit :
 « لاَ إِلَهَ إِلاَّ اللَّهُ وَحْدَهُ لاَ شَرِيكَ لَهُ لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كَلِّ شَىْءٍ قَدِيرٌ لاَ إِلَهَ إِلاَّ اللَّهُ وَحْدَهُ أَنْجَزَ وَعْدَهُ وَنَصَرَ عَبْدَهُ وَهَزَمَ الأَحْزَابَ وَحْدَهُ » (lā ilāha illa llāhu waḥdahu lā sharīka lah, lahu l-mulku wa lahu l-ḥamdu wa huwa ʿalā kulli shay’in qadīr, lā ilāha illa llāhu waḥdah, anjaza waʿdah, wa naṣara ʿabdah, wa hazama l-aḥzāba waḥdah).
 Sens : « Il n'y a de divinité qu'Allah, seul, sans associé ; à Lui la royauté et la louange, et Il est capable de toute chose. Il n'y a de divinité qu'Allah, seul ; Il a tenu Sa promesse, secouru Son serviteur et vaincu seul les coalisés. » Il invoqua entre ces paroles, et répéta cela trois fois ; puis il descendit vers al-Marwa ; au fond de la vallée il pressa le pas, puis il marcha jusqu'à al-Marwa, où il fit comme sur al-Ṣafā (Muslim n° 1218, d'après Jābir ; hadith authentique).
-Le même hadith dit que son dernier parcours se termina à al-Marwa : d'al-Ṣafā à al-Marwa compte pour un parcours, et le retour pour un autre, ce qui fait sept parcours terminés à al-Marwa.
+Le même hadith dit que son dernier parcours se termina à al-Marwa : d'al-Ṣafā à al-Marwa compte pour un parcours, et le retour pour un autre, et Ibn ʿUmar précise qu'ils sont sept (al-Bukhārī n° 1645).
 
 5. Raser ou raccourcir les cheveux
 Le Prophète ﷺ dit deux fois : « Ô Allah, fais miséricorde à ceux qui se rasent la tête. » On lui dit : et ceux qui raccourcissent ? La dernière fois, il dit : « et ceux qui raccourcissent » (al-Bukhārī n° 1727, d'après Ibn ʿUmar). Allah mentionne aussi les têtes rasées et les cheveux raccourcis (sourate al-Fatḥ, 48:27). Raser est donc meilleur pour l'homme ; raccourcir est permis.
@@ -38,7 +38,7 @@ Exercice : apprenez l'invocation d'al-Ṣafā et l'ordre des étapes de la ʿumr
 r as (insert into public.content_references (revision_id, kind, surah, ayah_from, ayah_to, collection, edition, hadith_number, grade, graded_by, source_title, author, locator, url, note)
       select rv.id, v.kind, v.surah, v.ayah_from, v.ayah_to, v.collection, v.edition, v.hadith_number, v.grade, v.graded_by, v.source_title, v.author, v.locator, v.url, v.note
       from rv, (values
-  (1, $x$hadith$x$::public.reference_kind, null::int, null::int, null::int, $x$Ṣaḥīḥ al-Bukhārī$x$, $x$Numérotation de sunnah.com$x$, $x$1623$x$, $x$Authentique (ṣaḥīḥ)$x$, $x$Recueil authentique d'al-Bukhārī$x$, $x$Sept tours, deux unités derrière la Station, puis al-Ṣafā et al-Marwa, d'après Ibn ʿUmar$x$, null, null, $x$https://sunnah.com/bukhari:1623$x$, null),
+  (1, $x$hadith$x$::public.reference_kind, null::int, null::int, null::int, $x$Ṣaḥīḥ al-Bukhārī$x$, $x$Numérotation de sunnah.com$x$, $x$1645$x$, $x$Authentique (ṣaḥīḥ)$x$, $x$Recueil authentique d'al-Bukhārī$x$, $x$Sept tours, deux unités derrière la Station, puis sept parcours entre al-Ṣafā et al-Marwa, d'après Ibn ʿUmar$x$, null, null, $x$https://sunnah.com/bukhari:1645$x$, null),
   (2, $x$quran$x$::public.reference_kind, 33::int, 21::int, 21::int, null, null, null, null, null, null, null, null, null, null),
   (3, $x$hadith$x$::public.reference_kind, null::int, null::int, null::int, $x$Ṣaḥīḥ al-Bukhārī$x$, $x$Numérotation de sunnah.com$x$, $x$1616$x$, $x$Authentique (ṣaḥīḥ)$x$, $x$Recueil authentique d'al-Bukhārī$x$, $x$Le pas pressé des trois premiers tours, d'après Ibn ʿUmar$x$, null, null, $x$https://sunnah.com/bukhari:1616$x$, null),
   (4, $x$hadith$x$::public.reference_kind, null::int, null::int, null::int, $x$Ṣaḥīḥ al-Bukhārī$x$, $x$Numérotation de sunnah.com$x$, $x$1597$x$, $x$Authentique (ṣaḥīḥ)$x$, $x$Recueil authentique d'al-Bukhārī$x$, $x$ʿUmar embrasse la Pierre noire : « tu n'es qu'une pierre »$x$, null, null, $x$https://sunnah.com/bukhari:1597$x$, null),
@@ -54,7 +54,7 @@ r as (insert into public.content_references (revision_id, kind, surah, ayah_from
 qq as (insert into public.content_questions (revision_id, prompt, options, answer, explanation)
        select rv.id, v.p, v.o, v.a, v.e
        from rv, (values
-  (1, $x$Combien de tours fait-on autour de la Kaʿba ?$x$, array[$x$Sept$x$, $x$Trois$x$, $x$Dix$x$]::text[], 0, $x$Al-Bukhārī n° 1623.$x$),
+  (1, $x$Combien de tours fait-on autour de la Kaʿba ?$x$, array[$x$Sept$x$, $x$Trois$x$, $x$Dix$x$]::text[], 0, $x$Al-Bukhārī n° 1645.$x$),
   (2, $x$Pendant combien de tours le Prophète ﷺ pressait-il le pas lors du premier ṭawāf ?$x$, array[$x$Trois$x$, $x$Sept$x$, $x$Un$x$]::text[], 0, $x$Al-Bukhārī n° 1616.$x$),
   (3, $x$Pourquoi ʿUmar embrassait-il la Pierre noire ?$x$, array[$x$Parce qu'il avait vu le Prophète ﷺ le faire$x$, $x$Parce qu'elle protège$x$, $x$Parce qu'elle guérit$x$]::text[], 0, $x$Al-Bukhārī n° 1597.$x$),
   (4, $x$Où prie-t-on les deux unités après le ṭawāf ?$x$, array[$x$Derrière la Station d'Ibrāhīm$x$, $x$Sur al-Ṣafā$x$, $x$À Mina$x$]::text[], 0, $x$2:125 ; Muslim n° 1218.$x$),
@@ -63,5 +63,5 @@ qq as (insert into public.content_questions (revision_id, prompt, options, answe
   (7, $x$Pour l'homme, qu'est-ce qui est meilleur à la fin de la ʿumra ?$x$, array[$x$Se raser la tête$x$, $x$Ne rien couper$x$, $x$Couper seulement la barbe$x$]::text[], 0, $x$Al-Bukhārī n° 1727.$x$),
   (8, $x$Que ne fait pas la femme en menstrues jusqu'à ce qu'elle soit pure ?$x$, array[$x$Le ṭawāf autour de la Kaʿba$x$, $x$La talbiya$x$, $x$Les invocations$x$]::text[], 0, $x$Al-Bukhārī n° 305.$x$)) v(k, p, o, a, e) order by v.k returning 1)
 select private.ai_log(rv.item_id, rv.id, 'created', null, null, $x$Brouillon rédigé par l'IA : Pèlerinage 3$x$),
-       rv.h = 'd2e185c0ebef4ab33cf8905f4145fb95' as arabe_identique,
+       rv.h = '5e561034720067621b29a95cc9bcbf27' as arabe_identique,
        (select count(*) from r) as refs, (select count(*) from qq) as questions from rv;
