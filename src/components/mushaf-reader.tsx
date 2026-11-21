@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import type { Dictionary } from "@/lib/dictionaries";
 import { type ChapterAudio, type ChapterReciter, RECITER_KEY, defaultReciter, fetchChapter, fetchReciters, reciterLabel, store, stored, verseAt } from "@/lib/chapter-audio";
 import { useWakeLock } from "@/lib/use-wake-lock";
+import { MUSHAF_LAST_KEY } from "@/lib/khatm";
 
 type T = Dictionary["quran"];
 type Position = { surah: number; verse: number };
@@ -60,6 +61,9 @@ export function MushafReader({ t, names, children }: { t: T; names: string[]; ch
     store(ZOOM_KEY, String(next));
     setZoom(next);
   };
+
+  // Derniere page ouverte : le plan de lecture propose de la compter comme lue.
+  useEffect(() => store(MUSHAF_LAST_KEY, String(page)), [page]);
 
   // Ecran allume pendant la recitation ou quand les pages tournent seules.
   useWakeLock(playing || auto > 0);

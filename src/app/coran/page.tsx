@@ -5,6 +5,7 @@ import { ArabicVerse, place } from "@/components/quran-view";
 import { getHizbStarts, getJuzStarts, getReadingSummary, getSurahs, searchQuran, verseBody } from "@/lib/quran";
 import { getPreferences } from "@/lib/preferences";
 import { OfflineTile } from "@/components/offline-tile";
+import { KhatmCard } from "@/components/khatm-plan";
 
 export const metadata: Metadata = { title: "Coran" };
 
@@ -12,7 +13,7 @@ const tile = "block rounded-lg border border-line p-3 hover:border-gold";
 const tab = "flex min-h-11 flex-1 items-center justify-center rounded-md text-base";
 
 export default async function QuranPage({ searchParams }: { searchParams: Promise<{ q?: string; vue?: string }> }) {
-  const [{ t }, params, surahs, reading] = await Promise.all([getPreferences(), searchParams, getSurahs(), getReadingSummary()]);
+  const [{ t, locale }, params, surahs, reading] = await Promise.all([getPreferences(), searchParams, getSurahs(), getReadingSummary()]);
   const q = t.quran;
   const query = (params.q ?? "").trim().slice(0, 80);
   const reference = query.match(/^(\d{1,3})(?:\s*[:. ]\s*(\d{1,3}))?$/);
@@ -43,6 +44,8 @@ export default async function QuranPage({ searchParams }: { searchParams: Promis
           <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 shrink-0 rtl:-scale-x-100"><path d="m9 5 7 7-7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
         </Link>
       ) : null}
+
+      <KhatmCard t={t.khatm} lang={locale === "ar" ? "ar" : "fr"} />
 
       <nav aria-label={q.title} className="mt-3 grid grid-cols-2 gap-3">
         <Link href="/coran/mushaf" className={tile} data-tile="mushaf">

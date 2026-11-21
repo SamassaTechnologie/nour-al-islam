@@ -163,3 +163,12 @@ export async function getBookmarks() {
 
 /** La basmala reste dans le texte importe : seul son affichage est separe du verset 1. */
 export const verseBody = (text: string, bismillahLength: number) => text.slice(bismillahLength);
+
+export type PageStart = { page: number; surah: number; number: number; juz: number };
+
+/** Premier verset et juz de chacune des 604 pages du Mushaf de Medine. */
+export const getPageStarts = cache(async (): Promise<PageStart[]> => {
+  const { data, error } = await content().rpc("page_starts");
+  if (error) throw new Error(error.message);
+  return data as PageStart[];
+});
