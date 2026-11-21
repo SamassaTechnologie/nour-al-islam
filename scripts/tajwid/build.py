@@ -39,6 +39,7 @@ def sql(L):
         qs.append(f"({i + 1}, {q(p)}, {q(s)}::smallint, {q(a)}::smallint, {q(wf)}::smallint, {q(wt)}::smallint, array[{', '.join(q(o) for o in opts)}]::text[], {ans}, {q(expl)})")
     marks = sorted(set(MARK.findall(L['body'])))
     check = ' || '.join(f"{q(':'.join(m) + '=')} || {word_sql(*m)} || ' | '" for m in marks)
+    check = check or "''"
     return f"""-- Tajwid {L['position']} : {L['slug']}
 with it as (insert into public.content_items (slug, kind, section, locale, position)
             values ({q(L['slug'])}, 'lesson', 'tajwid', 'fr', {L['position']}) returning id),
