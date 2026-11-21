@@ -4,11 +4,11 @@ import { redirect } from "next/navigation";
 import { ArabicVerse, place } from "@/components/quran-view";
 import { getHizbStarts, getJuzStarts, getReadingSummary, getSurahs, searchQuran, verseBody } from "@/lib/quran";
 import { getPreferences } from "@/lib/preferences";
-import { SaveQuran } from "@/components/save-quran";
-import { AudioDownloads } from "@/components/audio-downloads";
+import { OfflineTile } from "@/components/offline-tile";
 
 export const metadata: Metadata = { title: "Coran" };
 
+const tile = "block rounded-lg border border-line p-3 hover:border-gold";
 const tab = "flex min-h-11 flex-1 items-center justify-center rounded-md text-base";
 
 export default async function QuranPage({ searchParams }: { searchParams: Promise<{ q?: string; vue?: string }> }) {
@@ -33,15 +33,35 @@ export default async function QuranPage({ searchParams }: { searchParams: Promis
     <main className="mx-auto max-w-xl px-5 pt-6">
       <h1 className="text-3xl">{q.title}</h1>
       {last ? (
-        <Link href={`/coran/${last.surah}#v${last.surah}-${last.ayahs.number}`} className="mt-4 flex min-h-12 items-center justify-between rounded-lg bg-emerald px-4 font-medium text-on-emerald">
-          <span>{q.resume}</span>
-          <span>{surahs[last.surah - 1].name_translit}, {last.ayahs.number}</span>
+        <Link href={`/coran/${last.surah}#v${last.surah}-${last.ayahs.number}`} className="mt-4 flex items-center gap-4 rounded-lg bg-emerald px-4 py-3 text-on-emerald" data-resume>
+          <span className="min-w-0 flex-1">
+            <span className="block text-base opacity-90">{q.resume}</span>
+            <span className="block text-xl font-medium">{surahs[last.surah - 1].name_translit}</span>
+            <span className="block text-base opacity-90">{q.verseShort.replace("{n}", String(last.ayahs.number))}</span>
+          </span>
+          <span lang="ar" dir="rtl" className="surah-name">{surahs[last.surah - 1].name_ar}</span>
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 shrink-0 rtl:-scale-x-100"><path d="m9 5 7 7-7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
         </Link>
       ) : null}
 
-      <Link href="/coran/mushaf" className="mt-3 flex min-h-12 items-center justify-center rounded-lg border border-line px-4 font-medium text-emerald">{q.mushaf}</Link>
-      <SaveQuran t={t.offline} />
-      <AudioDownloads t={q} names={surahs.map((s) => s.name_translit)} />
+      <nav aria-label={q.title} className="mt-3 grid grid-cols-2 gap-3">
+        <Link href="/coran/mushaf" className={tile} data-tile="mushaf">
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-6 w-6 text-gold-ink" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2zM12 6v14" /></svg>
+          <span className="mt-2 block font-medium">{q.mushaf}</span>
+          <span className="block text-base leading-snug text-muted">{q.mushafTile}</span>
+        </Link>
+        <Link href={`/coran/${last?.surah ?? 1}/tafsir`} className={tile} data-tile="tafsir">
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-6 w-6 text-gold-ink" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="6" /><path d="m20 20-4.5-4.5M9 11h4M11 9v4" /></svg>
+          <span className="mt-2 block font-medium">{q.tafsir}</span>
+          <span className="block text-base leading-snug text-muted">{q.tafsirTile}</span>
+        </Link>
+        <Link href="/coran/signets" className={tile} data-tile="bookmarks">
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-6 w-6 text-gold-ink" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M7 4h10v16l-5-4-5 4z" /></svg>
+          <span className="mt-2 block font-medium">{q.bookmarks}</span>
+          <span className="block text-base leading-snug text-muted">{reading?.bookmarkCount ? q.bookmarksTile.replace("{n}", String(reading.bookmarkCount)) : q.bookmarksHint}</span>
+        </Link>
+        <OfflineTile o={t.offline} className={tile} />
+      </nav>
 
       <form role="search" action="/coran" className="mt-4 flex gap-2">
         <input name="q" type="search" defaultValue={query} aria-label={q.searchLabel} placeholder={q.searchPlaceholder} className="min-h-12 min-w-0 flex-1 rounded-lg border border-line bg-page px-3 outline-none focus:border-emerald" />
@@ -122,7 +142,6 @@ export default async function QuranPage({ searchParams }: { searchParams: Promis
           )}
         </>
       )}
-      {reading ? <Link href="/coran/signets" className="mt-5 inline-flex min-h-11 items-center font-medium text-emerald underline underline-offset-4">{q.bookmarks} ({reading.bookmarkCount})</Link> : null}
     </main>
   );
 }

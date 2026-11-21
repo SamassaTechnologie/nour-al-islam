@@ -35,6 +35,9 @@ await context.setOffline(false);
 
 // Tout le Coran.
 await page.goto(base + "/coran", { waitUntil: "networkidle" });
+await page.click('[data-tile="offline"]');
+await page.waitForURL(/\/coran\/hors-ligne/);
+await page.waitForSelector('[data-save-quran="idle"]');
 await page.click("[data-save-quran] button");
 await page.waitForSelector('[data-save-quran="saved"]', { timeout: 240000 });
 const usage = await page.evaluate(async () => (await navigator.storage.estimate()).usage);
