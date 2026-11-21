@@ -18,7 +18,7 @@ Au sujet de l'année, ʿAlī rapporte que le Prophète ﷺ a dit qu'il n'y a pas
 
 4. Le seuil (niṣāb)
 Le Prophète ﷺ a dit :
-« {{AR:bukhari:1405|ليس فيما دون خمس أواق صدقة|خمس أوسق صدقة}} » (laysa fīmā dūna khamsi awāqin ṣadaqah, wa laysa fīmā dūna khamsi dhawdin ṣadaqah, wa laysa fīmā dūna khamsati awsuqin ṣadaqah).
+« {{AR:bukhari:1405|ليس فيما دون خمس أواق صدقة|خمس أوسق صدقة}} » (laysa fīmā dūna khamsi awāqin ṣadaqah, wa laysa fīmā dūna khamsi dhawdin ṣadaqah, wa laysa fīmā dūna khamsi awsuqin ṣadaqah).
 Sens : « En dessous de cinq awāq (d'argent), pas de zakāt ; en dessous de cinq chameaux, pas de zakāt ; en dessous de cinq awsuq (de grains ou de dattes), pas de zakāt. » (al-Bukhārī n° 1405, d'après Abū Saʿīd ; hadith authentique).
 Pour l'argent-métal et l'or, ʿAlī rapporte :
 « {{AR:abudawud:1573|فإذا كانت لك مائتا درهم|فبحساب ذلك}} » (fa-idhā kānat laka mi’tā dirhamin wa ḥāla ʿalayhā l-ḥawlu fa-fīhā khamsatu darāhim, wa laysa ʿalayka shay’un yaʿnī fi dh-dhahabi ḥattā yakūna laka ʿishrūna dīnāran, fa-idhā kāna laka ʿishrūna dīnāran wa ḥāla ʿalayhā l-ḥawlu fa-fīhā niṣfu dīnār, fa-mā zāda fa-bi-ḥisābi dhālik).

@@ -17,7 +17,7 @@ Au sujet de l'année, ʿAlī rapporte que le Prophète ﷺ a dit qu'il n'y a pas
 
 4. Le seuil (niṣāb)
 Le Prophète ﷺ a dit :
-« لَيْسَ فِيمَا دُونَ خَمْسِ أَوَاقٍ صَدَقَةٌ، وَلَيْسَ فِيمَا دُونَ خَمْسِ ذَوْدٍ صَدَقَةٌ، وَلَيْسَ فِيمَا دُونَ خَمْسِ أَوْسُقٍ صَدَقَةٌ » (laysa fīmā dūna khamsi awāqin ṣadaqah, wa laysa fīmā dūna khamsi dhawdin ṣadaqah, wa laysa fīmā dūna khamsati awsuqin ṣadaqah).
+« لَيْسَ فِيمَا دُونَ خَمْسِ أَوَاقٍ صَدَقَةٌ، وَلَيْسَ فِيمَا دُونَ خَمْسِ ذَوْدٍ صَدَقَةٌ، وَلَيْسَ فِيمَا دُونَ خَمْسِ أَوْسُقٍ صَدَقَةٌ » (laysa fīmā dūna khamsi awāqin ṣadaqah, wa laysa fīmā dūna khamsi dhawdin ṣadaqah, wa laysa fīmā dūna khamsi awsuqin ṣadaqah).
 Sens : « En dessous de cinq awāq (d'argent), pas de zakāt ; en dessous de cinq chameaux, pas de zakāt ; en dessous de cinq awsuq (de grains ou de dattes), pas de zakāt. » (al-Bukhārī n° 1405, d'après Abū Saʿīd ; hadith authentique).
 Pour l'argent-métal et l'or, ʿAlī rapporte :
 « فَإِذَا كَانَتْ لَكَ مِائَتَا دِرْهَمٍ وَحَالَ عَلَيْهَا الْحَوْلُ فَفِيهَا خَمْسَةُ دَرَاهِمَ وَلَيْسَ عَلَيْكَ شَىْءٌ - يَعْنِي فِي الذَّهَبِ - حَتَّى يَكُونَ لَكَ عِشْرُونَ دِينَارًا فَإِذَا كَانَ لَكَ عِشْرُونَ دِينَارًا وَحَالَ عَلَيْهَا الْحَوْلُ فَفِيهَا نِصْفُ دِينَارٍ فَمَا زَادَ فَبِحِسَابِ ذَلِكَ » (fa-idhā kānat laka mi’tā dirhamin wa ḥāla ʿalayhā l-ḥawlu fa-fīhā khamsatu darāhim, wa laysa ʿalayka shay’un yaʿnī fi dh-dhahabi ḥattā yakūna laka ʿishrūna dīnāran, fa-idhā kāna laka ʿishrūna dīnāran wa ḥāla ʿalayhā l-ḥawlu fa-fīhā niṣfu dīnār, fa-mā zāda fa-bi-ḥisābi dhālik).
@@ -70,5 +70,5 @@ qq as (insert into public.content_questions (revision_id, prompt, options, answe
   (7, $x$Quel est le taux de la zakāt sur l'or, l'argent et la monnaie ?$x$, array[$x$2,5 % (un quarantième)$x$, $x$10 %$x$, $x$50 %$x$]::text[], 0, $x$Al-Bukhārī n° 1454 ; Ibn Bāz, fatwa n° 5745.$x$),
   (8, $x$Quel seuil Ibn Bāz retient-il pour la monnaie en papier ?$x$, array[$x$Le plus bas des deux seuils, or ou argent$x$, $x$Toujours le seuil de l'or$x$, $x$Aucun seuil$x$]::text[], 0, $x$Fatwa n° 5774.$x$)) v(k, p, o, a, e) order by v.k returning 1)
 select private.ai_log(rv.item_id, rv.id, 'created', null, null, $x$Brouillon rédigé par l'IA : Zakāt 1$x$),
-       rv.h = '8beb235404707bd489248cdb016ffd54' as arabe_identique,
+       rv.h = '430ac2c6dc8cae5eaf3de05962621fe0' as arabe_identique,
        (select count(*) from r) as refs, (select count(*) from qq) as questions from rv;
