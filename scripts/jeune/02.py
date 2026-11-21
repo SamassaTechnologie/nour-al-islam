@@ -69,7 +69,7 @@ Exercice : classez des situations (oubli, vomissement involontaire, injection nu
         quran(2, 187),
         coll('bukhari', 1894, 'Authentique (ṣaḥīḥ)', "Recueil authentique d'al-Bukhārī",
              "Le jeûneur délaisse sa nourriture, sa boisson et son désir pour Allah, d'après Abū Hurayra"),
-        coll('tirmidhi', 720, "« Ḥasan gharīb » selon al-Tirmidhī ; authentique selon al-Albānī et Aḥmad Shākir ; faible selon Bashshār ʿAwwād et Zubayr ʿAlī Zaʾī",
+        coll('tirmidhi', 720, "Ḥasan gharīb (al-Tirmidhī) ; authentique (al-Albānī, Aḥmad Shākir) ; faible (Bashshār ʿAwwād, Zubayr ʿAlī Zaʾī)",
              "Al-Tirmidhī ; jugements affichés sur sunnah.com",
              "Le vomissement involontaire et le vomissement volontaire, d'après Abū Hurayra"),
         coll('bukhari', 304, 'Authentique (ṣaḥīḥ)', "Recueil authentique d'al-Bukhārī",
