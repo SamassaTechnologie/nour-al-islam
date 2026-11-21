@@ -17,7 +17,7 @@ Si l'on doit s'arrêter par manque de souffle ou par oubli (arrêt forcé), on p
 
 2. Les quatre sortes d'arrêt choisi
 - L'arrêt complet (tāmm) : sur un mot qui n'est lié à la suite ni par la grammaire ni par le sens. On s'arrête et on reprend avec ce qui suit. Exemple : « {{Q:2:5:9}} » (al-mufliḥūn), fin du verset 5 de la sourate 2 ; le verset 6 commence un autre sujet.
-- L'arrêt suffisant (kāfī) : le mot n'est pas lié à la suite par la grammaire, mais seulement par le sens. Il se traite comme l'arrêt complet. Exemple : « {{Q:2:6:11}} » (lā yu’minūn), fin du verset 6 de la sourate 2, puis « {{Q:2:7:1}} {{Q:2:7:2}} » (khatama llāh), début du verset 7.
+- L'arrêt suffisant (kāfī) : le mot n'est pas lié à la suite par la grammaire, mais seulement par le sens. Il se traite comme l'arrêt complet. Exemple : « {{Q:2:6:11}} » (yu’minūn), fin du verset 6 de la sourate 2, puis « {{Q:2:7:1}} {{Q:2:7:2}} » (khatama llāh), début du verset 7.
 - L'arrêt bon (ḥasan) : le mot est lié à la suite par la grammaire et le sens, mais il donne un sens sur lequel on peut s'arrêter. Exemple : « {{Q:1:2:1}} {{Q:1:2:2}} » (al-ḥamdu li-llāh), sourate 1, verset 2. On peut s'y arrêter, mais pour continuer on reprend ces mots ; commencer directement par la suite est à éviter. À la fin d'un verset, comme « {{Q:1:2:4}} » (al-ʿālamīn), on peut s'arrêter et reprendre avec la suite.
 - L'arrêt à éviter (qabīḥ) : sur un mot qui ne donne pas de sens utile, par exemple entre un sujet et ce qu'on dit de lui, ou entre deux mots qui forment un seul groupe (iḍāfa).
 
