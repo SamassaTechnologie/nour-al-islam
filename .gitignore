@@ -8,3 +8,7 @@ out
 next-env.d.ts
 .vercel
 tests/screenshots
+
+# Python
+__pycache__/
+*.pyc
