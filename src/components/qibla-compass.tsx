@@ -38,6 +38,7 @@ export function QiblaCompass({ t, myPositionLabel, lang }: { t: T; myPositionLab
   const [geoError, setGeoError] = useState("");
   const smooth = useRef<number | null>(null);
   const buzzed = useRef(false);
+  const refused = useRef(false);
 
   useEffect(() => setPlace(loadPlace()), []);
   useWakeLock(state === "on");
@@ -58,10 +59,13 @@ export function QiblaCompass({ t, myPositionLabel, lang }: { t: T; myPositionLab
   const start = useCallback(async () => {
     const Ctor = (typeof DeviceOrientationEvent !== "undefined" ? DeviceOrientationEvent : undefined) as (typeof DeviceOrientationEvent & IOSPermission) | undefined;
     if (!Ctor) { setState("none"); return; }
+    // iPhone (et Chrome recent) : autorisation demandee au toucher. Si elle n'est pas accordee,
+    // on ecoute quand meme : sans mesure au bout de 3 s, on explique pourquoi.
+    refused.current = false;
     if (typeof Ctor.requestPermission === "function") {
       try {
-        if ((await Ctor.requestPermission()) !== "granted") { setState("denied"); return; }
-      } catch { setState("denied"); return; }
+        refused.current = (await Ctor.requestPermission()) !== "granted";
+      } catch { refused.current = true; }
     }
     setState("waiting");
   }, []);
@@ -83,7 +87,7 @@ export function QiblaCompass({ t, myPositionLabel, lang }: { t: T; myPositionLab
     };
     window.addEventListener("deviceorientationabsolute", onAbsolute as EventListener);
     window.addEventListener("deviceorientation", onRelative);
-    const timer = window.setTimeout(() => setState((s) => (s === "waiting" ? "none" : s)), 3000);
+    const timer = window.setTimeout(() => setState((s) => (s === "waiting" ? (refused.current ? "denied" : "none") : s)), 3000);
     return () => {
       window.clearTimeout(timer);
       window.removeEventListener("deviceorientationabsolute", onAbsolute as EventListener);

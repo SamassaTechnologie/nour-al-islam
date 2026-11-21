@@ -9,6 +9,8 @@ const check = (ok, label, extra = "") => {
 };
 const browser = await chromium.launch();
 const context = await browser.newContext({ viewport: { width: 360, height: 800 }, isMobile: true, hasTouch: true });
+// Capteurs autorises, comme sur un telephone Android.
+await context.grantPermissions(["accelerometer", "gyroscope", "magnetometer"], { origin: BASE });
 const page = await context.newPage();
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
