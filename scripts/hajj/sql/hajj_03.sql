@@ -2,7 +2,7 @@
 with it as (insert into public.content_items (slug, kind, section, locale, position)
             values ($x$la-omra-pas-a-pas$x$, 'lesson', $x$hajj$x$, 'fr', 3) returning id),
 rv as (insert into public.content_revisions (item_id, number, title, summary, body, ai_assisted, author_name)
-       select id, 1, $x$La ʿumra pas à pas : iḥrām, ṭawāf, prière, saʿy et rasage$x$, $x$Les étapes de la ʿumra d'après la Sunna authentique : l'état sacré au mīqāt, les sept tours autour de la Kaʿba (ṭawāf) avec le pas pressé (ramal) des trois premiers et la Pierre noire, les deux unités derrière la Station d'Ibrāhīm, les sept parcours entre al-Ṣafā et al-Marwa (saʿy) avec l'invocation du Prophète ﷺ, puis le rasage ou le raccourcissement des cheveux ; et le cas de la femme en menstrues.$x$, $x$1. L'état sacré (iḥrām)
+       select id, 1, $x$La ʿumra pas à pas : iḥrām, ṭawāf, prière, saʿy et rasage$x$, $x$Les étapes de la ʿumra d'après la Sunna : l'iḥrām au mīqāt, les sept tours autour de la Kaʿba avec le pas pressé et la Pierre noire, les deux unités derrière la Station d'Ibrāhīm, les sept parcours entre al-Ṣafā et al-Marwa avec l'invocation du Prophète ﷺ, le rasage ou le raccourcissement, et le cas de la femme en menstrues.$x$, $x$1. L'état sacré (iḥrām)
 Au mīqāt, on entre en état sacré avec l'intention de la ʿumra et on répète la talbiya (voir les leçons 1 et 2). On évite ensuite les interdits de l'iḥrām jusqu'à la fin de la ʿumra.
 
 2. Le ṭawāf : sept tours autour de la Kaʿba
