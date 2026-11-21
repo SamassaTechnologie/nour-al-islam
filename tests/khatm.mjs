@@ -29,7 +29,7 @@ check(await page.getAttribute("[data-khatm-mushaf]", "href") === "/coran/mushaf/
 await page.click("[data-khatm-mark]");
 await page.waitForSelector("[data-khatm-today]");
 check(await page.getAttribute("[data-khatm-portion]", "data-khatm-portion") === "21-40", "part lue : la suivante est 21 à 40");
-check((await page.textContent("[data-khatm-status]")).includes("avance"), "en avance sur le jour 1", await page.textContent("[data-khatm-status]"));
+check((await page.textContent("[data-khatm-status]")).includes("À jour"), "part du jour 1 lue : à jour", await page.textContent("[data-khatm-status]"));
 
 await page.goto(`${BASE}/coran`, { waitUntil: "networkidle" });
 const card = await page.textContent("[data-khatm-card]");
