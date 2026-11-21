@@ -4,7 +4,7 @@ import { getPreferences } from "@/lib/preferences";
 import { getSession } from "@/lib/supabase/server";
 
 const STEP_LINKS = ["/apprendre#rubrique-arabe", "/apprendre#rubrique-tajwid", "/apprendre/memorisation", "/coran/1/tafsir", "/priere"];
-const QUICK_LINKS = ["/coran", "/coran/mushaf", "/coran/1/tafsir", "/priere/horaires", "/priere/invocations", "/apprendre/memorisation", "/assistant", "/recherche"];
+const QUICK_LINKS = ["/coran", "/coran/mushaf", "/coran/1/tafsir", "/priere/horaires", "/priere/invocations", "/apprendre/memorisation", "/assistant", "/priere/qibla"];
 
 const arch = "M.5 150V132C.5 88 92 56 160 5c68 51 159.5 83 159.5 127v18";
 
