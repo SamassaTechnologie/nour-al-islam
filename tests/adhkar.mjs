@@ -9,7 +9,7 @@ let failed = 0;
 const check = (label, ok, detail = "") => { if (!ok) failed++; console.log(`${ok ? "OK   " : "ECHEC"} ${label}${detail ? ` : ${detail}` : ""}`); };
 const source = Object.values(JSON.parse(readFileSync(sourceFile, "utf8")));
 const sourceTexts = new Set(source.map((s) => s.arabic));
-const SLUGS = ["adhkar-matin-et-soir", "adhkar-sommeil-et-reveil", "adhkar-mosquee", "adhkar-apres-la-priere"];
+const SLUGS = ["adhkar-matin-et-soir", "adhkar-sommeil-et-reveil", "adhkar-mosquee", "adhkar-apres-la-priere", "adhkar-voyage", "adhkar-repas", "adhkar-maison", "adhkar-epreuves"];
 
 const browser = await chromium.launch(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {});
 const errors = [];
