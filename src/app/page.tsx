@@ -2,6 +2,9 @@ import Link from "next/link";
 import { Lattice, Star } from "@/components/art";
 import { getPreferences } from "@/lib/preferences";
 import { getSession } from "@/lib/supabase/server";
+import { ArabicVerse } from "@/components/quran-view";
+import { getSurahs } from "@/lib/quran";
+import { getVerseOfDay } from "@/lib/verse-of-day";
 
 const STEP_LINKS = ["/apprendre#rubrique-arabe", "/apprendre#rubrique-tajwid", "/apprendre/memorisation", "/coran/1/tafsir", "/priere"];
 const QUICK_LINKS = ["/coran", "/coran/mushaf", "/coran/1/tafsir", "/priere/horaires", "/priere/invocations", "/apprendre/memorisation", "/assistant", "/priere/qibla"];
@@ -9,7 +12,7 @@ const QUICK_LINKS = ["/coran", "/coran/mushaf", "/coran/1/tafsir", "/priere/hora
 const arch = "M.5 150V132C.5 88 92 56 160 5c68 51 159.5 83 159.5 127v18";
 
 export default async function HomePage() {
-  const [{ t, locale }, session] = await Promise.all([getPreferences(), getSession()]);
+  const [{ t, locale }, session, verse, surahs] = await Promise.all([getPreferences(), getSession(), getVerseOfDay().catch(() => null), getSurahs()]);
   const h = t.home;
   return (
     <main>
@@ -41,6 +44,30 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {verse ? (
+        <section className="mx-auto max-w-xl px-6 pt-10" aria-labelledby="verset-du-jour" data-verse-of-day={`${verse.surah}:${verse.number}`}>
+          <h2 id="verset-du-jour" className="text-2xl">{h.verseOfDay}</h2>
+          <div className="mt-4 rounded-lg border border-line px-4 py-4">
+            <ArabicVerse text={verse.arabic} />
+            {verse.translation ? <p lang="fr" dir="ltr" className="mt-3">{verse.translation}</p> : null}
+            <p className="mt-2 text-base font-medium text-emerald">
+              <span lang="en" dir="ltr">{surahs[verse.surah - 1].name_translit}</span> {verse.surah}:{verse.number}
+            </p>
+            {verse.tafsir ? (
+              <details className="mt-3 border-t border-line pt-2" data-verse-tafsir>
+                <summary className="flex min-h-11 cursor-pointer items-center font-medium">{h.verseExplain}</summary>
+                <p lang="fr" dir="ltr" className="text-muted">{verse.tafsir}</p>
+              </details>
+            ) : null}
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <Link href={`/coran/${verse.surah}#v${verse.surah}-${verse.number}`} className="flex min-h-11 items-center justify-center rounded-lg bg-emerald px-3 text-center font-medium text-on-emerald">{h.verseRead}</Link>
+              <Link href={`/coran/${verse.surah}/tafsir#t${verse.number}`} className="flex min-h-11 items-center justify-center rounded-lg border border-line px-3 text-center font-medium">{h.verseTafsir}</Link>
+            </div>
+          </div>
+          <p className="mt-2 text-sm text-muted">{h.verseSources}</p>
+        </section>
+      ) : null}
 
       <section className="mx-auto max-w-xl px-6 pt-10">
         <h2 className="text-2xl">{h.pathTitle}</h2>

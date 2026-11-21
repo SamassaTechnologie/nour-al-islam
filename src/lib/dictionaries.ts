@@ -34,6 +34,11 @@ const fr = {
       ["Comprendre", "Le Tafsir, les hadiths et la croyance."],
       ["Pratiquer", "La prière, les invocations et la vie quotidienne."],
     ],
+    verseOfDay: "Verset du jour",
+    verseExplain: "Explication (Tafsir al-Mukhtaṣar)",
+    verseRead: "Lire la sourate",
+    verseTafsir: "Tafsir complet",
+    verseSources: "Traduction de Rachid Maach ; Tafsir al-Mukhtaṣar, Centre d’Exégèse pour les Études Coraniques (QuranEnc). Versets choisis par l’équipe.",
     quickTitle: "Accès rapide",
     quick: [
       ["Le Coran", "Lire et écouter"],
@@ -567,6 +572,11 @@ const ar: Dictionary = {
       ["الفهم", "التفسير والحديث والعقيدة."],
       ["التطبيق", "الصلاة والأذكار والحياة اليومية."],
     ],
+    verseOfDay: "آية اليوم",
+    verseExplain: "التفسير (المختصر في تفسير القرآن الكريم)",
+    verseRead: "اقرأ السورة",
+    verseTafsir: "التفسير كاملًا",
+    verseSources: "الترجمة الفرنسية لرشيد معاش؛ المختصر في تفسير القرآن الكريم، مركز تفسير للدراسات القرآنية (موسوعة القرآن الكريم). الآيات من اختيار الفريق.",
     quickTitle: "وصول سريع",
     quick: [
       ["القرآن الكريم", "القراءة والاستماع"],
