@@ -21,7 +21,7 @@ a) La Résurrection (al-baʿth) : Allah rendra la vie aux morts. On soufflera da
 b) Le jugement et la rétribution (al-ḥisāb wa l-jazā’) : c'est vers Allah qu'est le retour des créatures, et c'est à Lui qu'il revient de les juger (sourate al-Ghāshiya, 88:25-26). Celui qui aura fait le poids d'un atome de bien le verra, et celui qui aura fait le poids d'un atome de mal le verra (sourate al-Zalzala, 99:7-8). Allah placera les balances justes, et aucune âme ne subira d'injustice (sourate al-Anbiyā’, 21:47). Le Prophète ﷺ a dit que chacun de nous, Allah lui parlera le Jour de la Résurrection sans interprète entre eux ; puis il a appelé à se protéger du Feu, ne serait-ce qu'avec la moitié d'une datte (al-Bukhārī n° 6539, d'après ʿAdī ibn Ḥātim ; hadith authentique, en substance).
 
 c) Le Paradis et l'Enfer : ce sont les deux demeures de la rétribution. Allah dit que le Feu a été préparé pour les mécréants, et que le Paradis, large comme les cieux et la terre, a été préparé pour les pieux (sourate Āl ʿImrān, 3:131-133). Le Prophète ﷺ rapporte qu'Allah a dit :
-« أَعْدَدْتُ لِعِبَادِي الصَّالِحِينَ مَا لاَ عَيْنَ رَأَتْ، وَلاَ أُذُنَ سَمِعَتْ، وَلاَ خَطَرَ عَلَى قَلْبِ بَشَرٍ » (aʿdadtu li-ʿibādiya ṣ-ṣāliḥīna mā lā ʿaynun ra’at, wa lā udhunun samiʿat, wa lā khaṭara ʿalā qalbi bashar).
+« أَعْدَدْتُ لِعِبَادِي الصَّالِحِينَ مَا لاَ عَيْنَ رَأَتْ، وَلاَ أُذُنَ سَمِعَتْ، وَلاَ خَطَرَ عَلَى قَلْبِ بَشَرٍ » (aʿdadtu li-ʿibādiya ṣ-ṣāliḥīna mā lā ʿayna ra’at, wa lā udhuna samiʿat, wa lā khaṭara ʿalā qalbi bashar).
 Sens : « J'ai préparé pour Mes serviteurs vertueux ce qu'aucun œil n'a vu, ce qu'aucune oreille n'a entendu, et ce qui n'est jamais venu à l'esprit d'un être humain. » (al-Bukhārī n° 3244, d'après Abū Hurayra ; hadith authentique ; voir sourate al-Sajda, 32:17).
 Le plus grand bienfait du Paradis est de voir Allah. Le Prophète ﷺ regarda la pleine lune et dit :
 « إِنَّكُمْ سَتَرَوْنَ رَبَّكُمْ كَمَا تَرَوْنَ هَذَا الْقَمَرَ لاَ تُضَامُّونَ فِي رُؤْيَتِهِ » (innakum satarawna rabbakum kamā tarawna hādhā l-qamar, lā tuḍāmmūna fī ru’yatih).
@@ -74,5 +74,5 @@ qq as (insert into public.content_questions (revision_id, prompt, options, answe
   (7, $x$Quel est le plus grand bienfait du Paradis ?$x$, array[$x$Voir Allah$x$, $x$Les palais$x$, $x$Les rivières$x$]::text[], 0, $x$Al-Bukhārī n° 554 ; IslamQA 13994.$x$),
   (8, $x$Que recommande le Prophète ﷺ après avoir parlé de la vision d'Allah ?$x$, array[$x$Ne pas manquer les prières d'avant le lever et le coucher du soleil$x$, $x$Jeûner toute l'année$x$, $x$Rester éveillé toute la nuit$x$]::text[], 0, $x$Al-Bukhārī n° 554 : le fajr et le ʿaṣr.$x$)) v(k, p, o, a, e) order by v.k returning 1)
 select private.ai_log(rv.item_id, rv.id, 'created', null, null, $x$Brouillon rédigé par l'IA : Croyance 8$x$),
-       rv.h = '3344d75c1fb10c040ea63826226f09df' as arabe_identique,
+       rv.h = 'b89183da5c710fa6378bb259e190a1c7' as arabe_identique,
        (select count(*) from r) as refs, (select count(*) from qq) as questions from rv;
