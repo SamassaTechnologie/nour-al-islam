@@ -5,6 +5,7 @@ import { getSession } from "@/lib/supabase/server";
 import { ArabicVerse } from "@/components/quran-view";
 import { getSurahs } from "@/lib/quran";
 import { getVerseOfDay } from "@/lib/verse-of-day";
+import { HijriDate } from "@/components/hijri-date";
 
 const STEP_LINKS = ["/apprendre#rubrique-arabe", "/apprendre#rubrique-tajwid", "/apprendre/memorisation", "/coran/1/tafsir", "/priere"];
 const QUICK_LINKS = ["/coran", "/coran/mushaf", "/coran/1/tafsir", "/priere/horaires", "/priere/invocations", "/apprendre/memorisation", "/assistant", "/priere/qibla"];
@@ -30,6 +31,7 @@ export default async function HomePage() {
               <span className="mt-0.5 block font-body text-base tracking-normal text-muted">{t.by}</span>
             </h1>
             <p className="mt-5 text-lg leading-snug">{t.slogan}</p>
+            <HijriDate locale={locale === "ar" ? "ar" : "fr"} label={h.hijriLabel} note={h.hijriNote} />
             <div className="mt-6 space-y-2">
               <Link href="/coran" className="flex min-h-12 items-center justify-center rounded-lg bg-night px-5 font-medium text-on-night">{t.quran.title}</Link>
               {session ? (

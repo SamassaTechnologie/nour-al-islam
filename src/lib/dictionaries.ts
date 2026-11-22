@@ -21,6 +21,8 @@ const fr = {
   switchLanguage: "Afficher en arabe",
   themeNext: { system: "Passer en mode sombre", dark: "Passer en mode clair", light: "Suivre le réglage du téléphone" },
   home: {
+    hijriLabel: "Date du jour selon le calendrier hégirien",
+    hijriNote: "Calendrier Umm al-Qurā calculé : le début du mois peut différer d'un jour selon l'observation du croissant dans votre pays.",
     start: "Créer mon compte",
     signIn: "Me connecter",
     open: "Ouvrir mon espace",
@@ -567,6 +569,8 @@ const ar: Dictionary = {
   switchLanguage: "العرض بالفرنسية",
   themeNext: { system: "التبديل إلى الوضع الداكن", dark: "التبديل إلى الوضع الفاتح", light: "اتباع إعداد الهاتف" },
   home: {
+    hijriLabel: "تاريخ اليوم بالتقويم الهجري",
+    hijriNote: "تقويم أم القرى المحسوب: قد يختلف أول الشهر يومًا واحدًا حسب رؤية الهلال في بلدك.",
     start: "إنشاء حساب",
     signIn: "تسجيل الدخول",
     open: "فتح مساحتي",
