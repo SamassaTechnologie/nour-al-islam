@@ -45,7 +45,7 @@ export default async function SurahPage({ params }: Props) {
           {staff ? <WordByWord surah={surah.number} t={q} /> : null}
         </div>
       </header>
-      <VerseList verses={verses} surahs={surahs} t={q} trackSurah={surah.number} />
+      <VerseList verses={verses} surahs={surahs} t={q} trackSurah={surah.number} wbw={staff} />
       <nav aria-label={q.browse} className="reader-chrome mt-6 flex justify-between gap-3">
         {previous ? <Link href={`/coran/${previous.number}`} className="inline-flex min-h-11 items-center font-medium text-emerald">{q.previous} : {previous.name_translit}</Link> : <span />}
         {next ? <Link href={`/coran/${next.number}`} className="inline-flex min-h-11 items-center text-end font-medium text-emerald">{q.next} : {next.name_translit}</Link> : null}

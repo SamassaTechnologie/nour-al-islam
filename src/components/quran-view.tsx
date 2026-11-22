@@ -25,13 +25,14 @@ export async function SourceNote({ t }: { t: Dictionary["quran"] }) {
   );
 }
 
-export async function VerseList({ verses, surahs, t, trackSurah, showHeadings = false, showRub = false }: {
+export async function VerseList({ verses, surahs, t, trackSurah, showHeadings = false, showRub = false, wbw = false }: {
   verses: Verse[];
   surahs: Surah[];
   t: Dictionary["quran"];
   trackSurah?: number;
   showHeadings?: boolean;
   showRub?: boolean;
+  wbw?: boolean;
 }) {
   const [bismillah, bookmarks] = await Promise.all([
     getBismillah(),
@@ -65,6 +66,9 @@ export async function VerseList({ verses, surahs, t, trackSurah, showHeadings = 
                   ) : null}
                   {bookmarks ? <BookmarkButton ayahId={verse.id} initial={bookmarks.has(verse.id)} t={t} /> : null}
                   <Link href={`/coran/${verse.surah}/tafsir#t${verse.number}`} aria-label={`${t.tafsirVerse} ${verse.surah}:${verse.number}`} data-tafsir-link={`${verse.surah}:${verse.number}`} className="reader-chrome inline-flex min-h-11 items-center px-2 text-base font-medium text-emerald">{t.tafsir}</Link>
+                  {wbw ? (
+                    <button type="button" data-wbw-verse={verse.number} aria-pressed="false" aria-label={`${t.wbwVerse} ${verse.surah}:${verse.number}`} className="reader-chrome inline-flex min-h-11 items-center rounded-md px-2 text-base font-medium text-emerald aria-pressed:bg-emerald aria-pressed:text-on-emerald">{t.wbw}</button>
+                  ) : null}
                 </span>
               </div>
               <ArabicVerse text={verseBody(verse.text_uthmani, verse.bismillah_length)} />

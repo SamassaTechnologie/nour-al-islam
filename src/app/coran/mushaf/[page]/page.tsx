@@ -57,6 +57,9 @@ export default async function MushafPageView({ params }: Props) {
       <ol className="sr-only" data-locked-text>
         {verses.map((verse) => <li key={verse.id} data-key={`${verse.surah}:${verse.number}`}>{verseBody(verse.text_uthmani, verse.bismillah_length)}</li>)}
       </ol>
+      <ol hidden data-translations>
+        {verses.map((verse) => <li key={verse.id} data-key={`${verse.surah}:${verse.number}`} lang="fr" dir="ltr">{verse.translation?.text ?? ""}</li>)}
+      </ol>
       <div className="mushaf-lines" aria-hidden="true">
         {data.lines.map((line) => {
           if (line.kind === "surah") {

@@ -85,9 +85,16 @@ export const getJuzVerses = cache((juz: number) => verses("juz", juz));
 export const getHizbVerses = cache((hizb: number) => verses("hizb", hizb));
 
 export const getVerseRange = cache(async (firstId: number, lastId: number) => {
-  const { data, error } = await content().from("ayahs").select("id,surah,number,text_uthmani,bismillah_length").gte("id", firstId).lte("id", lastId).order("id");
+  const { data, error } = await content()
+    .from("ayahs")
+    .select("id,surah,number,text_uthmani,bismillah_length,translation_verses(text,footnotes)")
+    .gte("id", firstId)
+    .lte("id", lastId)
+    .eq("translation_verses.source_id", TRANSLATION_ID)
+    .order("id");
   if (error) throw new Error(error.message);
-  return data as Pick<Verse, "id" | "surah" | "number" | "text_uthmani" | "bismillah_length">[];
+  type Row = Pick<Verse, "id" | "surah" | "number" | "text_uthmani" | "bismillah_length"> & { translation_verses: { text: string; footnotes: string | null }[] };
+  return (data as unknown as Row[]).map(({ translation_verses, ...v }) => ({ ...v, translation: translation_verses[0] ?? null }));
 });
 
 export const getJuzStarts = cache(async () => {

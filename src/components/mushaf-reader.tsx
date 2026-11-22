@@ -7,6 +7,8 @@ import type { Dictionary } from "@/lib/dictionaries";
 import { type ChapterAudio, type ChapterReciter, RECITER_KEY, defaultReciter, fetchChapter, fetchReciters, reciterLabel, store, stored, verseAt } from "@/lib/chapter-audio";
 import { useWakeLock } from "@/lib/use-wake-lock";
 import { MUSHAF_LAST_KEY } from "@/lib/khatm";
+import type { VerseWords } from "@/lib/quran-words";
+import { WordList } from "@/components/word-by-word";
 
 type T = Dictionary["quran"];
 type Position = { surah: number; verse: number };
@@ -25,7 +27,7 @@ const parseKey = (key: string): Position => {
   return { surah, verse };
 };
 
-export function MushafReader({ t, names, children }: { t: T; names: string[]; children: ReactNode }) {
+export function MushafReader({ t, names, staff = false, children }: { t: T; names: string[]; staff?: boolean; children: ReactNode }) {
   const router = useRouter();
   const page = Number(usePathname().split("/").pop()) || 1;
   const audio = useRef<HTMLAudioElement>(null);
@@ -46,6 +48,13 @@ export function MushafReader({ t, names, children }: { t: T; names: string[]; ch
   const [auto, setAuto] = useState(0);
   const [zoom, setZoom] = useState(1);
   const [landscape, setLandscape] = useState(false);
+  // Fenetre du verset touche : traduction, tafsir, mot a mot (equipe), lecture dans la sourate.
+  const [sheet, setSheet] = useState<Position | null>(null);
+  const [mode, setMode] = useState<"translation" | "wbw">("translation");
+  const [translation, setTranslation] = useState("");
+  const wordsCache = useRef(new Map<number, VerseWords[]>());
+  const [words, setWords] = useState<VerseWords[] | null>(null);
+  const [wordsFailed, setWordsFailed] = useState(false);
 
   // Telephone a l'horizontale (meme seuil que la feuille de style) : la taille de l'ecriture se regle.
   useEffect(() => {
@@ -61,6 +70,9 @@ export function MushafReader({ t, names, children }: { t: T; names: string[]; ch
     store(ZOOM_KEY, String(next));
     setZoom(next);
   };
+
+  // Nouvelle page : la fenetre du verset se ferme.
+  useEffect(() => setSheet(null), [page]);
 
   // Derniere page ouverte : le plan de lecture propose de la compter comme lue.
   useEffect(() => store(MUSHAF_LAST_KEY, String(page)), [page]);
@@ -293,6 +305,35 @@ export function MushafReader({ t, names, children }: { t: T; names: string[]; ch
     const position = parseKey(word.dataset.v);
     highlight(position);
     void select(position, playingRef.current);
+    openSheet(position);
+  };
+
+  const openSheet = (position: Position) => {
+    const key = verseKey(position);
+    const item = Array.from(document.querySelectorAll<HTMLElement>("[data-translations] li")).find((li) => li.dataset.key === key);
+    setTranslation(item?.textContent?.trim() ?? "");
+    setMode("translation");
+    setSheet(position);
+  };
+
+  const showWords = async (surah: number) => {
+    setMode("wbw");
+    const known = wordsCache.current.get(surah);
+    if (known) {
+      setWords(known);
+      return;
+    }
+    setWords(null);
+    setWordsFailed(false);
+    try {
+      const res = await fetch(`/api/mot-a-mot?surah=${surah}`);
+      if (!res.ok) throw new Error("wbw");
+      const data = (await res.json()) as { verses: VerseWords[] };
+      wordsCache.current.set(surah, data.verses);
+      setWords(data.verses);
+    } catch {
+      setWordsFailed(true);
+    }
   };
 
   const onTouchEnd = (event: React.TouchEvent) => {
@@ -336,6 +377,34 @@ export function MushafReader({ t, names, children }: { t: T; names: string[]; ch
           onPause={() => { if (!audio.current?.ended) playingRef.current = false; setPlaying(false); }}
           onEnded={() => void onEnded()} onError={() => { if (audio.current?.getAttribute("src")) setFailed(true); }} onCanPlay={() => setFailed(false)} />
         <div className="mx-auto max-w-xl px-3">
+          {sheet ? (
+            <div className="max-h-[45vh] overflow-y-auto border-b border-line py-3" data-verse-sheet={verseKey(sheet)}>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-base font-medium"><span lang="en" dir="ltr">{names[sheet.surah - 1]}</span> <span className="text-emerald">{sheet.surah}:{sheet.verse}</span></p>
+                <button type="button" onClick={() => setSheet(null)} aria-label={t.verseClose} className="grid h-11 w-11 place-items-center rounded-md text-muted" data-sheet-close>
+                  <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+                </button>
+              </div>
+              <div className="mt-1 flex flex-wrap gap-2">
+                <button type="button" aria-pressed={mode === "translation"} onClick={() => setMode("translation")} className="inline-flex min-h-11 items-center rounded-lg border border-line px-3 font-medium text-emerald aria-pressed:border-emerald aria-pressed:bg-emerald aria-pressed:text-on-emerald" data-sheet-translation>{t.translation}</button>
+                <Link href={`/coran/${sheet.surah}/tafsir#t${sheet.verse}`} className="inline-flex min-h-11 items-center rounded-lg border border-line px-3 font-medium text-emerald" data-sheet-tafsir>{t.tafsir}</Link>
+                {staff ? <button type="button" aria-pressed={mode === "wbw"} onClick={() => void showWords(sheet.surah)} className="inline-flex min-h-11 items-center rounded-lg border border-line px-3 font-medium text-emerald aria-pressed:border-emerald aria-pressed:bg-emerald aria-pressed:text-on-emerald" data-sheet-wbw>{t.wbw}</button> : null}
+                <Link href={`/coran/${sheet.surah}#v${sheet.surah}-${sheet.verse}`} className="inline-flex min-h-11 items-center rounded-lg border border-line px-3 font-medium text-emerald" data-sheet-read>{t.readInSurah}</Link>
+              </div>
+              {mode === "translation" ? (
+                <p lang="fr" dir="ltr" className="mt-3 text-lg leading-relaxed" data-sheet-text>{translation || t.translationUnavailable}</p>
+              ) : wordsFailed ? (
+                <p className="mt-3 text-sm text-muted">{t.wbwError}</p>
+              ) : words ? (
+                (() => {
+                  const list = words.find((v) => v.number === sheet.verse)?.words;
+                  return list ? <><WordList words={list} verse={sheet.verse} /><p className="mt-1 text-sm text-muted">{t.wbwShort}</p></> : <p className="mt-3 text-sm text-muted">{t.wbwError}</p>;
+                })()
+              ) : (
+                <p className="mt-3 text-sm text-muted">…</p>
+              )}
+            </div>
+          ) : null}
           {open ? (
             <div className="space-y-3 border-b border-line py-3">
               <label className="block text-base font-medium">
@@ -366,6 +435,7 @@ export function MushafReader({ t, names, children }: { t: T; names: string[]; ch
                   </div>
                 </fieldset>
               ) : null}
+              <p className="text-sm text-muted">{t.mushafTapHint}</p>
               <p className="text-sm text-muted">{t.mushafCredit} {t.audioCredit}</p>
             </div>
           ) : null}
