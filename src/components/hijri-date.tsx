@@ -4,9 +4,31 @@ import { useEffect, useState } from "react";
 
 type Props = { locale: "fr" | "ar"; label: string; note: string };
 
-function format(locale: string, calendar: string | null, d: Date) {
-  const tag = calendar ? `${locale}-u-ca-${calendar}` : locale;
-  return new Intl.DateTimeFormat(tag, { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(d);
+// Noms des mois écrits par l'application : certains navigateurs calculent bien le
+// calendrier hégirien mais affichent les noms des mois grégoriens (« juin »).
+const MONTHS = {
+  fr: ["Mouharram", "Safar", "Rabīʿ al-awwal", "Rabīʿ ath-thānī", "Joumādā al-oūlā", "Joumādā ath-thāniya", "Rajab", "Chaʿbān", "Ramadan", "Chawwāl", "Dhou al-qiʿda", "Dhou al-hijja"],
+  ar: ["المحرم", "صفر", "ربيع الأول", "ربيع الآخر", "جمادى الأولى", "جمادى الآخرة", "رجب", "شعبان", "رمضان", "شوال", "ذو القعدة", "ذو الحجة"],
+};
+
+export function hijriParts(d: Date): { day: number; month: number; year: number } | null {
+  try {
+    const parts = new Intl.DateTimeFormat("en-u-ca-islamic-umalqura-nu-latn", { day: "numeric", month: "numeric", year: "numeric" }).formatToParts(d);
+    const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
+    const day = get("day"), month = get("month"), year = get("year");
+    if (!(day >= 1 && day <= 30 && month >= 1 && month <= 12 && year >= 1400 && year <= 1600)) return null;
+    return { day, month, year };
+  } catch {
+    return null;
+  }
+}
+
+export function formatHijri(locale: "fr" | "ar", d: Date): string | null {
+  const h = hijriParts(d);
+  if (!h) return null;
+  const weekday = new Intl.DateTimeFormat(locale, { weekday: "long" }).format(d);
+  const month = MONTHS[locale][h.month - 1];
+  return locale === "ar" ? `${weekday} ${h.day} ${month} ${h.year} هـ` : `${weekday} ${h.day} ${month} ${h.year} H`;
 }
 
 export function HijriDate({ locale, label, note }: Props) {
@@ -15,13 +37,8 @@ export function HijriDate({ locale, label, note }: Props) {
   useEffect(() => {
     const update = () => {
       const now = new Date();
-      try {
-        const hijri = format(locale, "islamic-umalqura", now);
-        if (!/1[34]\d\d/.test(hijri.replace(/[٠-٩]/g, (c) => String(c.charCodeAt(0) - 0x660)))) throw new Error("calendrier absent");
-        setDates({ hijri, greg: format(locale, null, now) });
-      } catch {
-        setDates(null);
-      }
+      const hijri = formatHijri(locale, now);
+      setDates(hijri ? { hijri, greg: new Intl.DateTimeFormat(locale, { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(now) } : null);
     };
     update();
     const id = window.setInterval(update, 60_000);
