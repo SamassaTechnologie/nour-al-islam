@@ -78,7 +78,7 @@ Exercice : en famille, faites la liste des pauvres et des voisins à qui vous do
         dict(kind='hadith', collection='Ṣaḥīḥ Muslim', edition='Numérotation de sunnah.com', hadith_number='1963',
              grade='Authentique (ṣaḥīḥ)', graded_by='Recueil authentique de Muslim',
              source_title="« N'égorgez qu'une bête d'âge adulte », d'après Jābir", url='https://sunnah.com/muslim:1963'),
-        coll('abudawud', 2802, 'Ḥasan ṣaḥīḥ (Shuʿayb al-Arnaʾūṭ) ; authentique (Muḥyī d-Dīn ʿAbd al-Ḥamīd) ; chaîne authentique (Zubayr ʿAlī Zaʾī) ; faible (al-Albānī, pour cette version)', "Jugements affichés sur sunnah.com",
+        coll('abudawud', 2802, 'Ḥasan ṣaḥīḥ (al-Arnaʾūṭ) ; chaîne authentique (Zubayr ʿAlī Zaʾī) ; faible (al-Albānī, cette version)', "Jugements affichés sur sunnah.com",
              "Les quatre défauts, d'après al-Barāʾ ibn ʿĀzib",
              "Parole du Prophète ﷺ copiée telle quelle de l'édition de sunnah.com (base hadith-api)."),
         coll('tirmidhi', 1497, 'Authentique (Aḥmad Shākir, al-Albānī) ; ḥasan ṣaḥīḥ (Bashshār ʿAwwād)', "Jugements affichés sur sunnah.com",
