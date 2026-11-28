@@ -7,10 +7,11 @@ import { Reminders } from "@/components/reminders";
 
 type T = Dictionary["prayerTimes"];
 const KEY = "nour_prayer_settings";
-type Settings = { place: Place; method: Method; asr: AsrSchool };
+export type Settings = { place: Place; method: Method; asr: AsrSchool };
 const DEFAULTS: Settings = { place: CITIES[0], method: DEFAULT_METHOD, asr: "standard" };
 
-function load(): Settings {
+/** Reglages de priere gardes sur l'appareil (ville ou position, methode, ecole du ʿasr). */
+export function loadPrayerSettings(): Settings {
   try {
     const raw = JSON.parse(localStorage.getItem(KEY) ?? "null");
     if (!raw) return DEFAULTS;
@@ -26,7 +27,7 @@ export function PrayerTimesView({ t, tr, locale }: { t: T; tr: Dictionary["remin
   const [locating, setLocating] = useState(false);
   const [geoError, setGeoError] = useState("");
 
-  useEffect(() => { setSettings(load()); }, []);
+  useEffect(() => { setSettings(loadPrayerSettings()); }, []);
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 30_000);
     return () => clearInterval(id);

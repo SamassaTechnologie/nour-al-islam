@@ -6,6 +6,9 @@ import { ArabicVerse } from "@/components/quran-view";
 import { getSurahs } from "@/lib/quran";
 import { getVerseOfDay } from "@/lib/verse-of-day";
 import { HijriDate } from "@/components/hijri-date";
+import { Today } from "@/components/today";
+import { getDashboard } from "@/lib/dashboard";
+import { getReadingSummary } from "@/lib/quran";
 
 const STEP_LINKS = ["/apprendre#rubrique-arabe", "/apprendre#rubrique-tajwid", "/apprendre/memorisation", "/coran/1/tafsir", "/priere"];
 const QUICK_LINKS = ["/coran", "/coran/mushaf", "/coran/1/tafsir", "/priere/horaires", "/priere/invocations", "/apprendre/memorisation", "/assistant", "/priere/qibla"];
@@ -15,8 +18,13 @@ const arch = "M.5 150V132C.5 88 92 56 160 5c68 51 159.5 83 159.5 127v18";
 export default async function HomePage() {
   const [{ t, locale }, session, verse, surahs] = await Promise.all([getPreferences(), getSession(), getVerseOfDay().catch(() => null), getSurahs()]);
   const h = t.home;
+  // Personne connectee : l'ecran « Aujourd'hui » remplace la porte d'entree, le parcours et les engagements.
+  const today = session ? await Promise.all([getDashboard(), getReadingSummary()]) : null;
   return (
     <main>
+      {session && today ? (
+        <Today t={t} locale={locale} name={session.profile?.display_name ?? ""} data={today[0]} reading={today[1]} surahs={surahs} />
+      ) : (
       <section className="relative overflow-hidden bg-night px-6 pt-6">
         <Lattice id="hero-lattice" className="opacity-25" />
         <div className="relative mx-auto max-w-[27rem]">
@@ -46,6 +54,7 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       {verse ? (
         <section className="mx-auto max-w-xl px-6 pt-10" aria-labelledby="verset-du-jour" data-verse-of-day={`${verse.surah}:${verse.number}`}>
@@ -71,6 +80,7 @@ export default async function HomePage() {
         </section>
       ) : null}
 
+      {!session ? (
       <section className="mx-auto max-w-xl px-6 pt-10">
         <h2 className="text-2xl">{h.pathTitle}</h2>
         <p className="mt-2 text-muted">{h.pathIntro}</p>
@@ -90,6 +100,7 @@ export default async function HomePage() {
           ))}
         </ol>
       </section>
+      ) : null}
 
       <section className="mx-auto max-w-xl px-6 pt-10" aria-labelledby="acces-rapide">
         <h2 id="acces-rapide" className="text-2xl">{h.quickTitle}</h2>
@@ -105,6 +116,7 @@ export default async function HomePage() {
         </ul>
       </section>
 
+      {!session ? (
       <section className="mt-10 bg-tint">
         <div className="mx-auto max-w-xl px-6 py-9">
           <h2 className="text-2xl">{h.trustTitle}</h2>
@@ -118,6 +130,7 @@ export default async function HomePage() {
           </dl>
         </div>
       </section>
+      ) : null}
 
       <footer dir="ltr" lang="en" className="px-6 pt-8 text-center text-base text-muted" data-locale={locale}>
         NOUR AL-ISLAM {t.by}

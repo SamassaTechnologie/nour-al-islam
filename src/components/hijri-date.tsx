@@ -31,7 +31,7 @@ export function formatHijri(locale: "fr" | "ar", d: Date): string | null {
   return locale === "ar" ? `${weekday} ${h.day} ${month} ${h.year} هـ` : `${weekday} ${h.day} ${month} ${h.year} H`;
 }
 
-export function HijriDate({ locale, label, note }: Props) {
+export function HijriDate({ locale, label, note, onNight = false }: Props & { onNight?: boolean }) {
   const [dates, setDates] = useState<{ hijri: string; greg: string } | null>(null);
 
   useEffect(() => {
@@ -45,13 +45,14 @@ export function HijriDate({ locale, label, note }: Props) {
     return () => window.clearInterval(id);
   }, [locale]);
 
-  if (!dates) return <div className="mt-4 min-h-[4.5rem]" aria-hidden="true" />;
+  const box = onNight ? "mt-1 min-h-[3rem]" : "mt-4 min-h-[4.5rem]";
+  if (!dates) return <div className={box} aria-hidden="true" />;
   return (
-    <div className="mt-4 min-h-[4.5rem]" data-hijri-date>
+    <div className={box} data-hijri-date>
       <p className="sr-only">{label}</p>
-      <p lang={locale} dir={locale === "ar" ? "rtl" : "ltr"} className="text-lg font-semibold text-emerald" data-hijri>{dates.hijri}</p>
-      <p lang={locale} dir={locale === "ar" ? "rtl" : "ltr"} className="text-base text-muted" data-gregorian>{dates.greg}</p>
-      <p className="mt-1 text-sm text-muted">{note}</p>
+      <p lang={locale} dir={locale === "ar" ? "rtl" : "ltr"} className={onNight ? "text-lg font-semibold text-gold" : "text-lg font-semibold text-emerald"} data-hijri>{dates.hijri}</p>
+      <p lang={locale} dir={locale === "ar" ? "rtl" : "ltr"} className={onNight ? "text-base text-on-night/80" : "text-base text-muted"} data-gregorian>{dates.greg}</p>
+      <p className={onNight ? "mt-1 text-sm text-on-night/70" : "mt-1 text-sm text-muted"}>{note}</p>
     </div>
   );
 }
