@@ -46,7 +46,7 @@ export const SECTION_LABEL: Record<string, string> = {
 export const ROLE_LABEL: Record<AppRole, string> = { user: "Utilisateur", editor: "Éditeur", reviewer: "Réviseur religieux", admin: "Administrateur" };
 export const ACTION_LABEL: Record<string, string> = {
   created: "Création", new_version: "Nouvelle version", submit: "Envoi à la vérification", reference_verified: "Référence vérifiée", reference_unverified: "Vérification annulée",
-  confirm_sources: "Sources confirmées", ai_review: "Relecture par l’assistant IA", ai_corrected: "Corrections par l’assistant IA", validate: "Validation par un réviseur", ai_edited: "Modifications par l’assistant IA", request_changes: "Corrections demandées", publish: "Publication", withdraw: "Retrait", role_changed: "Rôle modifié", position_changed: "Place dans le parcours modifiée",
+  confirm_sources: "Sources confirmées", ai_review: "Relecture par l’assistant IA", ai_corrected: "Corrections par l’assistant IA", validate: "Validation par un réviseur", ai_edited: "Modifications par l’assistant IA", request_changes: "Corrections demandées", publish: "Publication", withdraw: "Retrait", role_changed: "Rôle modifié", position_changed: "Place dans le parcours modifiée", level_changed: "Niveau modifié",
 };
 export const formatDate = (value: string) => new Date(value).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short", timeZone: "UTC" }) + " UTC";
 

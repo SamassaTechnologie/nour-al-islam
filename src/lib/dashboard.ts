@@ -25,11 +25,14 @@ export async function getDashboard() {
   // Lecons avec exercices, dans l'ordre du parcours ; une lecon est « faite » quand ses exercices ont ete tentes.
   const withQuestions = new Set((questions.data ?? []).map((q) => q.revision_id));
   const tried = new Set((attempts.data ?? []).map((a) => a.item_id));
-  const path = lessons.filter((l) => withQuestions.has(l.revisionId));
+  // Parcours : niveau par niveau (Debutant, Intermediaire, Avance), puis l'ordre des rubriques et des places.
+  const path = lessons.filter((l) => withQuestions.has(l.revisionId)).map((l, i) => ({ l, i }))
+    .sort((a, b) => (a.l.level ?? 2) - (b.l.level ?? 2) || a.i - b.i).map(({ l }) => l);
   const sections: SectionProgress[] = [];
-  for (const lesson of path) {
-    let entry = sections.at(-1);
-    if (entry?.section !== lesson.section) sections.push(entry = { section: lesson.section, done: 0, total: 0 });
+  // Progression par rubrique, dans l'ordre des rubriques (une rubrique peut s'etendre sur plusieurs niveaux).
+  for (const lesson of lessons.filter((l) => withQuestions.has(l.revisionId))) {
+    let entry = sections.find((s) => s.section === lesson.section);
+    if (!entry) sections.push(entry = { section: lesson.section, done: 0, total: 0 });
     entry.total++;
     if (tried.has(lesson.id)) entry.done++;
   }

@@ -133,6 +133,18 @@ export async function setPosition(_: AdminState, form: FormData): Promise<AdminS
   return { ok: true };
 }
 
+export async function setLevel(_: AdminState, form: FormData): Promise<AdminState> {
+  const raw = field(form, "level");
+  const level = raw ? Number(raw) : null;
+  if (level !== null && level !== 1 && level !== 2 && level !== 3) return { error: "Choisissez Débutant, Intermédiaire ou Avancé." };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_content_level", { p_item: field(form, "item"), p_level: level });
+  if (error) return failure(error);
+  refresh(field(form, "item"));
+  revalidatePath("/apprendre");
+  return { ok: true };
+}
+
 export async function newRevision(_: AdminState, form: FormData): Promise<AdminState> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("new_content_revision", { p_item: field(form, "item") });

@@ -81,6 +81,20 @@ const fr = {
     streakTitle: "Votre série",
     profile: "Voir mon tableau de bord",
   },
+  levels: {
+    label: "Niveaux",
+    names: ["Débutant", "Intermédiaire", "Avancé"],
+    intros: [
+      "Pour commencer : lire l’arabe, les bases de la croyance, les ablutions et la prière, la vie du Prophète ﷺ et les premiers hadiths.",
+      "Pour celui qui prie et lit déjà : le tajwid, la purification, la prière, le jeûne, la zakāt, le pèlerinage, la famille et le bon comportement.",
+      "Pour approfondir : les règles fines du tajwid, les questions de croyance et les avis des savants.",
+    ],
+    count: "{n} leçon(s)",
+    progress: "{done} leçon(s) faite(s) sur {total}",
+    suggested: "Conseillé pour vous",
+    empty: "Aucune leçon n’est encore disponible à ce niveau.",
+    tools: "Mémorisation et assistant",
+  },
   soon: {
     label: "Cette partie n’est pas encore ouverte.",
     planned: "Ce qu’elle contiendra",
@@ -650,6 +664,20 @@ const ar: Dictionary = {
     hifdhStart: "اختر سورة لحفظها",
     streakTitle: "أيامك المتتالية",
     profile: "عرض لوحتي",
+  },
+  levels: {
+    label: "المستويات",
+    names: ["مبتدئ", "متوسط", "متقدم"],
+    intros: [
+      "للبداية: قراءة العربية، وأصول العقيدة، والوضوء والصلاة، وسيرة النبي ﷺ، وأول الأحاديث.",
+      "لمن يصلي ويقرأ: التجويد، والطهارة، والصلاة، والصيام، والزكاة، والحج، والأسرة، وحسن الخلق.",
+      "للتعمق: دقائق التجويد، ومسائل العقيدة، وأقوال العلماء.",
+    ],
+    count: "{n} درس",
+    progress: "{done} من {total} دروس",
+    suggested: "المستوى المقترح لك",
+    empty: "لا يوجد درس متاح في هذا المستوى بعد.",
+    tools: "الحفظ والمساعد",
   },
   soon: {
     label: "هذا القسم لم يُفتح بعد.",

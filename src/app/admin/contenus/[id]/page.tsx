@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { setPosition, addOpinion, addQuestion, addReference, contentAction, newRevision, removeOpinion, removeQuestion, removeReference, saveRevision, verifyReference } from "@/app/admin/actions";
+import { setLevel, setPosition, addOpinion, addQuestion, addReference, contentAction, newRevision, removeOpinion, removeQuestion, removeReference, saveRevision, verifyReference } from "@/app/admin/actions";
 import { AdminForm, inputClass } from "@/components/admin-form";
 import { ArabicVerse } from "@/components/quran-view";
 import { Paragraphs, referenceText } from "@/components/content-view";
@@ -19,7 +19,7 @@ export default async function ContentDetail({ params }: { params: Promise<{ id: 
   const [{ id }, staff, surahs] = await Promise.all([params, requireStaff(), getSurahs()]);
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
   const { supabase, role, userId } = staff;
-  const { data: item } = await supabase.from("content_items").select("id,slug,kind,section,locale,published_revision_id,position").eq("id", id).maybeSingle<Item & { position: number | null }>();
+  const { data: item } = await supabase.from("content_items").select("id,slug,kind,section,locale,published_revision_id,position,level").eq("id", id).maybeSingle<Item & { position: number | null; level: number | null }>();
   if (!item) notFound();
   const { data: revisions } = await supabase.from("content_revisions").select("*").eq("item_id", id).order("number", { ascending: false }).returns<Revision[]>();
   const rev = revisions?.[0];
@@ -61,6 +61,19 @@ export default async function ContentDetail({ params }: { params: Promise<{ id: 
           <label className={label}>Place dans le parcours « {SECTION_LABEL[item.section]} » (vide : à la fin)<input name="position" type="number" min={1} max={999} defaultValue={item.position ?? ""} className={inputClass} /></label>
         </AdminForm>
       ) : item.position ? <p className="text-muted">Place dans le parcours : {item.position}</p> : null}
+      {canWrite && item.kind === "lesson" && item.section !== "adhkar" ? (
+        <AdminForm action={setLevel} submit="Enregistrer le niveau" done="Niveau enregistré." tone="plain">
+          {hidden("item", id)}
+          <label className={label}>Niveau dans Apprendre
+            <select name="level" defaultValue={item.level ?? ""} className={inputClass} data-level-select>
+              <option value="">Non classé (Intermédiaire)</option>
+              <option value="1">Débutant</option>
+              <option value="2">Intermédiaire</option>
+              <option value="3">Avancé</option>
+            </select>
+          </label>
+        </AdminForm>
+      ) : null}
 
       {lastNote ? <p role="status" className="border-s-2 border-gold ps-3"><span className="font-medium">Corrections demandées : </span>{lastNote}</p> : null}
 
