@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AudioPlayer } from "@/components/audio-player";
 import { SourceNote, VerseList, place } from "@/components/quran-view";
 import { getSurahs, getSurahVerses } from "@/lib/quran";
 import { getPreferences } from "@/lib/preferences";
@@ -51,7 +50,6 @@ export default async function SurahPage({ params }: Props) {
         {next ? <Link href={`/coran/${next.number}`} className="inline-flex min-h-11 items-center text-end font-medium text-emerald">{q.next} : {next.name_translit}</Link> : null}
       </nav>
       <SourceNote t={q} />
-      <AudioPlayer surah={surah.number} surahName={surah.name_translit} t={q} />
     </main>
   );
 }

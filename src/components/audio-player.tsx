@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Dictionary } from "@/lib/dictionaries";
 import {
@@ -28,12 +29,23 @@ import { useWakeLock } from "@/lib/use-wake-lock";
 type T = Dictionary["quran"];
 
 const SPEED_KEY = "nour_audio_speed";
+const END_KEY = "nour_audio_end";
+const LAST_SURAH = 114;
+// Repetition d'une partie : 0 = sans fin.
+const RANGE_TIMES = [1, 3, 5, 10, 0];
+type EndMode = "stop" | "repeat" | "next";
+type Range = { from: number; to: number; times: number };
 const REPEATS = [1, 3, 5, 10];
 const SPEEDS = [0.75, 1, 1.25, 1.5];
 
 // Un seul fichier par sourate : le telephone garde la lecture ecran eteint ou application en arriere-plan.
 export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName: string; t: T }) {
+  const router = useRouter();
   const audio = useRef<HTMLAudioElement>(null);
+  // Le lecteur reste en place d'une sourate a l'autre (mise en page de /coran) : la lecture peut enchainer sans s'arreter.
+  const shownSurah = useRef(surah);
+  const autoNext = useRef(false);
+  const rangePlays = useRef(1);
   const plays = useRef(1);
   const verseRef = useRef(1);
   const pendingSeek = useRef<number | null>(null);
@@ -51,7 +63,11 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
   const [failed, setFailed] = useState(false);
   const [open, setOpen] = useState(false);
   const [repeat, setRepeat] = useState(1);
-  const [loop, setLoop] = useState(false);
+  const [endMode, setEndMode] = useState<EndMode>("stop");
+  const [range, setRange] = useState<Range | null>(null);
+  const [rangeOpen, setRangeOpen] = useState(false);
+  const [draft, setDraft] = useState<Range>({ from: 1, to: 1, times: 3 });
+  const [rangeRound, setRangeRound] = useState(1);
   const [speed, setSpeed] = useState(1);
   const [progress, setProgress] = useState(0);
   const [saved, setSaved] = useState(false);
@@ -68,6 +84,8 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
     let active = true;
     const savedSpeed = Number(stored(SPEED_KEY));
     if (SPEEDS.includes(savedSpeed)) setSpeed(savedSpeed);
+    const savedEnd = stored(END_KEY);
+    if (savedEnd === "repeat" || savedEnd === "next") setEndMode(savedEnd);
     fetchReciters()
       .then((list) => {
         if (!active) return;
@@ -97,6 +115,22 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
   useEffect(() => {
     if (reciter === null) return;
     let active = true;
+    if (shownSurah.current !== surah) {
+      // Autre sourate : on repart de son debut ; la lecture ne continue que si elle enchaine d'elle-meme.
+      shownSurah.current = surah;
+      const element = audio.current;
+      if (element && !autoNext.current) element.pause();
+      intro.current = null;
+      setIntroOn(false);
+      plays.current = 1;
+      verseRef.current = 1;
+      setVerse(1);
+      setProgress(0);
+      setRange(null);
+      setRangeOpen(false);
+      chapterRef.current = null;
+      setChapter(null);
+    }
     setLoading(true);
     setFailed(false);
     setSaved(Boolean(findDownload(reciter, surah)));
@@ -126,6 +160,11 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
       intro.current = null;
       setIntroOn(false);
     }
+    if (autoNext.current) {
+      autoNext.current = false;
+      startSurah(true);
+      return;
+    }
     if (element.src !== chapter.url) {
       pendingSeek.current = verseStart(chapter, verseRef.current);
       element.src = chapter.url;
@@ -139,7 +178,8 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
   }, [speed]);
 
   useEffect(() => {
-    if (reciter === null || !chapter || !needsBasmala(surah, chapter)) return;
+    // Basmala du recitant chargee d'avance (utile aussi pour la sourate suivante).
+    if (reciter === null) return;
     if (basmala.current?.reciter === reciter) return;
     let active = true;
     fetchBasmala(reciter)
@@ -148,7 +188,7 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
     return () => {
       active = false;
     };
-  }, [chapter, reciter, surah]);
+  }, [reciter]);
 
   const highlight = useCallback((number: number, scroll: boolean) => {
     document.querySelectorAll("[data-playing]").forEach((el) => el.removeAttribute("data-playing"));
@@ -173,7 +213,17 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
     verseRef.current = first.number;
     setVerse(first.number);
     highlight(first.number, true);
-    const b = needsBasmala(surah, ch) && basmala.current?.reciter === reciter ? basmala.current.value : null;
+    const known = basmala.current?.reciter === reciter ? basmala.current.value : undefined;
+    if (needsBasmala(surah, ch) && known === undefined && reciter !== null) {
+      // Basmala pas encore chargee : on la charge puis on commence.
+      const done = (value: Basmala | null) => {
+        basmala.current = { reciter, value };
+        startSurah(autoplay);
+      };
+      fetchBasmala(reciter).then(done, () => done(null));
+      return;
+    }
+    const b = needsBasmala(surah, ch) ? known ?? null : null;
     if (b) {
       intro.current = b;
       setIntroOn(true);
@@ -259,6 +309,11 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
       element.currentTime = active.from / 1000;
       return;
     }
+    // Repetition d'une partie : a la fin du dernier verset choisi, retour au premier, ou arret.
+    if (range && active && active.number === range.to && ms >= active.to - 120 && active !== timings.at(-1)) {
+      endOfRange(element);
+      return;
+    }
     const at = verseAt(timings, ms);
     if (at && at.number !== verseRef.current) {
       plays.current = 1;
@@ -280,17 +335,57 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
       plays.current += 1;
       element.currentTime = last.from / 1000;
       play();
-    } else if (loop) {
+    } else if (range && last && range.to === last.number) {
+      endOfRange(element);
+    } else if (range) {
+      setPlaying(false);
+    } else if (endMode === "repeat") {
       seekTo(timings[0]?.number ?? 1, true);
+    } else if (endMode === "next" && surah < LAST_SURAH) {
+      // Sourate suivante : la page change et le meme lecteur continue (basmala puis premier verset).
+      autoNext.current = true;
+      router.push(window.location.pathname.replace(/\d+$/, String(surah + 1)));
     } else {
       setPlaying(false);
     }
+  };
+
+  const endOfRange = (element: HTMLAudioElement) => {
+    if (!range) return;
+    if (range.times === 0 || rangePlays.current < range.times) {
+      rangePlays.current += 1;
+      setRangeRound(rangePlays.current);
+      const start = timings.find((x) => x.number === range.from);
+      plays.current = 1;
+      verseRef.current = range.from;
+      setVerse(range.from);
+      highlight(range.from, true);
+      element.currentTime = start && range.from !== timings[0]?.number ? start.from / 1000 : 0;
+      play();
+    } else {
+      element.pause();
+      rangePlays.current = 1;
+      setRangeRound(1);
+    }
+  };
+
+  const applyRange = (next: Range | null) => {
+    setRange(next);
+    rangePlays.current = 1;
+    setRangeRound(1);
+    if (next) seekTo(next.from, true);
   };
 
   const toggle = useCallback(() => {
     const element = audio.current;
     if (!element || !chapter) return;
     if (element.paused) {
+      if (range && !intro.current && (verseRef.current < range.from || verseRef.current > range.to)) {
+        rangePlays.current = 1;
+        setRangeRound(1);
+        seekTo(range.from, true);
+        return;
+      }
       const first = timings[0];
       // Ecoute depuis le debut de la sourate : avec la basmala.
       if (!intro.current && first && verseRef.current === first.number && element.currentTime * 1000 <= first.from + 300) {
@@ -302,7 +397,7 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
     } else {
       element.pause();
     }
-  }, [chapter, highlight, play, startSurah, timings]);
+  }, [chapter, highlight, play, range, seekTo, startSurah, timings]);
 
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
@@ -440,7 +535,59 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
                 {SPEEDS.map((n) => <button key={n} type="button" aria-pressed={speed === n} onClick={() => { store(SPEED_KEY, String(n)); setSpeed(n); }} className={choice(speed === n)}>{n}×</button>)}
               </div>
             </fieldset>
-            <button type="button" aria-pressed={loop} onClick={() => setLoop(!loop)} className={`min-h-11 w-full rounded-lg border border-line text-base ${loop ? "border-emerald font-medium text-emerald" : ""}`}>{t.repeatSurah}</button>
+            <fieldset data-end-mode={endMode}>
+              <legend className="text-base font-medium">{t.endTitle}</legend>
+              <div className="mt-1 flex gap-1 rounded-lg bg-tint p-1">
+                {(["stop", "repeat", "next"] as const).map((mode) => (
+                  <button key={mode} type="button" aria-pressed={endMode === mode} data-end={mode} onClick={() => { store(END_KEY, mode); setEndMode(mode); }} className={choice(endMode === mode)}>
+                    {mode === "stop" ? t.endStop : mode === "repeat" ? t.endRepeat : t.endNext}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+            <div className="rounded-lg border border-line p-3" data-range={range ? "on" : "off"}>
+              <button type="button" aria-expanded={rangeOpen || Boolean(range)} onClick={() => {
+                if (!rangeOpen && !range) setDraft({ from: verse, to: Math.min(verse + 4, timings.at(-1)?.number ?? verse), times: draft.times });
+                setRangeOpen(!rangeOpen);
+              }} className="flex min-h-11 w-full items-center justify-between text-start text-base font-medium" data-range-toggle>
+                {t.rangeTitle}
+                <svg aria-hidden="true" viewBox="0 0 24 24" className={`h-5 w-5 transition-transform ${rangeOpen || range ? "rotate-180" : ""}`}><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </button>
+              {rangeOpen || range ? (
+                <div className="mt-2 space-y-3">
+                  <div className="grid grid-cols-2 gap-2">
+                    {(["from", "to"] as const).map((key) => (
+                      <label key={key} className="block text-base">
+                        {key === "from" ? t.rangeFrom : t.rangeTo}
+                        <select value={draft[key]} data-range-select={key} onChange={(event) => {
+                          const value = Number(event.target.value);
+                          const next = key === "from" ? { ...draft, from: value, to: Math.max(value, draft.to) } : { ...draft, to: value, from: Math.min(value, draft.from) };
+                          setDraft(next);
+                          if (range) applyRange(next);
+                        }} className="mt-1 block min-h-11 w-full rounded-lg border border-line bg-page px-2">
+                          {timings.map((x) => <option key={x.number} value={x.number}>{x.number}</option>)}
+                        </select>
+                      </label>
+                    ))}
+                  </div>
+                  <fieldset>
+                    <legend className="text-base">{t.rangeTimes}</legend>
+                    <div className="mt-1 flex gap-1 rounded-lg bg-tint p-1">
+                      {RANGE_TIMES.map((n) => (
+                        <button key={n} type="button" aria-pressed={draft.times === n} onClick={() => { const next = { ...draft, times: n }; setDraft(next); if (range) { setRange(next); } }} className={choice(draft.times === n)}>
+                          {n === 0 ? t.rangeEndless : `${n}×`}
+                        </button>
+                      ))}
+                    </div>
+                  </fieldset>
+                  {range ? (
+                    <button type="button" onClick={() => { applyRange(null); setRangeOpen(false); }} className="min-h-11 w-full rounded-lg border border-line font-medium" data-range-off>{t.rangeOff}</button>
+                  ) : (
+                    <button type="button" disabled={!chapter} onClick={() => applyRange(draft)} className="min-h-11 w-full rounded-lg bg-emerald font-medium text-on-emerald disabled:opacity-60" data-range-on>{t.rangeOn}</button>
+                  )}
+                </div>
+              ) : null}
+            </div>
             {canDownload && current ? (
               <div className="rounded-lg border border-line p-3" data-download={saved ? "saved" : saving !== null ? "saving" : "none"}>
                 {saved ? (
@@ -471,7 +618,7 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
             <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 rtl:rotate-180" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z" /></svg>
           </button>
           <p role="status" className="min-w-0 flex-1 truncate px-1 text-base" data-audio-status>
-            {failed ? t.audioError : loading ? t.audioLoading : chapter ? <><span className="font-medium" data-audio-verse>{introOn ? t.basmala : `${surah}:${verse}`}</span> <span className="text-muted">{current?.name}</span>{saved ? <span className="sr-only"> · {t.downloaded}</span> : null}</> : null}
+            {failed ? t.audioError : loading ? t.audioLoading : chapter ? <>{range ? <span className="block text-sm text-emerald" data-range-status>{(range.times === 0 ? t.rangeStatusEndless : t.rangeStatus).replace("{from}", String(range.from)).replace("{to}", String(range.to)).replace("{n}", String(rangeRound)).replace("{total}", String(range.times))}</span> : null}<span className="font-medium" data-audio-verse>{introOn ? t.basmala : `${surah}:${verse}`}</span> <span className="text-muted">{current?.name}</span>{saved ? <span className="sr-only"> · {t.downloaded}</span> : null}</> : null}
           </p>
           {saved ? <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-emerald"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg> : null}
           <button type="button" aria-expanded={open} aria-label={t.audioSettings} disabled={!reciters.length} onClick={() => setOpen(!open)} className={control} data-audio-settings>
