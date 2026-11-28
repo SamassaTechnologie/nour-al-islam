@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import type { Dictionary } from "@/lib/dictionaries";
-import { type ChapterAudio, type ChapterReciter, RECITER_KEY, defaultReciter, fetchChapter, fetchReciters, reciterLabel, store, stored, verseAt } from "@/lib/chapter-audio";
+import { type Basmala, type ChapterAudio, type ChapterReciter, RECITER_KEY, basmalaFrom, defaultReciter, fetchChapter, fetchReciters, needsBasmala, reciterLabel, store, stored, verseAt, verseStart } from "@/lib/chapter-audio";
 import { useWakeLock } from "@/lib/use-wake-lock";
 import { MUSHAF_LAST_KEY } from "@/lib/khatm";
 import type { VerseWords } from "@/lib/quran-words";
@@ -34,6 +34,9 @@ export function MushafReader({ t, names, staff = false, children }: { t: T; name
   const cache = useRef(new Map<string, ChapterAudio>());
   const loaded = useRef<{ surah: number; chapter: ChapterAudio } | null>(null);
   const pendingSeek = useRef<number | null>(null);
+  // Basmala jouee avant le premier verset d'une sourate dont l'enregistrement n'en a pas (sauf al-Fatiha et at-Tawba).
+  const intro = useRef<(Basmala & { surah: number; chapter: ChapterAudio }) | null>(null);
+  const [introOn, setIntroOn] = useState(false);
   const playingRef = useRef(false);
   const posRef = useRef<Position | null>(null);
   const turning = useRef(0);
@@ -110,11 +113,24 @@ export function MushafReader({ t, names, staff = false, children }: { t: T; name
     setPos(position);
     try {
       const chapter = await chapterFor(position.surah);
+      const first = chapter.timings[0];
+      const basmala = first && position.verse === first.number && needsBasmala(position.surah, chapter)
+        ? await chapterFor(1).then(basmalaFrom).catch(() => null)
+        : null;
       const element = audio.current;
-      const timing = chapter.timings.find((item) => item.number === position.verse);
       if (!element || posRef.current !== position) return;
-      const at = (timing?.from ?? 0) / 1000;
-      if (element.src !== chapter.url) {
+      const at = verseStart(chapter, position.verse);
+      if (basmala) {
+        // Fin fixee dans l'adresse (#t=debut,fin) : le navigateur s'arrete a la fin de la basmala, meme ecran eteint.
+        intro.current = { ...basmala, surah: position.surah, chapter };
+        setIntroOn(true);
+        loaded.current = { surah: position.surah, chapter };
+        pendingSeek.current = basmala.from / 1000;
+        element.src = `${basmala.url}#t=${(basmala.from / 1000).toFixed(2)},${(basmala.to / 1000).toFixed(2)}`;
+        element.load();
+      } else if (intro.current || element.src !== chapter.url) {
+        intro.current = null;
+        setIntroOn(false);
         loaded.current = { surah: position.surah, chapter };
         pendingSeek.current = at;
         element.src = chapter.url;
@@ -229,9 +245,29 @@ export function MushafReader({ t, names, staff = false, children }: { t: T; name
     }
   }, [goPage, highlight, page]);
 
+  // Fin de la basmala : on enchaine sur le debut de la sourate.
+  const endIntro = () => {
+    const element = audio.current;
+    const done = intro.current;
+    intro.current = null;
+    setIntroOn(false);
+    if (!element || !done) return;
+    loaded.current = { surah: done.surah, chapter: done.chapter };
+    pendingSeek.current = 0;
+    element.src = done.chapter.url;
+    element.load();
+    element.playbackRate = speed;
+    element.play().catch(() => setFailed(true));
+  };
+
   // Le verset en cours suit la position dans le fichier de la sourate.
   const onTime = () => {
     const element = audio.current;
+    if (element && intro.current) {
+      // Securite si le navigateur ne s'arrete pas tout seul a la fin indiquee.
+      if (element.currentTime * 1000 >= intro.current.to) endIntro();
+      return;
+    }
     const current = loaded.current;
     if (!element || !current || element.src !== current.chapter.url || pendingSeek.current !== null) return;
     const at = verseAt(current.chapter.timings, element.currentTime * 1000);
@@ -243,6 +279,10 @@ export function MushafReader({ t, names, staff = false, children }: { t: T; name
   };
 
   const onEnded = async () => {
+    if (intro.current) {
+      endIntro();
+      return;
+    }
     const current = loaded.current;
     if (!current || current.surah >= 114) {
       setPlaying(false);
@@ -374,8 +414,24 @@ export function MushafReader({ t, names, staff = false, children }: { t: T; name
           onSeeked={positionState}
           onRateChange={positionState}
           onPlay={() => { playingRef.current = true; setPlaying(true); positionState(); }}
-          onPause={() => { if (!audio.current?.ended) playingRef.current = false; setPlaying(false); }}
-          onEnded={() => void onEnded()} onError={() => { if (audio.current?.getAttribute("src")) setFailed(true); }} onCanPlay={() => setFailed(false)} />
+          onPause={() => {
+            const element = audio.current;
+            if (element && intro.current && element.currentTime * 1000 >= intro.current.to - 300) {
+              endIntro();
+              return;
+            }
+            if (!element?.ended) playingRef.current = false;
+            setPlaying(false);
+          }}
+          onEnded={() => void onEnded()}
+          onError={() => {
+            // Basmala indisponible (hors connexion par exemple) : on lit la sourate sans elle.
+            if (intro.current) {
+              endIntro();
+              return;
+            }
+            if (audio.current?.getAttribute("src")) setFailed(true);
+          }} onCanPlay={() => setFailed(false)} />
         <div className="mx-auto max-w-xl px-3">
           {sheet ? (
             <div className="max-h-[45vh] overflow-y-auto border-b border-line py-3" data-verse-sheet={verseKey(sheet)}>
@@ -445,7 +501,7 @@ export function MushafReader({ t, names, staff = false, children }: { t: T; name
               <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">{playing ? <path d="M6 5h4v14H6zM14 5h4v14h-4z" /> : <path d="M8 5v14l11-7z" />}</svg>
             </button>
             <button type="button" aria-label={t.previousPage} disabled={page <= 1} onClick={() => goPage(page - 1)} className={control}><svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 rotate-180 rtl:rotate-0" fill="none" stroke="currentColor" strokeWidth="2"><path d={arrow} /></svg></button>
-            <p role="status" className="min-w-0 flex-1 truncate px-1 text-base">{failed ? t.audioError : pos ? <><span className="font-medium">{pos.surah}:{pos.verse}</span> <span className="text-muted">{reciter?.name}</span></> : t.audioLoading}</p>
+            <p role="status" className="min-w-0 flex-1 truncate px-1 text-base">{failed ? t.audioError : pos ? <><span className="font-medium" data-audio-verse>{introOn ? t.basmala : `${pos.surah}:${pos.verse}`}</span> <span className="text-muted">{reciter?.name}</span></> : t.audioLoading}</p>
             <button type="button" aria-expanded={open} aria-label={t.audioSettings} onClick={() => setOpen(!open)} className={control}><svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10" /><circle cx="16" cy="7" r="2" /><circle cx="8" cy="17" r="2" /></svg></button>
           </div>
         </div>

@@ -76,6 +76,37 @@ async function cachedChapter(reciter: number, surah: number) {
   return res ? ((await res.json()) as { chapter: ChapterAudio }).chapter : null;
 }
 
+// Debut d'une sourate et basmala.
+// Certains enregistrements commencent par la basmala (ou la formule de protection) avant le premier verset :
+// on lit alors le fichier depuis le debut. D'autres (fichiers « qdc ») commencent directement au premier verset :
+// on fait entendre avant la basmala du meme recitant, prise dans son enregistrement d'al-Fatiha (verset 1:1).
+// Pas de basmala ajoutee pour al-Fatiha (elle en est le premier verset) ni pour at-Tawba (sourate 9).
+const INTRO_MS = 1000;
+export type Basmala = { url: string; from: number; to: number };
+
+export const hasIntro = (chapter: ChapterAudio) => (chapter.timings[0]?.from ?? 0) >= INTRO_MS;
+
+/** Position (secondes) ou commencer un verset : le debut du fichier pour le premier verset. */
+export function verseStart(chapter: ChapterAudio, number: number) {
+  const first = chapter.timings[0];
+  if (first && number === first.number) return 0;
+  return (chapter.timings.find((x) => x.number === number)?.from ?? 0) / 1000;
+}
+
+export const needsBasmala = (surah: number, chapter: ChapterAudio) => surah !== 1 && surah !== 9 && !hasIntro(chapter);
+
+export async function fetchBasmala(reciter: number): Promise<Basmala | null> {
+  return basmalaFrom(await fetchChapter(reciter, 1));
+}
+
+/** Basmala tiree de l'enregistrement d'al-Fatiha du recitant (verset 1:1). */
+export function basmalaFrom(fatiha: ChapterAudio): Basmala | null {
+  const first = fatiha.timings[0];
+  // Repere manifestement faux (trop court ou trop long) : on n'ajoute rien plutot que de couper la recitation.
+  if (!first || first.number !== 1 || first.to - first.from < 2000 || first.to - first.from > 20000) return null;
+  return { url: fatiha.url, from: first.from, to: first.to };
+}
+
 // Verset en cours a l'instant t (ms). Entre deux versets (silence), on garde le precedent.
 export function verseAt(timings: VerseTiming[], ms: number) {
   let found = timings[0];

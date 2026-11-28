@@ -3,21 +3,25 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Dictionary } from "@/lib/dictionaries";
 import {
+  type Basmala,
   type ChapterAudio,
   type ChapterReciter,
   RECITER_KEY,
   defaultReciter,
   downloadChapter,
+  fetchBasmala,
   fetchChapter,
   fetchReciters,
   findDownload,
   listDownloads,
+  needsBasmala,
   reciterLabel,
   removeDownload,
   store,
   stored,
   syncDownloads,
   verseAt,
+  verseStart,
 } from "@/lib/chapter-audio";
 import { useWakeLock } from "@/lib/use-wake-lock";
 
@@ -33,6 +37,11 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
   const plays = useRef(1);
   const verseRef = useRef(1);
   const pendingSeek = useRef<number | null>(null);
+  // Basmala jouee avant le premier verset (enregistrements qui n'en ont pas) : prechargee pour demarrer sans attente.
+  const intro = useRef<Basmala | null>(null);
+  const basmala = useRef<{ reciter: number; value: Basmala | null } | null>(null);
+  const chapterRef = useRef<ChapterAudio | null>(null);
+  const [introOn, setIntroOn] = useState(false);
   const [reciters, setReciters] = useState<ChapterReciter[]>([]);
   const [reciter, setReciter] = useState<number | null>(null);
   const [chapter, setChapter] = useState<ChapterAudio | null>(null);
@@ -109,11 +118,16 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
   // Nouveau fichier : on garde la position (changement de recitant pendant l'ecoute).
   useEffect(() => {
     const element = audio.current;
+    chapterRef.current = chapter;
     if (!element || !chapter) return;
     const wasPlaying = !element.paused;
+    if (intro.current) {
+      // Changement de recitant pendant la basmala : on passe directement a la sourate.
+      intro.current = null;
+      setIntroOn(false);
+    }
     if (element.src !== chapter.url) {
-      const target = chapter.timings.find((x) => x.number === verseRef.current);
-      pendingSeek.current = target ? target.from / 1000 : 0;
+      pendingSeek.current = verseStart(chapter, verseRef.current);
       element.src = chapter.url;
       element.load();
       if (wasPlaying) element.play().catch(() => setPlaying(false));
@@ -123,6 +137,18 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
   useEffect(() => {
     if (audio.current) audio.current.playbackRate = speed;
   }, [speed]);
+
+  useEffect(() => {
+    if (reciter === null || !chapter || !needsBasmala(surah, chapter)) return;
+    if (basmala.current?.reciter === reciter) return;
+    let active = true;
+    fetchBasmala(reciter)
+      .then((value) => { if (active) basmala.current = { reciter, value }; })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [chapter, reciter, surah]);
 
   const highlight = useCallback((number: number, scroll: boolean) => {
     document.querySelectorAll("[data-playing]").forEach((el) => el.removeAttribute("data-playing"));
@@ -137,10 +163,66 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
     audio.current?.play().catch(() => setPlaying(false));
   }, []);
 
+  // Debut de la sourate : la basmala d'abord si l'enregistrement n'en a pas, puis le premier verset.
+  const startSurah = useCallback((autoplay: boolean) => {
+    const element = audio.current;
+    const ch = chapterRef.current;
+    const first = ch?.timings[0];
+    if (!element || !ch || !first) return;
+    plays.current = 1;
+    verseRef.current = first.number;
+    setVerse(first.number);
+    highlight(first.number, true);
+    const b = needsBasmala(surah, ch) && basmala.current?.reciter === reciter ? basmala.current.value : null;
+    if (b) {
+      intro.current = b;
+      setIntroOn(true);
+      // Fin fixee dans l'adresse (#t=debut,fin) : le navigateur s'arrete lui-meme a la fin de la basmala, meme ecran eteint.
+      pendingSeek.current = b.from / 1000;
+      element.src = `${b.url}#t=${(b.from / 1000).toFixed(2)},${(b.to / 1000).toFixed(2)}`;
+      element.load();
+    } else if (element.src !== ch.url) {
+      intro.current = null;
+      setIntroOn(false);
+      pendingSeek.current = 0;
+      element.src = ch.url;
+      element.load();
+    } else if (element.readyState >= 1) {
+      element.currentTime = 0;
+    } else {
+      pendingSeek.current = 0;
+    }
+    if (autoplay) play();
+  }, [highlight, play, reciter, surah]);
+
+  const endIntro = useCallback(() => {
+    const element = audio.current;
+    const ch = chapterRef.current;
+    intro.current = null;
+    setIntroOn(false);
+    if (!element || !ch) return;
+    pendingSeek.current = 0;
+    element.src = ch.url;
+    element.load();
+    play();
+  }, [play]);
+
   const seekTo = useCallback((number: number, autoplay: boolean) => {
     const element = audio.current;
     const target = timings.find((x) => x.number === number);
     if (!element || !target) return;
+    if (number === timings[0].number) {
+      startSurah(autoplay);
+      return;
+    }
+    if (intro.current) {
+      intro.current = null;
+      setIntroOn(false);
+    }
+    if (chapter && element.src !== chapter.url) {
+      element.src = chapter.url;
+      element.load();
+    }
     plays.current = 1;
     verseRef.current = number;
     setVerse(number);
@@ -148,7 +230,7 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
     if (element.readyState >= 1) element.currentTime = target.from / 1000;
     else pendingSeek.current = target.from / 1000;
     if (autoplay) play();
-  }, [highlight, play, timings]);
+  }, [chapter, highlight, play, startSurah, timings]);
 
   const updatePosition = useCallback(() => {
     const element = audio.current;
@@ -164,6 +246,11 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
     const element = audio.current;
     if (!element || !timings.length) return;
     const ms = element.currentTime * 1000;
+    if (intro.current) {
+      // Securite si le navigateur ne s'arrete pas tout seul a la fin indiquee.
+      if (ms >= intro.current.to) endIntro();
+      return;
+    }
     if (element.duration) setProgress(element.currentTime / element.duration);
     const active = timings.find((x) => x.number === verseRef.current);
     // Repetition du verset : retour au debut du verset tant que le nombre n'est pas atteint.
@@ -184,6 +271,10 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
   const onEnded = () => {
     const element = audio.current;
     if (!element) return;
+    if (intro.current) {
+      endIntro();
+      return;
+    }
     const last = timings.at(-1);
     if (last && repeat > 1 && plays.current < repeat) {
       plays.current += 1;
@@ -200,12 +291,18 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
     const element = audio.current;
     if (!element || !chapter) return;
     if (element.paused) {
+      const first = timings[0];
+      // Ecoute depuis le debut de la sourate : avec la basmala.
+      if (!intro.current && first && verseRef.current === first.number && element.currentTime * 1000 <= first.from + 300) {
+        startSurah(true);
+        return;
+      }
       highlight(verseRef.current, true);
       play();
     } else {
       element.pause();
     }
-  }, [chapter, highlight, play]);
+  }, [chapter, highlight, play, startSurah, timings]);
 
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
@@ -287,12 +384,28 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
           updatePosition();
         }}
         onPlay={() => { setPlaying(true); highlight(verseRef.current, false); updatePosition(); }}
-        onPause={() => { setPlaying(false); updatePosition(); }}
+        onPause={() => {
+          const element = audio.current;
+          // Arret automatique a la fin de la basmala (#t=debut,fin) : on enchaine sur la sourate.
+          if (element && intro.current && element.currentTime * 1000 >= intro.current.to - 300) {
+            endIntro();
+            return;
+          }
+          setPlaying(false);
+          updatePosition();
+        }}
         onSeeked={updatePosition}
         onRateChange={updatePosition}
         onTimeUpdate={onTime}
         onEnded={onEnded}
-        onError={() => { if (chapter) { setFailed(true); setPlaying(false); } }}
+        onError={() => {
+          // Basmala indisponible (hors connexion par exemple) : on lit la sourate sans elle.
+          if (intro.current) {
+            endIntro();
+            return;
+          }
+          if (chapter) { setFailed(true); setPlaying(false); }
+        }}
         onCanPlay={() => setFailed(false)}
       />
       <div aria-hidden="true" className="h-0.5 bg-line">
@@ -358,7 +471,7 @@ export function AudioPlayer({ surah, surahName, t }: { surah: number; surahName:
             <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 rtl:rotate-180" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z" /></svg>
           </button>
           <p role="status" className="min-w-0 flex-1 truncate px-1 text-base" data-audio-status>
-            {failed ? t.audioError : loading ? t.audioLoading : chapter ? <><span className="font-medium" data-audio-verse>{surah}:{verse}</span> <span className="text-muted">{current?.name}</span>{saved ? <span className="sr-only"> · {t.downloaded}</span> : null}</> : null}
+            {failed ? t.audioError : loading ? t.audioLoading : chapter ? <><span className="font-medium" data-audio-verse>{introOn ? t.basmala : `${surah}:${verse}`}</span> <span className="text-muted">{current?.name}</span>{saved ? <span className="sr-only"> · {t.downloaded}</span> : null}</> : null}
           </p>
           {saved ? <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-emerald"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg> : null}
           <button type="button" aria-expanded={open} aria-label={t.audioSettings} disabled={!reciters.length} onClick={() => setOpen(!open)} className={control} data-audio-settings>
