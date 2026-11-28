@@ -38,8 +38,8 @@ export function Today({ t, locale, name, data, reading, surahs }: { t: Dictionar
   const date = (day: string) => new Date(`${day}T00:00:00Z`);
   const last = reading?.recent[0];
 
-  // Une seule action principale : la plus utile du moment (revision due, sinon lecon suivante, sinon lecture).
-  const main = data.due > 0 ? "hifdh" : data.next ? "lesson" : "read";
+  // Une seule action principale : la plus utile du moment (versets a reviser, puis exercices a revoir, puis lecon suivante, sinon lecture).
+  const main = data.due > 0 ? "hifdh" : data.reviewDue > 0 ? "review" : data.next ? "lesson" : "read";
 
   return (
     <>
@@ -70,6 +70,10 @@ export function Today({ t, locale, name, data, reading, surahs }: { t: Dictionar
           ) : (
             <Action href="/apprendre" icon="learn" title={d.lessonNone} note={d.lessonNoneNote} data="lesson" />
           )}
+          {data.reviewDue > 0 ? (
+            <Action href="/apprendre/revision" icon="learn" title={t.review.open} strong={main === "review"} data="review"
+              note={t.review.due.replace("{n}", String(data.reviewDue))} />
+          ) : null}
           <Action href={data.due > 0 ? "/apprendre/memorisation/revision" : "/apprendre/memorisation"} icon="learn" title={d.hifdh} strong={main === "hifdh"} data="hifdh"
             note={data.due > 0 ? d.hifdhDue.replace("{n}", String(data.due)) : data.memorised > 0 ? d.hifdhNone : d.hifdhStart} />
         </ul>

@@ -3,6 +3,7 @@ import { ComingSection } from "@/components/coming-section";
 import { OpenSection } from "@/components/open-section";
 import { getPublishedList, type PublishedCard } from "@/lib/content";
 import { getPreferences } from "@/lib/preferences";
+import { countDueReviews } from "@/lib/review";
 import { createClient, getSession } from "@/lib/supabase/server";
 
 export const metadata = { title: "Apprendre" };
@@ -14,6 +15,7 @@ const levelOf = (item: PublishedCard) => (item.level === 1 || item.level === 3 ?
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ niveau?: string }> }) {
   const [{ t }, items, session, params] = await Promise.all([getPreferences(), getPublishedList(), getSession(), searchParams]);
+  const reviewDue = session ? await countDueReviews() : 0;
   const c = t.content;
   const lv = t.levels;
   const supabase = await createClient();
@@ -136,6 +138,12 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ n
       </section>
 
       <h2 className="mt-8 text-xl">{lv.tools}</h2>
+      {session ? (
+        <Link href="/apprendre/revision" className={`mt-3 block rounded-lg px-4 py-3 ${reviewDue > 0 ? "bg-emerald text-on-emerald" : "border border-line"}`} data-open-review={reviewDue}>
+          <span className="block font-medium">{t.review.open}</span>
+          <span className={`block text-base ${reviewDue > 0 ? "" : "text-muted"}`}>{reviewDue > 0 ? t.review.due.replace("{n}", String(reviewDue)) : t.review.none}</span>
+        </Link>
+      ) : null}
       <Link href="/apprendre/memorisation" className="mt-3 block rounded-lg bg-emerald px-4 py-3 text-on-emerald">
         <span className="block font-medium">{t.hifdh.open}</span>
         <span className="block text-base">{t.hifdh.openNote}</span>

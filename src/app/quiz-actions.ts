@@ -12,3 +12,12 @@ export async function saveQuizAttempt(itemId: string, revisionId: string, score:
   const { error } = await supabase.from("quiz_attempts").insert({ item_id: itemId, revision_id: revisionId, score, total });
   return !error;
 }
+
+/** Revision espacee : chaque reponse d'une personne connectee replace (ou non) la question dans ses revisions. */
+export async function recordAnswer(questionId: string, correct: boolean, source: "lesson" | "review") {
+  const session = await getSession();
+  if (!session || !UUID.test(questionId) || typeof correct !== "boolean") return false;
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("quiz_review_record", { p_question: questionId, p_correct: correct, p_source: source === "review" ? "review" : "lesson" });
+  return !error;
+}

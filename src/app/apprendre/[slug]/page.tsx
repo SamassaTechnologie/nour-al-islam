@@ -50,7 +50,7 @@ export default async function PublishedContent({ params }: Props) {
         {session ? <FavoriteButton itemId={item.id} initial={favorite} t={t.favorites} /> : null}
         <Paragraphs text={revision.body} />
       </article>
-      {questions.length ? <LessonQuiz questions={questions} itemId={item.id} revisionId={revision.id} slug={item.slug} signedIn={!!session} best={best} contentLocale={item.locale} uiLocale={locale} t={t.quiz} /> : null}
+      {questions.length ? <LessonQuiz questions={questions} itemId={item.id} revisionId={revision.id} slug={item.slug} signedIn={!!session} best={best} contentLocale={item.locale} uiLocale={locale} t={t.quiz} reviewT={t.review} /> : null}
       {opinions.length ? (
         <section className="mt-7">
           <h2 className="text-xl">{c.opinions}</h2>
